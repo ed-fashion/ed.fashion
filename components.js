@@ -4,7 +4,7 @@ function carregarNavbar() {
   <nav class="navbar">
     <div class="navbar-container">
       <a href="/index.html" class="navbar-logo">
-        <img src="/assets/logo.png" alt="E'D Fashion" height="50">
+        <img src="logo.png" alt="E'D Fashion" height="50">
       </a>
       <div class="navbar-search">
         <input type="text" id="searchInput" placeholder="Pesquisar produtos...">
@@ -37,7 +37,7 @@ function carregarFooter() {
   <footer class="footer">
     <div class="footer-container">
       <div class="footer-col">
-        <img src="/assets/logo.png" alt="E'D Fashion" height="60">
+        <img src="logo.png" alt="E'D Fashion" height="60">
         <p>Moda para todos, com estilo e elegância.</p>
       </div>
       <div class="footer-col">
