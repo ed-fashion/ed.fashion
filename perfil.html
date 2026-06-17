@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Perfil — E'D Fashion</title>
+  <link rel="stylesheet" href="main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      background: var(--cinza-claro);
+      min-height: 100vh;
+    }
+
+    .perfil-container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .perfil-header {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: var(--sombra);
+      margin-bottom: 20px;
+    }
+
+    .perfil-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: var(--rosa-claro);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      margin: 0 auto 16px;
+      border: 3px solid var(--rosa);
+    }
+
+    .perfil-nome {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--preto);
+      margin-bottom: 6px;
+    }
+
+    .perfil-email {
+      font-size: 14px;
+      color: var(--cinza);
+      margin-bottom: 12px;
+    }
+
+    .perfil-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-admin {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .badge-employee {
+      background: #DBEAFE;
+      color: #2563EB;
+    }
+
+    .badge-customer {
+      background: var(--rosa-claro);
+      color: var(--rosa);
+    }
+
+    .perfil-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: var(--sombra);
+      margin-bottom: 20px;
+    }
+
+    .perfil-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--preto);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--cinza-claro);
+    }
+
+    .btn-salvar {
+      width: 100%;
+      padding: 12px;
+      background: var(--rosa);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-salvar:hover { background: #c4186f; }
+    .btn-salvar:disabled { background: #ccc; cursor: not-allowed; }
+
+    .btn-logout {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      color: var(--cinza);
+      border: 2px solid #ddd;
+      border-radius: 25px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      border-color: #ff4444;
+      color: #ff4444;
+    }
+
+    .perfil-menu {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--sombra);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .perfil-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--cinza-claro);
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      color: var(--preto);
+    }
+
+    .perfil-menu-item:last-child { border-bottom: none; }
+    .perfil-menu-item:hover { background: var(--cinza-claro); }
+
+    .perfil-menu-item .icone {
+      font-size: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--rosa-claro);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .perfil-menu-item .texto { flex: 1; }
+    .perfil-menu-item .texto span { display: block; font-size: 13px; color: var(--cinza); }
+    .perfil-menu-item .seta { color: var(--cinza); font-size: 18px; }
+
+    .admin-link .icone { background: #FEF3C7; }
+
+    /* Navbar simples para esta página */
+    .top-bar {
+      background: white;
+      box-shadow: var(--sombra);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .top-bar a {
+      color: var(--cinza);
+      font-size: 22px;
+      text-decoration: none;
+    }
+
+    .top-bar h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--preto);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <a href="index.html">←</a>
+  <h1>Meu Perfil</h1>
+</div>
+
+<!-- Conteúdo -->
+<div class="perfil-container">
+
+  <!-- Mensagens -->
+  <div class="msg-erro" id="msgErro"></div>
+  <div class="msg-sucesso" id="msgSucesso"></div>
+
+  <!-- Header do perfil -->
+  <div class="perfil-header">
+    <div class="perfil-avatar" id="perfilAvatar">👤</div>
+    <div class="perfil-nome" id="perfilNome">A carregar...</div>
+    <div class="perfil-email" id="perfilEmail"></div>
+    <span class="perfil-badge" id="perfilBadge"></span>
+  </div>
+
+  <!-- Editar dados -->
+  <div class="perfil-card">
+    <h3>✏️ Editar Dados</h3>
+
+    <div class="form-grupo">
+      <label>Nome completo</label>
+      <input type="text" id="editNome" placeholder="O teu nome completo">
+    </div>
+
+    <div class="form-grupo">
+      <label>Telefone</label>
+      <input type="tel" id="editTelefone" placeholder="+258 84 000 0000">
+    </div>
+
+    <button class="btn-salvar" id="btnSalvar" onclick="salvarPerfil()">
+      Guardar Alterações
+    </button>
+  </div>
+
+  <!-- Menu de navegação -->
+  <div class="perfil-menu">
+    <a href="encomendas-cliente.html" class="perfil-menu-item">
+      <div class="icone">📦</div>
+      <div class="texto">
+        As Minhas Encomendas
+        <span>Ver histórico de compras</span>
+      </div>
+      <div class="seta">›</div>
+    </a>
+
+    <a href="favoritos.html" class="perfil-menu-item">
+      <div class="icone">♡</div>
+      <div class="texto">
+        Favoritos
+        <span>Produtos guardados</span>
+      </div>
+      <div class="seta">›</div>
+    </a>
+
+    <a href="enderecos.html" class="perfil-menu-item">
+      <div class="icone">📍</div>
+      <div class="texto">
+        Endereços
+        <span>Gerir endereços de entrega</span>
+      </div>
+      <div class="seta">›</div>
+    </a>
+  </div>
+
+  <!-- Link admin (só aparece para admin/employee) -->
+  <div class="perfil-menu" id="menuAdmin" style="display:none">
+    <a href="admin.html" class="perfil-menu-item admin-link">
+      <div class="icone">⚙️</div>
+      <div class="texto">
+        Painel Administrativo
+        <span>Gerir a loja</span>
+      </div>
+      <div class="seta">›</div>
+    </a>
+  </div>
+
+  <!-- Logout -->
+  <div class="perfil-card">
+    <button class="btn-logout" onclick="fazerLogout()">
+      🚪 Terminar Sessão
+    </button>
+  </div>
+
+</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script>
+
+  let utilizadorActual = null;
+
+  // CARREGAR PERFIL
+  async function carregarPerfil() {
+    const { data: { session } } = await db.auth.getSession();
+
+    if (!session) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    utilizadorActual = session.user;
+
+    const { data: perfil, error } = await db
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+
+    if (error || !perfil) {
+      mostrarErro('msgErro', 'Erro ao carregar perfil.');
+      return;
+    }
+
+    // Preencher header
+    const iniciais = (perfil.full_name || 'U').charAt(0).toUpperCase();
+    document.getElementById('perfilAvatar').textContent = iniciais;
+    document.getElementById('perfilNome').textContent = perfil.full_name || 'Sem nome';
+    document.getElementById('perfilEmail').textContent = session.user.email;
+
+    // Badge de role
+    const badge = document.getElementById('perfilBadge');
+    if (perfil.role === 'admin') {
+      badge.textContent = '⭐ Administrador';
+      badge.className = 'perfil-badge badge-admin';
+      document.getElementById('menuAdmin').style.display = 'block';
+    } else if (perfil.role === 'employee') {
+      badge.textContent = '👔 Funcionário';
+      badge.className = 'perfil-badge badge-employee';
+      document.getElementById('menuAdmin').style.display = 'block';
+    } else {
+      badge.textContent = '🛍️ Cliente';
+      badge.className = 'perfil-badge badge-customer';
+    }
+
+    // Preencher formulário
+    document.getElementById('editNome').value = perfil.full_name || '';
+    document.getElementById('editTelefone').value = perfil.phone || '';
+  }
+
+  // SALVAR PERFIL
+  async function salvarPerfil() {
+    const nome = document.getElementById('editNome').value.trim();
+    const telefone = document.getElementById('editTelefone').value.trim();
+    const btn = document.getElementById('btnSalvar');
+
+    esconderMensagem('msgErro');
+    esconderMensagem('msgSucesso');
+
+    if (!nome) {
+      mostrarErro('msgErro', 'O nome não pode estar vazio.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'A guardar...';
+
+    const { error } = await db
+      .from('profiles')
+      .update({ full_name: nome, phone: telefone })
+      .eq('id', utilizadorActual.id);
+
+    if (error) {
+      mostrarErro('msgErro', 'Erro ao guardar. Tenta novamente.');
+    } else {
+      mostrarSucesso('msgSucesso', '✅ Perfil actualizado com sucesso!');
+      document.getElementById('perfilNome').textContent = nome;
+      const iniciais = nome.charAt(0).toUpperCase();
+      document.getElementById('perfilAvatar').textContent = iniciais;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Guardar Alterações';
+  }
+
+  // LOGOUT
+  async function fazerLogout() {
+    await db.auth.signOut();
+    window.location.href = 'login.html';
+  }
+
+  // Iniciar
+  carregarPerfil();
+</script>
+
+</body>
+</html>
