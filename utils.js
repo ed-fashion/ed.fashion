@@ -1,10 +1,10 @@
 // Formatar moeda MZN
 function formatMZN(valor) {
-  return new Intl.NumberFormat('pt-MZ', {
-    style: 'currency',
-    currency: 'MZN',
-    minimumFractionDigits: 2
-  }).format(valor).replace('MZN', 'MT').trim();
+  if (!valor && valor !== 0) return '0,00 MT';
+  return new Intl.NumberFormat('pt-PT', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(valor) + ' MT';
 }
 
 // Formatar data
