@@ -3,7 +3,7 @@ function carregarNavbar() {
   const navbar = `
   <nav class="navbar">
     <div class="navbar-container">
-      <a href="/index.html" class="navbar-logo">
+      <a href="index.html" class="navbar-logo">
         <img src="logo.png" alt="E'D Fashion" height="50">
       </a>
       <div class="navbar-search">
@@ -11,24 +11,44 @@ function carregarNavbar() {
         <button onclick="pesquisar()">🔍</button>
       </div>
       <div class="navbar-icons">
-        <a href="/favoritos.html" title="Favoritos">♡</a>
-        <a href="/carrinho.html" title="Carrinho">
+        <a href="favoritos.html" title="Favoritos">♡</a>
+        <a href="carrinho.html" title="Carrinho">
           🛒 <span id="carrinhoCount" class="badge">0</span>
         </a>
-        <a href="/perfil.html" id="navPerfil" title="Conta">👤</a>
+        <a href="login.html" id="navPerfil" title="Conta">👤</a>
       </div>
     </div>
     <div class="navbar-categorias">
-      <a href="/index.html?cat=feminino">Feminino</a>
-      <a href="/index.html?cat=masculino">Masculino</a>
-      <a href="/index.html?cat=crianca">Criança</a>
-      <a href="/index.html?cat=calcado">Calçado</a>
-      <a href="/index.html?cat=acessorios">Acessórios</a>
-      <a href="/encomenda.html">📦 Por Encomenda</a>
+      <a href="catalogo.html?cat=feminino">👗 Feminino</a>
+      <a href="catalogo.html?cat=masculino">👔 Masculino</a>
+      <a href="catalogo.html?cat=crianca">🧒 Criança</a>
+      <a href="catalogo.html?cat=calcado">👠 Calçado</a>
+      <a href="catalogo.html?cat=acessorios">👜 Acessórios</a>
+      <a href="catalogo.html?cat=cabelos">💇 Cabelos</a>
+      <a href="catalogo.html?cat=electronica">📱 Electrónica</a>
+      <a href="catalogo.html?cat=desporto">🏃 Desporto</a>
+      <a href="catalogo.html?cat=casa">🏠 Casa</a>
+      <a href="encomenda.html">📦 Por Encomenda</a>
     </div>
   </nav>`;
   document.getElementById('navbar').innerHTML = navbar;
   atualizarContadorCarrinho();
+  atualizarNavbarSessao();
+}
+
+// Actualizar navbar conforme sessão
+async function atualizarNavbarSessao() {
+  const { data: { session } } = await db.auth.getSession();
+  const navPerfil = document.getElementById('navPerfil');
+  if (navPerfil) {
+    if (session) {
+      navPerfil.href = 'perfil.html';
+      navPerfil.title = 'Meu Perfil';
+    } else {
+      navPerfil.href = 'login.html';
+      navPerfil.title = 'Entrar';
+    }
+  }
 }
 
 // Footer principal
@@ -42,20 +62,20 @@ function carregarFooter() {
       </div>
       <div class="footer-col">
         <h4>Loja</h4>
-        <a href="/index.html">Produtos</a>
-        <a href="/encomenda.html">Por Encomenda</a>
-        <a href="/favoritos.html">Favoritos</a>
+        <a href="catalogo.html">Produtos</a>
+        <a href="encomenda.html">Por Encomenda</a>
+        <a href="favoritos.html">Favoritos</a>
       </div>
       <div class="footer-col">
         <h4>Conta</h4>
-        <a href="/perfil.html">Meu Perfil</a>
-        <a href="/encomendas.html">Minhas Encomendas</a>
-        <a href="/login.html">Login / Registo</a>
+        <a href="perfil.html">Meu Perfil</a>
+        <a href="encomendas-cliente.html">Minhas Encomendas</a>
+        <a href="login.html">Login / Registo</a>
       </div>
       <div class="footer-col">
         <h4>Contacto</h4>
-        <p>📱 WhatsApp: <a href="https://wa.me/258XXXXXXXXX" target="_blank">+258 XX XXX XXXX</a></p>
-        <p>📍 Beira, Moçambique</p>
+        <p>📱 WhatsApp: <a href="https://wa.me/258866464666?text=Olá%20E'D%20Fashion!%20Gostaria%20de%20saber%20mais%20sobre%20os%20vossos%20produtos%20😊" target="_blank">+258 86 646 4666</a></p>
+        <p>📍 6º Bairro Esturro — Beira, Moçambique</p>
       </div>
     </div>
     <div class="footer-bottom">
@@ -76,5 +96,5 @@ function atualizarContadorCarrinho() {
 // Pesquisa
 function pesquisar() {
   const termo = document.getElementById('searchInput')?.value?.trim();
-  if (termo) window.location.href = `/index.html?search=${encodeURIComponent(termo)}`;
+  if (termo) window.location.href = `catalogo.html?search=${encodeURIComponent(termo)}`;
 }
