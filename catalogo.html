@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo — E'D Fashion</title>
+  <meta name="description" content="Catálogo de produtos E'D Fashion — Roupa, calçado, acessórios e muito mais.">
+  <link rel="stylesheet" href="main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .catalogo-layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 20px;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* PAINEL DE FILTROS */
+    .filtros-painel {
+      background: white;
+      border-radius: 14px;
+      box-shadow: var(--sombra);
+      position: sticky;
+      top: 80px;
+    }
+
+    .filtros-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #F0F2F5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .filtros-header h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--preto);
+    }
+
+    .filtros-limpar {
+      font-size: 12px;
+      color: var(--rosa);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .filtros-limpar:hover { text-decoration: underline; }
+
+    .filtro-secao {
+      padding: 16px 20px;
+      border-bottom: 1px solid #F0F2F5;
+    }
+
+    .filtro-secao:last-child { border-bottom: none; }
+
+    .filtro-secao h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .filtro-opcao {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--cinza-escuro);
+      transition: color 0.2s;
+    }
+
+    .filtro-opcao:hover { color: var(--rosa); }
+
+    .filtro-opcao input[type="checkbox"] {
+      accent-color: var(--rosa);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .filtro-preco {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .filtro-preco input {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      width: 100%;
+    }
+
+    .filtro-preco input:focus { border-color: var(--rosa); }
+    .filtro-preco span { font-size: 12px; color: var(--cinza); }
+
+    /* BOTÃO FILTROS MOBILE */
+    .btn-filtros-mobile {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: white;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--preto);
+    }
+
+    .filtros-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+    }
+
+    .filtros-overlay.visivel { display: block; }
+
+    /* ÁREA PRINCIPAL */
+    .catalogo-main {}
+
+    .catalogo-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .catalogo-titulo {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--preto);
+    }
+
+    .catalogo-titulo span { color: var(--rosa); }
+
+    .catalogo-controles {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .catalogo-total {
+      font-size: 13px;
+      color: var(--cinza);
+    }
+
+    .ordenar-select {
+      padding: 8px 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      background: white;
+    }
+
+    .ordenar-select:focus { border-color: var(--rosa); }
+
+    /* TAGS DE FILTROS ACTIVOS */
+    .filtros-activos {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .filtro-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--rosa-claro);
+      color: var(--rosa);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .filtro-tag button {
+      background: none;
+      border: none;
+      color: var(--rosa);
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0;
+    }
+
+    /* VAZIO */
+    .catalogo-vazio {
+      background: white;
+      border-radius: 14px;
+      padding: 60px 20px;
+      text-align: center;
+      box-shadow: var(--sombra);
+    }
+
+    .catalogo-vazio .icone { font-size: 56px; display: block; margin-bottom: 16px; }
+    .catalogo-vazio h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .catalogo-vazio p { font-size: 14px; color: var(--cinza); }
+
+    /* LOADING */
+    .loading-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .loading-card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--sombra);
+    }
+
+    .loading-img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    .loading-info { padding: 12px; }
+
+    .loading-linha {
+      height: 12px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .loading-linha.curta { width: 60%; }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* PAGINAÇÃO */
+    .paginacao {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+
+    .pag-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1.5px solid #ddd;
+      background: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pag-btn:hover { border-color: var(--rosa); color: var(--rosa); }
+    .pag-btn.activa { background: var(--rosa); color: white; border-color: var(--rosa); }
+    .pag-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* RESPONSIVIDADE */
+    @media (max-width: 900px) {
+      .catalogo-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .filtros-painel {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        z-index: 300;
+        border-radius: 0;
+        overflow-y: auto;
+      }
+
+      .filtros-painel.aberto { display: block; }
+      .btn-filtros-mobile { display: flex; }
+    }
+
+    @media (max-width: 480px) {
+      .produtos-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<!-- Overlay filtros mobile -->
+<div class="filtros-overlay" id="filtrosOverlay" onclick="fecharFiltros()"></div>
+
+<div class="catalogo-layout">
+
+  <!-- PAINEL DE FILTROS -->
+  <aside class="filtros-painel" id="filtrosPainel">
+    <div class="filtros-header">
+      <h3>🔍 Filtros</h3>
+      <span class="filtros-limpar" onclick="limparFiltros()">Limpar tudo</span>
+    </div>
+
+    <!-- Categorias -->
+    <div class="filtro-secao">
+      <h4>Categoria</h4>
+      <div id="filtrosCategorias">
+        <div class="filtro-opcao">
+          <span style="color:var(--cinza);font-size:13px;">A carregar...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tipo -->
+    <div class="filtro-secao">
+      <h4>Disponibilidade</h4>
+      <label class="filtro-opcao">
+        <input type="checkbox" id="filtroStock" onchange="aplicarFiltros()">
+        Em Stock
+      </label>
+      <label class="filtro-opcao">
+        <input type="checkbox" id="filtroEncomenda" onchange="aplicarFiltros()">
+        Por Encomenda
+      </label>
+    </div>
+
+    <!-- Preço -->
+    <div class="filtro-secao">
+      <h4>Preço (MT)</h4>
+      <div class="filtro-preco">
+        <input type="number" id="precoMin" placeholder="Mín" onchange="aplicarFiltros()">
+        <span>—</span>
+        <input type="number" id="precoMax" placeholder="Máx" onchange="aplicarFiltros()">
+      </div>
+    </div>
+
+    <!-- Promoções -->
+    <div class="filtro-secao">
+      <h4>Ofertas</h4>
+      <label class="filtro-opcao">
+        <input type="checkbox" id="filtroPromocao" onchange="aplicarFiltros()">
+        Em Promoção
+      </label>
+      <label class="filtro-opcao">
+        <input type="checkbox" id="filtroDestaque" onchange="aplicarFiltros()">
+        Em Destaque
+      </label>
+    </div>
+
+    <!-- Fechar mobile -->
+    <div style="padding:16px; display:none" id="btnFecharFiltros">
+      <button class="btn btn-rosa" style="width:100%" onclick="fecharFiltros()">
+        Ver Resultados
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="catalogo-main">
+
+    <div class="catalogo-topbar">
+      <div>
+        <div class="catalogo-titulo" id="catalogoTitulo">
+          Todos os <span>Produtos</span>
+        </div>
+      </div>
+      <div class="catalogo-controles">
+        <button class="btn-filtros-mobile" onclick="abrirFiltros()">
+          🔍 Filtros
+        </button>
+        <span class="catalogo-total" id="catalogoTotal"></span>
+        <select class="ordenar-select" id="ordenarSelect" onchange="aplicarFiltros()">
+          <option value="recente">Mais Recentes</option>
+          <option value="preco_asc">Preço: Menor → Maior</option>
+          <option value="preco_desc">Preço: Maior → Menor</option>
+          <option value="nome_asc">Nome: A → Z</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tags de filtros activos -->
+    <div class="filtros-activos" id="filtrosActivos"></div>
+
+    <!-- Mensagens -->
+    <div class="msg-erro" id="msgErro"></div>
+
+    <!-- Grid de produtos -->
+    <div id="produtosContainer"></div>
+
+    <!-- Paginação -->
+    <div class="paginacao" id="paginacao"></div>
+
+  </main>
+</div>
+
+<div id="footer"></div>
+
+<a href="https://wa.me/258866464666?text=Olá%20E'D%20Fashion!%20Gostaria%20de%20saber%20mais%20sobre%20os%20vossos%20produtos%20😊"
+   target="_blank" class="btn-whatsapp-fixo" title="WhatsApp">💬</a>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="components.js"></script>
+<script>
+
+  const POR_PAGINA = 20;
+  let paginaActual = 1;
+  let todosProdutos = [];
+  let produtosFiltrados = [];
+  let categorias = [];
+  let categoriasSelecionadas = [];
+
+  async function iniciar() {
+    carregarNavbar();
+    carregarFooter();
+    await carregarCategorias();
+    await carregarProdutos();
+    verificarParametrosUrl();
+  }
+
+  // CARREGAR CATEGORIAS
+  async function carregarCategorias() {
+    const { data } = await db
+      .from('categories')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order');
+
+    categorias = data || [];
+    const container = document.getElementById('filtrosCategorias');
+
+    container.innerHTML = categorias.map(c => `
+      <label class="filtro-opcao">
+        <input type="checkbox" class="filtro-cat" value="${c.id}"
+          data-nome="${c.name}" onchange="aplicarFiltros()">
+        ${c.name}
+      </label>
+    `).join('');
+  }
+
+  // CARREGAR PRODUTOS
+  async function carregarProdutos() {
+    mostrarLoading();
+
+    const { data, error } = await db
+      .from('products')
+      .select(`
+        id, name, slug, price, sale_price, image_url,
+        availability_type, is_featured, status, created_at,
+        categories(id, name),
+        product_stock(quantity)
+      `)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      document.getElementById('msgErro').textContent = 'Erro ao carregar produtos.';
+      document.getElementById('msgErro').style.display = 'block';
+      return;
+    }
+
+    todosProdutos = data || [];
+    aplicarFiltros();
+  }
+
+  // VERIFICAR PARÂMETROS URL
+  function verificarParametrosUrl() {
+    const params = new URLSearchParams(window.location.search);
+
+    // Filtro por categoria (slug)
+    const catSlug = params.get('cat');
+    if (catSlug && categorias.length > 0) {
+      const cat = categorias.find(c => c.slug === catSlug);
+      if (cat) {
+        const checkbox = document.querySelector(`.filtro-cat[value="${cat.id}"]`);
+        if (checkbox) {
+          checkbox.checked = true;
+          categoriasSelecionadas = [cat.id];
+          document.getElementById('catalogoTitulo').innerHTML =
+            `${cat.name} — <span>Produtos</span>`;
+        }
+      }
+    }
+
+    // Pesquisa
+    const search = params.get('search');
+    if (search) {
+      // Adicionar campo de pesquisa ao topbar se houver termo
+      document.getElementById('catalogoTitulo').innerHTML =
+        `Resultados para: <span>"${search}"</span>`;
+    }
+
+    aplicarFiltros(search || '');
+  }
+
+  // APLICAR FILTROS
+  function aplicarFiltros(pesquisaForced = null) {
+    paginaActual = 1;
+
+    // Categorias seleccionadas
+    categoriasSelecionadas = Array.from(
+      document.querySelectorAll('.filtro-cat:checked')
+    ).map(cb => cb.value);
+
+    const filtroStock = document.getElementById('filtroStock').checked;
+    const filtroEncomenda = document.getElementById('filtroEncomenda').checked;
+    const filtroPromocao = document.getElementById('filtroPromocao').checked;
+    const filtroDestaque = document.getElementById('filtroDestaque').checked;
+    const precoMin = parseFloat(document.getElementById('precoMin').value) || 0;
+    const precoMax = parseFloat(document.getElementById('precoMax').value) || Infinity;
+    const ordenar = document.getElementById('ordenarSelect').value;
+
+    // Pesquisa da URL
+    const params = new URLSearchParams(window.location.search);
+    const pesquisa = pesquisaForced !== null
+      ? pesquisaForced
+      : (params.get('search') || '').toLowerCase();
+
+    produtosFiltrados = todosProdutos.filter(p => {
+      // Pesquisa
+      if (pesquisa && !p.name.toLowerCase().includes(pesquisa)) return false;
+
+      // Categoria
+      if (categoriasSelecionadas.length > 0 &&
+          !categoriasSelecionadas.includes(p.categories?.id)) return false;
+
+      // Tipo
+      if (filtroStock && !filtroEncomenda && p.availability_type !== 'stock') return false;
+      if (filtroEncomenda && !filtroStock && p.availability_type !== 'pre_order') return false;
+
+      // Promoção
+      if (filtroPromocao && !(p.sale_price && p.sale_price < p.price)) return false;
+
+      // Destaque
+      if (filtroDestaque && !p.is_featured) return false;
+
+      // Preço
+      const precoFinal = (p.sale_price && p.sale_price < p.price) ? p.sale_price : p.price;
+      if (precoFinal < precoMin || precoFinal > precoMax) return false;
+
+      return true;
+    });
+
+    // Ordenação
+    produtosFiltrados.sort((a, b) => {
+      const precoA = (a.sale_price && a.sale_price < a.price) ? a.sale_price : a.price;
+      const precoB = (b.sale_price && b.sale_price < b.price) ? b.sale_price : b.price;
+
+      if (ordenar === 'preco_asc') return precoA - precoB;
+      if (ordenar === 'preco_desc') return precoB - precoA;
+      if (ordenar === 'nome_asc') return a.name.localeCompare(b.name);
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+
+    actualizarTagsFiltros();
+    renderProdutos();
+    renderPaginacao();
+  }
+
+  // ACTUALIZAR TAGS DE FILTROS ACTIVOS
+  function actualizarTagsFiltros() {
+    const tags = [];
+
+    categoriasSelecionadas.forEach(id => {
+      const cat = categorias.find(c => c.id === id);
+      if (cat) tags.push(`
+        <div class="filtro-tag">
+          ${cat.name}
+          <button onclick="removerFiltroCat('${id}')">×</button>
+        </div>`);
+    });
+
+    if (document.getElementById('filtroStock').checked)
+      tags.push(`<div class="filtro-tag">Em Stock <button onclick="document.getElementById('filtroStock').checked=false;aplicarFiltros()">×</button></div>`);
+
+    if (document.getElementById('filtroEncomenda').checked)
+      tags.push(`<div class="filtro-tag">Por Encomenda <button onclick="document.getElementById('filtroEncomenda').checked=false;aplicarFiltros()">×</button></div>`);
+
+    if (document.getElementById('filtroPromocao').checked)
+      tags.push(`<div class="filtro-tag">Em Promoção <button onclick="document.getElementById('filtroPromocao').checked=false;aplicarFiltros()">×</button></div>`);
+
+    document.getElementById('filtrosActivos').innerHTML = tags.join('');
+  }
+
+  function removerFiltroCat(id) {
+    const cb = document.querySelector(`.filtro-cat[value="${id}"]`);
+    if (cb) cb.checked = false;
+    aplicarFiltros();
+  }
+
+  // RENDER PRODUTOS
+  function renderProdutos() {
+    const inicio = (paginaActual - 1) * POR_PAGINA;
+    const fim = inicio + POR_PAGINA;
+    const pagina = produtosFiltrados.slice(inicio, fim);
+
+    const total = produtosFiltrados.length;
+    document.getElementById('catalogoTotal').textContent =
+      `${total} produto${total !== 1 ? 's' : ''}`;
+
+    if (total === 0) {
+      document.getElementById('produtosContainer').innerHTML = `
+        <div class="catalogo-vazio">
+          <span class="icone">🔍</span>
+          <h3>Nenhum produto encontrado</h3>
+          <p>Tenta ajustar os filtros ou pesquisar por outro termo.</p>
+        </div>`;
+      return;
+    }
+
+    document.getElementById('produtosContainer').innerHTML = `
+      <div class="produtos-grid">
+        ${pagina.map(renderCard).join('')}
+      </div>`;
+  }
+
+  // RENDER CARD
+  function renderCard(p) {
+    const temPromo = p.sale_price && p.sale_price < p.price;
+    const precoFinal = temPromo ? p.sale_price : p.price;
+    const desconto = temPromo ? Math.round((1 - p.sale_price / p.price) * 100) : 0;
+    const esgotado = p.availability_type === 'stock' &&
+      p.product_stock?.quantity === 0;
+
+    return `
+      <div class="produto-card ${esgotado ? 'opacity:0.6' : ''}"
+           onclick="window.location.href='produto.html?id=${p.id}'">
+        ${temPromo ? `<div class="produto-card-badge">-${desconto}%</div>` : ''}
+        ${p.availability_type === 'pre_order'
+          ? `<div class="produto-card-badge" style="background:var(--verde)">📦 Encomenda</div>`
+          : ''}
+        ${esgotado
+          ? `<div class="produto-card-badge" style="background:#888">Esgotado</div>`
+          : ''}
+        <img src="${p.image_url || 'assets/sem-imagem.png'}"
+             alt="${p.name}" loading="lazy"
+             onerror="this.src='assets/sem-imagem.png'">
+        <div class="produto-card-info">
+          <div class="produto-card-nome">${p.name}</div>
+          <div style="margin-top:4px">
+            ${temPromo
+              ? `<span class="produto-card-preco-antigo">${formatMZN(p.price)}</span>`
+              : ''}
+            <span class="produto-card-preco">${formatMZN(precoFinal)}</span>
+          </div>
+          ${p.categories?.name
+            ? `<div style="font-size:11px;color:var(--cinza);margin-top:4px">${p.categories.name}</div>`
+            : ''}
+        </div>
+      </div>`;
+  }
+
+  // RENDER PAGINAÇÃO
+  function renderPaginacao() {
+    const totalPaginas = Math.ceil(produtosFiltrados.length / POR_PAGINA);
+    if (totalPaginas <= 1) {
+      document.getElementById('paginacao').innerHTML = '';
+      return;
+    }
+
+    let html = `
+      <button class="pag-btn" onclick="irPagina(${paginaActual - 1})"
+        ${paginaActual === 1 ? 'disabled' : ''}>‹</button>`;
+
+    for (let i = 1; i <= totalPaginas; i++) {
+      if (i === 1 || i === totalPaginas ||
+          (i >= paginaActual - 2 && i <= paginaActual + 2)) {
+        html += `<button class="pag-btn ${i === paginaActual ? 'activa' : ''}"
+          onclick="irPagina(${i})">${i}</button>`;
+      } else if (i === paginaActual - 3 || i === paginaActual + 3) {
+        html += `<span style="padding:0 4px;color:var(--cinza)">...</span>`;
+      }
+    }
+
+    html += `
+      <button class="pag-btn" onclick="irPagina(${paginaActual + 1})"
+        ${paginaActual === totalPaginas ? 'disabled' : ''}>›</button>`;
+
+    document.getElementById('paginacao').innerHTML = html;
+  }
+
+  function irPagina(n) {
+    const totalPaginas = Math.ceil(produtosFiltrados.length / POR_PAGINA);
+    if (n < 1 || n > totalPaginas) return;
+    paginaActual = n;
+    renderProdutos();
+    renderPaginacao();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // LOADING
+  function mostrarLoading() {
+    document.getElementById('produtosContainer').innerHTML = `
+      <div class="loading-grid">
+        ${Array(8).fill(`
+          <div class="loading-card">
+            <div class="loading-img"></div>
+            <div class="loading-info">
+              <div class="loading-linha"></div>
+              <div class="loading-linha curta"></div>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  // LIMPAR FILTROS
+  function limparFiltros() {
+    document.querySelectorAll('.filtro-cat').forEach(cb => cb.checked = false);
+    document.getElementById('filtroStock').checked = false;
+    document.getElementById('filtroEncomenda').checked = false;
+    document.getElementById('filtroPromocao').checked = false;
+    document.getElementById('filtroDestaque').checked = false;
+    document.getElementById('precoMin').value = '';
+    document.getElementById('precoMax').value = '';
+    document.getElementById('ordenarSelect').value = 'recente';
+    categoriasSelecionadas = [];
+    aplicarFiltros();
+  }
+
+  // MOBILE
+  function abrirFiltros() {
+    document.getElementById('filtrosPainel').classList.add('aberto');
+    document.getElementById('filtrosOverlay').classList.add('visivel');
+    document.getElementById('btnFecharFiltros').style.display = 'block';
+  }
+
+  function fecharFiltros() {
+    document.getElementById('filtrosPainel').classList.remove('aberto');
+    document.getElementById('filtrosOverlay').classList.remove('visivel');
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>
