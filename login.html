@@ -320,13 +320,7 @@
     btn.disabled = true;
     btn.textContent = 'A criar conta...';
 
-    const { data, error } = await db.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: nome, phone: telefone }
-      }
-    });
+    const { data, error } = await db.auth.signUp({ email, password });
 
     if (error) {
       mostrarErro('msgErro', traduzirErro(error.message));
@@ -334,6 +328,21 @@
       btn.textContent = 'Criar Conta';
       return;
     }
+
+    // Criar perfil manualmente
+    if (data.user) {
+      await db.from('profiles').upsert({
+        id: data.user.id,
+        full_name: nome,
+        phone: telefone,
+        role: 'customer'
+      });
+    }
+
+    mostrarSucesso('msgSucesso', '✅ Conta criada com sucesso! Podes entrar agora.');
+    btn.disabled = false;
+    btn.textContent = 'Criar Conta';
+  }
 
     mostrarSucesso('msgSucesso', '✅ Conta criada! Verifica o teu email para confirmar o registo.');
     btn.disabled = false;
