@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produto — E'D Fashion</title>
+  <link rel="stylesheet" href="main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .produto-layout {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    /* BREADCRUMB */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--cinza);
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .breadcrumb a { color: var(--cinza); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--rosa); }
+    .breadcrumb span { color: var(--preto); font-weight: 600; }
+
+    /* GRID PRINCIPAL */
+    .produto-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    /* IMAGEM */
+    .produto-imagem-wrap {
+      position: sticky;
+      top: 80px;
+    }
+
+    .produto-imagem-principal {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      border-radius: 16px;
+      background: var(--cinza-claro);
+      display: block;
+    }
+
+    .produto-sem-imagem {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: var(--cinza-claro);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+    }
+
+    /* BADGES */
+    .produto-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .produto-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-categoria { background: var(--cinza-claro); color: var(--cinza-escuro); }
+    .badge-promo { background: var(--rosa); color: white; }
+    .badge-encomenda { background: var(--verde); color: white; }
+    .badge-esgotado { background: #888; color: white; }
+
+    /* INFO */
+    .produto-nome {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--preto);
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+
+    .produto-precos {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .produto-preco-actual {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--rosa);
+    }
+
+    .produto-preco-antigo {
+      font-size: 18px;
+      color: var(--cinza);
+      text-decoration: line-through;
+    }
+
+    .produto-desconto {
+      background: var(--rosa);
+      color: white;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* STOCK */
+    .produto-stock {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .stock-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .stock-dot.verde { background: #16A34A; }
+    .stock-dot.amarelo { background: #D97706; }
+    .stock-dot.vermelho { background: #DC2626; }
+
+    /* ENCOMENDA INFO */
+    .encomenda-info {
+      background: #F0F7E6;
+      border: 1px solid var(--verde);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .encomenda-info h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #16A34A;
+      margin-bottom: 8px;
+    }
+
+    .encomenda-info ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .encomenda-info ul li {
+      font-size: 13px;
+      color: var(--cinza-escuro);
+      padding: 3px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* QUANTIDADE */
+    .quantidade-wrap {
+      margin-bottom: 20px;
+    }
+
+    .quantidade-wrap label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .quantidade-controlo {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      width: fit-content;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .qtd-btn {
+      width: 40px;
+      height: 40px;
+      background: var(--cinza-claro);
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      color: var(--preto);
+    }
+
+    .qtd-btn:hover { background: #ddd; }
+
+    .qtd-input {
+      width: 50px;
+      height: 40px;
+      border: none;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 700;
+      outline: none;
+      color: var(--preto);
+    }
+
+    /* BOTÕES */
+    .produto-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .btn-carrinho {
+      width: 100%;
+      padding: 14px;
+      background: var(--rosa);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-carrinho:hover { background: #c4186f; transform: translateY(-1px); }
+    .btn-carrinho:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+    .btn-whatsapp {
+      width: 100%;
+      padding: 14px;
+      background: #25D366;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn-whatsapp:hover { background: #1da851; transform: translateY(-1px); }
+
+    .btn-favorito {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      color: var(--cinza-escuro);
+      border: 1.5px solid #ddd;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-favorito:hover { border-color: var(--rosa); color: var(--rosa); }
+    .btn-favorito.activo { border-color: var(--rosa); color: var(--rosa); background: var(--rosa-claro); }
+
+    /* DESCRIÇÃO */
+    .produto-tabs {
+      display: flex;
+      border-bottom: 2px solid #eee;
+      margin-bottom: 20px;
+      gap: 0;
+    }
+
+    .produto-tab {
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--cinza);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .produto-tab.activa {
+      color: var(--rosa);
+      border-bottom-color: var(--rosa);
+    }
+
+    .produto-tab-conteudo { display: none; }
+    .produto-tab-conteudo.activa { display: block; }
+
+    .produto-descricao {
+      font-size: 14px;
+      color: var(--cinza-escuro);
+      line-height: 1.7;
+    }
+
+    /* PARTILHA */
+    .produto-partilha {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .produto-partilha span {
+      font-size: 13px;
+      color: var(--cinza);
+      font-weight: 600;
+    }
+
+    .partilha-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid #ddd;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .partilha-btn:hover { border-color: var(--rosa); }
+
+    /* RELACIONADOS */
+    .relacionados {
+      margin-top: 50px;
+      padding-top: 30px;
+      border-top: 2px solid #eee;
+    }
+
+    .relacionados h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--preto);
+      margin-bottom: 20px;
+    }
+
+    .relacionados h2 span { color: var(--rosa); }
+
+    /* NOTIFICAÇÃO CARRINHO */
+    .notif-carrinho {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--preto);
+      color: white;
+      padding: 14px 24px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 999;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+
+    .notif-carrinho.visivel {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* LOADING */
+    .produto-loading {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    /* RESPONSIVIDADE */
+    @media (max-width: 768px) {
+      .produto-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .produto-imagem-wrap { position: static; }
+      .produto-nome { font-size: 20px; }
+      .produto-preco-actual { font-size: 26px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div id="conteudoProduto">
+  <!-- Carregado via JS -->
+  <div class="produto-loading">
+    <div style="text-align:center; padding:80px 20px; color:var(--cinza);">
+      <div style="font-size:40px; margin-bottom:12px;">⏳</div>
+      <p>A carregar produto...</p>
+    </div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<!-- Notificação carrinho -->
+<div class="notif-carrinho" id="notifCarrinho">✅ Produto adicionado ao carrinho!</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="components.js"></script>
+<script>
+
+  let produto = null;
+  let isFavorito = false;
+
+  async function iniciar() {
+    carregarNavbar();
+    carregarFooter();
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    if (!id) {
+      window.location.href = 'catalogo.html';
+      return;
+    }
+
+    await carregarProduto(id);
+  }
+
+  async function carregarProduto(id) {
+    const { data, error } = await db
+      .from('products')
+      .select(`
+        *,
+        categories(id, name, slug),
+        product_stock(quantity, low_stock_threshold)
+      `)
+      .eq('id', id)
+      .eq('status', 'active')
+      .single();
+
+    if (error || !data) {
+      document.getElementById('conteudoProduto').innerHTML = `
+        <div style="text-align:center; padding:80px 20px;">
+          <div style="font-size:60px; margin-bottom:16px;">😕</div>
+          <h2 style="font-size:22px; margin-bottom:8px;">Produto não encontrado</h2>
+          <p style="color:var(--cinza); margin-bottom:24px;">Este produto pode ter sido removido ou não existe.</p>
+          <a href="catalogo.html" class="btn btn-rosa">Ver Catálogo</a>
+        </div>`;
+      return;
+    }
+
+    produto = data;
+    document.title = `${produto.name} — E'D Fashion`;
+    renderProduto();
+    verificarFavorito();
+    carregarRelacionados();
+  }
+
+  function renderProduto() {
+    const temPromo = produto.sale_price && produto.sale_price < produto.price;
+    const precoFinal = temPromo ? produto.sale_price : produto.price;
+    const desconto = temPromo ? Math.round((1 - produto.sale_price / produto.price) * 100) : 0;
+    const stock = produto.product_stock?.quantity ?? 0;
+    const esgotado = produto.availability_type === 'stock' && stock === 0;
+    const stockBaixo = produto.availability_type === 'stock' && stock > 0 && stock <= 5;
+    const eEncomenda = produto.availability_type === 'pre_order';
+
+    const whatsappMsg = encodeURIComponent(
+      `Olá E'D Fashion! 👋\n\nTenho interesse no seguinte produto:\n\n` +
+      `*${produto.name}*\n` +
+      `Preço: ${formatMZN(precoFinal)}\n` +
+      (eEncomenda ? `Tipo: Por Encomenda\n` : '') +
+      `\nPoderia dar mais informações?`
+    );
+
+    document.getElementById('conteudoProduto').innerHTML = `
+      <div class="produto-layout">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <a href="index.html">Início</a> ›
+          <a href="catalogo.html">Catálogo</a> ›
+          ${produto.categories ? `<a href="catalogo.html?cat=${produto.categories.slug}">${produto.categories.name}</a> ›` : ''}
+          <span>${produto.name.substring(0, 40)}${produto.name.length > 40 ? '...' : ''}</span>
+        </div>
+
+        <div class="produto-grid">
+
+          <!-- IMAGEM -->
+          <div class="produto-imagem-wrap">
+            ${produto.image_url
+              ? `<img src="${produto.image_url}" alt="${produto.name}"
+                   class="produto-imagem-principal"
+                   onerror="this.style.display='none'; document.getElementById('semImagem').style.display='flex'">`
+              : ''}
+            <div id="semImagem" class="produto-sem-imagem" ${produto.image_url ? 'style="display:none"' : ''}>
+              👗
+            </div>
+          </div>
+
+          <!-- INFO -->
+          <div class="produto-info">
+
+            <!-- Badges -->
+            <div class="produto-badges">
+              ${produto.categories ? `<span class="produto-badge badge-categoria">${produto.categories.name}</span>` : ''}
+              ${temPromo ? `<span class="produto-badge badge-promo">-${desconto}% Promoção</span>` : ''}
+              ${eEncomenda ? `<span class="produto-badge badge-encomenda">📦 Por Encomenda</span>` : ''}
+              ${esgotado ? `<span class="produto-badge badge-esgotado">Esgotado</span>` : ''}
+            </div>
+
+            <!-- Nome -->
+            <h1 class="produto-nome">${produto.name}</h1>
+
+            <!-- Preços -->
+            <div class="produto-precos">
+              <span class="produto-preco-actual">${formatMZN(precoFinal)}</span>
+              ${temPromo ? `<span class="produto-preco-antigo">${formatMZN(produto.price)}</span>` : ''}
+              ${temPromo ? `<span class="produto-desconto">-${desconto}%</span>` : ''}
+            </div>
+
+            <!-- Stock / Disponibilidade -->
+            ${eEncomenda
+              ? `<div class="encomenda-info">
+                  <h4>📦 Produto por Encomenda</h4>
+                  <ul>
+                    ${produto.estimated_delivery_days ? `<li>⏱️ Prazo estimado: <strong>${produto.estimated_delivery_days} dias</strong></li>` : ''}
+                    ${produto.deposit_percentage ? `<li>💰 Adiantamento: <strong>${produto.deposit_percentage}% do valor total</strong></li>` : ''}
+                    <li>✅ Acompanhamento de todo o processo</li>
+                    <li>🔒 Compra segura e garantida</li>
+                  </ul>
+                </div>`
+              : `<div class="produto-stock">
+                  <div class="stock-dot ${esgotado ? 'vermelho' : stockBaixo ? 'amarelo' : 'verde'}"></div>
+                  <span>
+                    ${esgotado
+                      ? 'Produto esgotado'
+                      : stockBaixo
+                        ? `Últimas ${stock} unidades`
+                        : `Em stock (${stock} disponíveis)`}
+                  </span>
+                </div>`}
+
+            <!-- Descrição curta -->
+            ${produto.short_description
+              ? `<p style="font-size:14px; color:var(--cinza-escuro); line-height:1.6; margin-bottom:20px;">
+                  ${produto.short_description}
+                </p>`
+              : ''}
+
+            <!-- Quantidade -->
+            ${!esgotado ? `
+            <div class="quantidade-wrap">
+              <label>Quantidade</label>
+              <div class="quantidade-controlo">
+                <button class="qtd-btn" onclick="alterarQtd(-1)">−</button>
+                <input type="number" class="qtd-input" id="quantidade" value="1" min="1"
+                  max="${eEncomenda ? 99 : stock}" readonly>
+                <button class="qtd-btn" onclick="alterarQtd(1)">+</button>
+              </div>
+            </div>` : ''}
+
+            <!-- Mensagens -->
+            <div class="msg-sucesso" id="msgSucesso"></div>
+            <div class="msg-erro" id="msgErro"></div>
+
+            <!-- Botões -->
+            <div class="produto-btns">
+              ${!esgotado
+                ? `<button class="btn-carrinho" onclick="adicionarCarrinho()" id="btnCarrinho">
+                    🛒 Adicionar ao Carrinho
+                  </button>`
+                : `<button class="btn-carrinho" disabled>😔 Produto Esgotado</button>`}
+
+              <a href="https://wa.me/258866464666?text=${whatsappMsg}"
+                 target="_blank" class="btn-whatsapp">
+                💬 Comprar via WhatsApp
+              </a>
+
+              <button class="btn-favorito" id="btnFavorito" onclick="toggleFavorito()">
+                ♡ Guardar nos Favoritos
+              </button>
+            </div>
+
+            <!-- Partilha -->
+            <div class="produto-partilha">
+              <span>Partilhar:</span>
+              <a href="https://wa.me/?text=${encodeURIComponent(window.location.href)}"
+                 target="_blank" class="partilha-btn" title="WhatsApp">💬</a>
+              <button class="partilha-btn" onclick="copiarLink()" title="Copiar link">🔗</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TABS DE DESCRIÇÃO -->
+        <div>
+          <div class="produto-tabs">
+            <div class="produto-tab activa" onclick="mudarTab('descricao', this)">Descrição</div>
+            ${produto.specifications && Object.keys(produto.specifications).length > 0
+              ? `<div class="produto-tab" onclick="mudarTab('especificacoes', this)">Especificações</div>`
+              : ''}
+          </div>
+
+          <div class="produto-tab-conteudo activa" id="tab-descricao">
+            <div class="produto-descricao">
+              ${produto.full_description
+                ? produto.full_description.replace(/\n/g, '<br>')
+                : produto.short_description || 'Sem descrição disponível.'}
+            </div>
+          </div>
+
+          ${produto.specifications && Object.keys(produto.specifications).length > 0
+            ? `<div class="produto-tab-conteudo" id="tab-especificacoes">
+                <div class="produto-descricao">
+                  ${Object.entries(produto.specifications).map(([k, v]) =>
+                    `<div style="display:flex; gap:16px; padding:10px 0; border-bottom:1px solid #eee;">
+                      <span style="font-weight:600; min-width:140px;">${k}</span>
+                      <span>${v}</span>
+                    </div>`
+                  ).join('')}
+                </div>
+              </div>`
+            : ''}
+        </div>
+
+        <!-- RELACIONADOS -->
+        <div class="relacionados" id="relacionados"></div>
+
+      </div>`;
+  }
+
+  // QUANTIDADE
+  function alterarQtd(delta) {
+    const input = document.getElementById('quantidade');
+    if (!input) return;
+    const max = parseInt(input.max) || 99;
+    const novoVal = Math.max(1, Math.min(max, parseInt(input.value) + delta));
+    input.value = novoVal;
+  }
+
+  // CARRINHO
+  function adicionarCarrinho() {
+    const quantidade = parseInt(document.getElementById('quantidade')?.value || 1);
+    const carrinho = JSON.parse(localStorage.getItem('ed_carrinho') || '[]');
+
+    const idx = carrinho.findIndex(i => i.id === produto.id);
+    if (idx >= 0) {
+      carrinho[idx].quantidade += quantidade;
+    } else {
+      carrinho.push({
+        id: produto.id,
+        nome: produto.name,
+        preco: produto.sale_price && produto.sale_price < produto.price ? produto.sale_price : produto.price,
+        imagem: produto.image_url || '',
+        quantidade,
+        tipo: produto.availability_type
+      });
+    }
+
+    localStorage.setItem('ed_carrinho', JSON.stringify(carrinho));
+    atualizarContadorCarrinho();
+    mostrarNotifCarrinho();
+  }
+
+  function mostrarNotifCarrinho() {
+    const notif = document.getElementById('notifCarrinho');
+    notif.classList.add('visivel');
+    setTimeout(() => notif.classList.remove('visivel'), 3000);
+  }
+
+  // FAVORITO
+  async function verificarFavorito() {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) return;
+
+    const { data } = await db
+      .from('wishlists')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .eq('product_id', produto.id)
+      .single();
+
+    isFavorito = !!data;
+    actualizarBtnFavorito();
+  }
+
+  async function toggleFavorito() {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) {
+      localStorage.setItem('ed_redirect', window.location.href);
+      window.location.href = 'login.html';
+      return;
+    }
+
+    if (isFavorito) {
+      await db.from('wishlists')
+        .delete()
+        .eq('user_id', session.user.id)
+        .eq('product_id', produto.id);
+      isFavorito = false;
+    } else {
+      await db.from('wishlists').insert({
+        user_id: session.user.id,
+        product_id: produto.id
+      });
+      isFavorito = true;
+    }
+
+    actualizarBtnFavorito();
+  }
+
+  function actualizarBtnFavorito() {
+    const btn = document.getElementById('btnFavorito');
+    if (!btn) return;
+    if (isFavorito) {
+      btn.textContent = '❤️ Guardado nos Favoritos';
+      btn.classList.add('activo');
+    } else {
+      btn.textContent = '♡ Guardar nos Favoritos';
+      btn.classList.remove('activo');
+    }
+  }
+
+  // TABS
+  function mudarTab(id, el) {
+    document.querySelectorAll('.produto-tab').forEach(t => t.classList.remove('activa'));
+    document.querySelectorAll('.produto-tab-conteudo').forEach(t => t.classList.remove('activa'));
+    el.classList.add('activa');
+    document.getElementById('tab-' + id)?.classList.add('activa');
+  }
+
+  // COPIAR LINK
+  function copiarLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      mostrarSucesso('msgSucesso', '🔗 Link copiado!');
+      setTimeout(() => esconderMensagem('msgSucesso'), 2000);
+    });
+  }
+
+  // PRODUTOS RELACIONADOS
+  async function carregarRelacionados() {
+    if (!produto.categories?.id) return;
+
+    const { data } = await db
+      .from('products')
+      .select('id, name, price, sale_price, image_url')
+      .eq('status', 'active')
+      .eq('category_id', produto.categories.id)
+      .neq('id', produto.id)
+      .limit(4);
+
+    if (!data || data.length === 0) return;
+
+    document.getElementById('relacionados').innerHTML = `
+      <h2>Também podes <span>gostar</span></h2>
+      <div class="produtos-grid">
+        ${data.map(p => {
+          const temPromo = p.sale_price && p.sale_price < p.price;
+          const precoFinal = temPromo ? p.sale_price : p.price;
+          return `
+            <div class="produto-card" onclick="window.location.href='produto.html?id=${p.id}'">
+              ${temPromo ? `<div class="produto-card-badge">Promoção</div>` : ''}
+              <img src="${p.image_url || 'assets/sem-imagem.png'}" alt="${p.name}" loading="lazy"
+                   onerror="this.src='assets/sem-imagem.png'">
+              <div class="produto-card-info">
+                <div class="produto-card-nome">${p.name}</div>
+                <div>
+                  ${temPromo ? `<span class="produto-card-preco-antigo">${formatMZN(p.price)}</span>` : ''}
+                  <span class="produto-card-preco">${formatMZN(precoFinal)}</span>
+                </div>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>`;
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>
