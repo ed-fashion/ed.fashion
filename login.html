@@ -30,9 +30,7 @@
       margin-bottom: 28px;
     }
 
-    .auth-logo img {
-      height: 80px;
-    }
+    .auth-logo img { height: 80px; }
 
     .auth-tabs {
       display: flex;
@@ -100,30 +98,9 @@
     .link-recuperar a {
       font-size: 12px;
       color: var(--rosa);
+      cursor: pointer;
     }
 
-    .divisor {
-      text-align: center;
-      margin: 20px 0;
-      color: var(--cinza);
-      font-size: 12px;
-      position: relative;
-    }
-
-    .divisor::before,
-    .divisor::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 40%;
-      height: 1px;
-      background: #eee;
-    }
-
-    .divisor::before { left: 0; }
-    .divisor::after { right: 0; }
-
-    /* Recuperar password */
     .recuperar-form { display: none; }
     .recuperar-form.active { display: block; }
 
@@ -134,24 +111,25 @@
       color: var(--rosa);
       cursor: pointer;
     }
+
+    .voltar-login:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
 <div class="auth-container">
 
-  <!-- Logo -->
   <div class="auth-logo">
-    <img src="logo.png" alt="E'D Fashion">
+    <a href="index.html">
+      <img src="logo.png" alt="E'D Fashion">
+    </a>
   </div>
 
-  <!-- Tabs -->
   <div class="auth-tabs" id="authTabs">
     <div class="auth-tab active" onclick="mudarTab('login')">Entrar</div>
     <div class="auth-tab" onclick="mudarTab('registo')">Criar Conta</div>
   </div>
 
-  <!-- Mensagens -->
   <div class="msg-erro" id="msgErro"></div>
   <div class="msg-sucesso" id="msgSucesso"></div>
 
@@ -174,9 +152,7 @@
       <a onclick="mostrarRecuperar()">Esqueceste a password?</a>
     </div>
 
-    <button class="btn-auth" onclick="fazerLogin()" id="btnLogin">
-      Entrar
-    </button>
+    <button class="btn-auth" onclick="fazerLogin()" id="btnLogin">Entrar</button>
   </div>
 
   <!-- FORM REGISTO -->
@@ -204,24 +180,20 @@
       <input type="password" id="registoPassword" placeholder="Mínimo 6 caracteres">
     </div>
 
-    <button class="btn-auth" onclick="fazerRegisto()" id="btnRegisto">
-      Criar Conta
-    </button>
+    <button class="btn-auth" onclick="fazerRegisto()" id="btnRegisto">Criar Conta</button>
   </div>
 
   <!-- FORM RECUPERAR PASSWORD -->
   <div class="recuperar-form" id="formRecuperar">
     <p class="auth-titulo">Recuperar Password 🔑</p>
-    <p class="auth-subtitulo">Envia-nos o teu email e enviamos instruções</p>
+    <p class="auth-subtitulo">Introduz o teu email e enviamos instruções</p>
 
     <div class="form-grupo">
       <label>Email</label>
       <input type="email" id="recuperarEmail" placeholder="o.teu@email.com">
     </div>
 
-    <button class="btn-auth" onclick="recuperarPassword()" id="btnRecuperar">
-      Enviar Email
-    </button>
+    <button class="btn-auth" onclick="recuperarPassword()" id="btnRecuperar">Enviar Email</button>
 
     <p class="voltar-login" onclick="voltarLogin()">← Voltar ao login</p>
   </div>
@@ -232,7 +204,6 @@
 <script src="utils.js"></script>
 <script>
 
-  // MUDAR TAB
   function mudarTab(tab) {
     document.querySelectorAll('.auth-tab').forEach((t, i) => {
       t.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'registo' && i === 1));
@@ -245,7 +216,6 @@
     esconderMensagem('msgSucesso');
   }
 
-  // MOSTRAR RECUPERAR
   function mostrarRecuperar() {
     document.getElementById('formLogin').classList.remove('active');
     document.getElementById('formRegisto').classList.remove('active');
@@ -255,13 +225,9 @@
     esconderMensagem('msgSucesso');
   }
 
-  // VOLTAR AO LOGIN
-  function voltarLogin() {
-    mudarTab('login');
-  }
+  function voltarLogin() { mudarTab('login'); }
 
-  // FAZER LOGIN
-async function fazerLogin() {
+  async function fazerLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
     const btn = document.getElementById('btnLogin');
@@ -292,27 +258,15 @@ async function fazerLogin() {
       .eq('id', data.user.id)
       .single();
 
-    // Redirecionar
-    const destino = localStorage.getItem('ed_redirect') || 'index.html';
-    localStorage.removeItem('ed_redirect');
-
     if (perfil?.role === 'admin' || perfil?.role === 'employee') {
-      window.location.href = 'admin.html';
+      window.location.replace('admin.html');
     } else {
-      window.location.href = destino;
-    }
-  }
-    // Redirecionar conforme perfil
-    const { data: perfil } = await db.from('profiles').select('role').eq('id', data.user.id).single();
-
-    if (perfil?.role === 'admin' || perfil?.role === 'employee') {
-      window.location.href = 'admin.html';
-    } else {
-      window.location.href = 'index.html';
+      const destino = localStorage.getItem('ed_redirect') || 'index.html';
+      localStorage.removeItem('ed_redirect');
+      window.location.replace(destino);
     }
   }
 
-  // FAZER REGISTO
   async function fazerRegisto() {
     const nome = document.getElementById('registoNome').value.trim();
     const email = document.getElementById('registoEmail').value.trim();
@@ -345,7 +299,6 @@ async function fazerLogin() {
       return;
     }
 
-    // Criar perfil manualmente
     if (data.user) {
       await db.from('profiles').upsert({
         id: data.user.id,
@@ -355,17 +308,14 @@ async function fazerLogin() {
       });
     }
 
-    mostrarSucesso('msgSucesso', '✅ Conta criada com sucesso! Podes entrar agora.');
-    btn.disabled = false;
-    btn.textContent = 'Criar Conta';
-  }
-
     mostrarSucesso('msgSucesso', '✅ Conta criada com sucesso! Já podes entrar na tua conta.');
     btn.disabled = false;
     btn.textContent = 'Criar Conta';
+
+    // Mudar automaticamente para o tab de login após 2 segundos
+    setTimeout(() => mudarTab('login'), 2000);
   }
 
- // RECUPERAR PASSWORD
   async function recuperarPassword() {
     const email = document.getElementById('recuperarEmail').value.trim();
     const btn = document.getElementById('btnRecuperar');
@@ -388,32 +338,36 @@ async function fazerLogin() {
     if (error) {
       mostrarErro('msgErro', 'Erro ao enviar. Verifica o email introduzido.');
     } else {
-      mostrarSucesso('msgSucesso', '✅ Email enviado! Verifica a tua caixa de entrada.');
+      mostrarSucesso('msgSucesso', '✅ Se o email existir na nossa base de dados, receberás as instruções em breve.');
     }
 
     btn.disabled = false;
     btn.textContent = 'Enviar Email';
   }
 
-  // TRADUZIR ERROS DO SUPABASE
   function traduzirErro(msg) {
     if (msg.includes('Invalid login credentials')) return 'Email ou password incorrectos.';
     if (msg.includes('Email not confirmed')) return 'Confirma o teu email antes de entrar.';
-    if (msg.includes('User already registered')) return 'Este email já está registado.';
+    if (msg.includes('User already registered')) return 'Este email já está registado. Usa o separador Entrar.';
     if (msg.includes('Password should be at least')) return 'A password deve ter pelo menos 6 caracteres.';
     if (msg.includes('Unable to validate email')) return 'Email inválido.';
+    if (msg.includes('over_email_send_rate_limit')) return 'Demasiados pedidos. Aguarda alguns minutos.';
     return 'Ocorreu um erro. Tenta novamente.';
   }
 
-  // VERIFICAR SE JÁ ESTÁ LOGADO
   async function verificarSessao() {
     const { data: { session } } = await db.auth.getSession();
     if (session) {
-      const { data: perfil } = await db.from('profiles').select('role').eq('id', session.user.id).single();
+      const { data: perfil } = await db
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
       if (perfil?.role === 'admin' || perfil?.role === 'employee') {
-        window.location.href = 'admin.html';
+        window.location.replace('admin.html');
       } else {
-        window.location.href = 'index.html';
+        window.location.replace('index.html');
       }
     }
   }
