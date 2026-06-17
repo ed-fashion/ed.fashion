@@ -1,382 +1,400 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Entrar — E'D Fashion</title>
-  <link rel="icon" type="image/png" href="./assets/logo.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./css/main.css" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — E'D Fashion</title>
+  <link rel="stylesheet" href="main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { background: linear-gradient(135deg, #fff0f7 0%, #f0fae0 100%); min-height: 100vh; }
-
-    .auth-wrapper {
-      min-height: calc(100vh - 66px);
+    body {
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 40px 16px;
+      background: linear-gradient(135deg, var(--rosa-claro) 0%, var(--verde-claro) 100%);
     }
 
-    .auth-card {
+    .auth-container {
       background: white;
-      border-radius: var(--radius-lg);
-      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
       width: 100%;
-      max-width: 440px;
-      overflow: hidden;
+      max-width: 420px;
+      padding: 40px;
+      margin: 20px;
     }
-
-    .auth-tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-    }
-    .auth-tab {
-      padding: 18px;
-      text-align: center;
-      font-size: 15px;
-      font-weight: 600;
-      border: none;
-      background: var(--cinza-claro);
-      color: var(--cinza);
-      cursor: pointer;
-      transition: all var(--transicao);
-    }
-    .auth-tab.active {
-      background: var(--rosa);
-      color: white;
-    }
-
-    .auth-body { padding: 32px; }
 
     .auth-logo {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
     }
-    .auth-logo img { height: 56px; margin: 0 auto; }
-    .auth-logo p { font-size: 14px; color: var(--cinza); margin-top: 6px; }
+
+    .auth-logo img {
+      height: 80px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      border-bottom: 2px solid #eee;
+      margin-bottom: 28px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--cinza);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.active {
+      color: var(--rosa);
+      border-bottom-color: var(--rosa);
+    }
 
     .auth-form { display: none; }
     .auth-form.active { display: block; }
 
-    .auth-footer {
-      text-align: center;
-      margin-top: 20px;
+    .auth-titulo {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--preto);
+      margin-bottom: 6px;
+    }
+
+    .auth-subtitulo {
       font-size: 13px;
       color: var(--cinza);
+      margin-bottom: 24px;
     }
-    .auth-footer a { color: var(--rosa); font-weight: 600; }
 
-    .password-wrapper { position: relative; }
-    .password-wrapper input { padding-right: 44px; width: 100%; }
-    .toggle-pw {
-      position: absolute;
-      right: 12px; top: 50%;
-      transform: translateY(-50%);
-      background: none;
+    .btn-auth {
+      width: 100%;
+      padding: 12px;
+      background: var(--rosa);
+      color: white;
       border: none;
-      color: var(--cinza);
+      border-radius: 25px;
+      font-size: 15px;
+      font-weight: 700;
       cursor: pointer;
-      padding: 0;
+      transition: background 0.2s;
+      margin-top: 8px;
     }
 
-    .social-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .btn-auth:hover { background: #c4186f; }
+    .btn-auth:disabled { background: #ccc; cursor: not-allowed; }
+
+    .link-recuperar {
+      text-align: right;
+      margin-top: -8px;
+      margin-bottom: 16px;
+    }
+
+    .link-recuperar a {
+      font-size: 12px;
+      color: var(--rosa);
+    }
+
+    .divisor {
+      text-align: center;
       margin: 20px 0;
       color: var(--cinza);
-      font-size: 13px;
-    }
-    .social-divider::before,
-    .social-divider::after {
-      content: '';
-      flex: 1;
-      border-top: 1px solid var(--cinza-claro);
+      font-size: 12px;
+      position: relative;
     }
 
-    /* Recuperar senha */
-    #formRecuperar { display: none; }
-    #formRecuperar.active { display: block; }
+    .divisor::before,
+    .divisor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #eee;
+    }
+
+    .divisor::before { left: 0; }
+    .divisor::after { right: 0; }
+
+    /* Recuperar password */
+    .recuperar-form { display: none; }
+    .recuperar-form.active { display: block; }
+
+    .voltar-login {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--rosa);
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
-  <nav id="navbar"></nav>
+<div class="auth-container">
 
-  <div class="auth-wrapper">
-    <div class="auth-card">
-
-      <!-- Tabs -->
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Entrar</button>
-        <button class="auth-tab" id="tabRegisto" onclick="switchTab('registo')">Criar Conta</button>
-      </div>
-
-      <div class="auth-body">
-        <div class="auth-logo">
-          <img src="./assets/logo.png" alt="E'D Fashion" />
-          <p id="authSubtitle">Bem-vindo de volta!</p>
-        </div>
-
-        <!-- Mensagem global -->
-        <div class="msg" id="authMsg"></div>
-
-        <!-- ── FORM LOGIN ──────────────────────────────── -->
-        <div class="auth-form active" id="formLogin">
-          <div class="form-group">
-            <label for="loginEmail">Email</label>
-            <input type="email" id="loginEmail" placeholder="o.teu@email.com" autocomplete="email" />
-          </div>
-          <div class="form-group">
-            <label for="loginPassword">Password</label>
-            <div class="password-wrapper">
-              <input type="password" id="loginPassword" placeholder="A tua password" autocomplete="current-password" />
-              <button class="toggle-pw" type="button" onclick="togglePassword('loginPassword', this)">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div style="text-align:right; margin-top: -10px; margin-bottom: 18px;">
-            <a href="#" onclick="showRecuperar()" style="font-size:13px; color:var(--rosa);">Esqueceste a password?</a>
-          </div>
-          <button class="btn btn-rosa btn-full btn-lg" id="btnLogin" onclick="handleLogin()">
-            Entrar
-          </button>
-        </div>
-
-        <!-- ── FORM REGISTO ────────────────────────────── -->
-        <div class="auth-form" id="formRegisto">
-          <div class="form-group">
-            <label for="registoNome">Nome completo</label>
-            <input type="text" id="registoNome" placeholder="O teu nome" autocomplete="name" />
-          </div>
-          <div class="form-group">
-            <label for="registoEmail">Email</label>
-            <input type="email" id="registoEmail" placeholder="o.teu@email.com" autocomplete="email" />
-          </div>
-          <div class="form-group">
-            <label for="registoTelefone">Telefone <span style="color:var(--cinza); font-weight:400;">(opcional)</span></label>
-            <input type="tel" id="registoTelefone" placeholder="8X XXX XXXX" />
-          </div>
-          <div class="form-group">
-            <label for="registoPassword">Password</label>
-            <div class="password-wrapper">
-              <input type="password" id="registoPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
-              <button class="toggle-pw" type="button" onclick="togglePassword('registoPassword', this)">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <button class="btn btn-rosa btn-full btn-lg" id="btnRegisto" onclick="handleRegisto()">
-            Criar Conta
-          </button>
-          <p style="font-size:12px; color:var(--cinza); text-align:center; margin-top:14px; line-height:1.6;">
-            Ao criar conta, aceitas os nossos <a href="./termos.html" style="color:var(--rosa);">Termos</a> e <a href="./privacidade.html" style="color:var(--rosa);">Política de Privacidade</a>.
-          </p>
-        </div>
-
-        <!-- ── FORM RECUPERAR SENHA ────────────────────── -->
-        <div id="formRecuperar">
-          <p style="font-size:14px; color:var(--cinza-escuro); margin-bottom:20px; line-height:1.6;">
-            Indica o teu email e enviamos um link para criares uma nova password.
-          </p>
-          <div class="form-group">
-            <label for="recuperarEmail">Email</label>
-            <input type="email" id="recuperarEmail" placeholder="o.teu@email.com" />
-          </div>
-          <button class="btn btn-rosa btn-full" id="btnRecuperar" onclick="handleRecuperar()">
-            Enviar Link
-          </button>
-          <div style="text-align:center; margin-top:16px;">
-            <a href="#" onclick="hideRecuperar()" style="font-size:13px; color:var(--cinza);">← Voltar ao login</a>
-          </div>
-        </div>
-
-      </div>
-    </div>
+  <!-- Logo -->
+  <div class="auth-logo">
+    <img src="logo.png" alt="E'D Fashion">
   </div>
 
-  <!-- FOOTER -->
-  <footer id="footer"></footer>
+  <!-- Tabs -->
+  <div class="auth-tabs" id="authTabs">
+    <div class="auth-tab active" onclick="mudarTab('login')">Entrar</div>
+    <div class="auth-tab" onclick="mudarTab('registo')">Criar Conta</div>
+  </div>
 
-  <!-- SCRIPTS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./js/supabase.js"></script>
-  <script src="./js/utils.js"></script>
-  <script src="./js/components.js"></script>
+  <!-- Mensagens -->
+  <div class="msg-erro" id="msgErro"></div>
+  <div class="msg-sucesso" id="msgSucesso"></div>
 
-  <script>
-    // Se já está autenticado, redireciona
-    db.auth.getSession().then(({ data: { session } }) => {
-      if (session) window.location.href = './index.html';
+  <!-- FORM LOGIN -->
+  <div class="auth-form active" id="formLogin">
+    <p class="auth-titulo">Bem-vinda de volta! 👋</p>
+    <p class="auth-subtitulo">Entra na tua conta para continuar</p>
+
+    <div class="form-grupo">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="o.teu@email.com">
+    </div>
+
+    <div class="form-grupo">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="A tua password">
+    </div>
+
+    <div class="link-recuperar">
+      <a onclick="mostrarRecuperar()">Esqueceste a password?</a>
+    </div>
+
+    <button class="btn-auth" onclick="fazerLogin()" id="btnLogin">
+      Entrar
+    </button>
+  </div>
+
+  <!-- FORM REGISTO -->
+  <div class="auth-form" id="formRegisto">
+    <p class="auth-titulo">Cria a tua conta ✨</p>
+    <p class="auth-subtitulo">Junta-te à E'D Fashion hoje</p>
+
+    <div class="form-grupo">
+      <label>Nome completo</label>
+      <input type="text" id="registoNome" placeholder="O teu nome completo">
+    </div>
+
+    <div class="form-grupo">
+      <label>Email</label>
+      <input type="email" id="registoEmail" placeholder="o.teu@email.com">
+    </div>
+
+    <div class="form-grupo">
+      <label>Telefone (opcional)</label>
+      <input type="tel" id="registoTelefone" placeholder="+258 84 000 0000">
+    </div>
+
+    <div class="form-grupo">
+      <label>Password</label>
+      <input type="password" id="registoPassword" placeholder="Mínimo 6 caracteres">
+    </div>
+
+    <button class="btn-auth" onclick="fazerRegisto()" id="btnRegisto">
+      Criar Conta
+    </button>
+  </div>
+
+  <!-- FORM RECUPERAR PASSWORD -->
+  <div class="recuperar-form" id="formRecuperar">
+    <p class="auth-titulo">Recuperar Password 🔑</p>
+    <p class="auth-subtitulo">Envia-nos o teu email e enviamos instruções</p>
+
+    <div class="form-grupo">
+      <label>Email</label>
+      <input type="email" id="recuperarEmail" placeholder="o.teu@email.com">
+    </div>
+
+    <button class="btn-auth" onclick="recuperarPassword()" id="btnRecuperar">
+      Enviar Email
+    </button>
+
+    <p class="voltar-login" onclick="voltarLogin()">← Voltar ao login</p>
+  </div>
+
+</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script>
+
+  // MUDAR TAB
+  function mudarTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach((t, i) => {
+      t.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'registo' && i === 1));
     });
+    document.getElementById('formLogin').classList.toggle('active', tab === 'login');
+    document.getElementById('formRegisto').classList.toggle('active', tab === 'registo');
+    document.getElementById('formRecuperar').classList.remove('active');
+    document.getElementById('authTabs').style.display = 'flex';
+    esconderMensagem('msgErro');
+    esconderMensagem('msgSucesso');
+  }
 
-    // ── TABS ─────────────────────────────────────────────
-    function switchTab(tab) {
-      clearMsg('authMsg');
-      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-      document.getElementById('formRecuperar').style.display = 'none';
+  // MOSTRAR RECUPERAR
+  function mostrarRecuperar() {
+    document.getElementById('formLogin').classList.remove('active');
+    document.getElementById('formRegisto').classList.remove('active');
+    document.getElementById('formRecuperar').classList.add('active');
+    document.getElementById('authTabs').style.display = 'none';
+    esconderMensagem('msgErro');
+    esconderMensagem('msgSucesso');
+  }
 
-      if (tab === 'login') {
-        document.getElementById('formLogin').classList.add('active');
-        document.getElementById('tabLogin').classList.add('active');
-        document.getElementById('authSubtitle').textContent = 'Bem-vindo de volta!';
-      } else {
-        document.getElementById('formRegisto').classList.add('active');
-        document.getElementById('tabRegisto').classList.add('active');
-        document.getElementById('authSubtitle').textContent = 'Cria a tua conta gratuita';
-      }
+  // VOLTAR AO LOGIN
+  function voltarLogin() {
+    mudarTab('login');
+  }
+
+  // FAZER LOGIN
+  async function fazerLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const btn = document.getElementById('btnLogin');
+
+    esconderMensagem('msgErro');
+    esconderMensagem('msgSucesso');
+
+    if (!email || !password) {
+      mostrarErro('msgErro', 'Preenche o email e a password.');
+      return;
     }
 
-    // ── MOSTRAR/OCULTAR PASSWORD ──────────────────────────
-    function togglePassword(inputId, btn) {
-      const input = document.getElementById(inputId);
-      input.type = input.type === 'password' ? 'text' : 'password';
-    }
+    btn.disabled = true;
+    btn.textContent = 'A entrar...';
 
-    // ── RECUPERAR SENHA ───────────────────────────────────
-    function showRecuperar() {
-      document.getElementById('formLogin').classList.remove('active');
-      document.getElementById('formRecuperar').style.display = 'block';
-      document.getElementById('authSubtitle').textContent = 'Recuperar password';
-      clearMsg('authMsg');
-    }
-    function hideRecuperar() {
-      document.getElementById('formRecuperar').style.display = 'none';
-      document.getElementById('formLogin').classList.add('active');
-      document.getElementById('authSubtitle').textContent = 'Bem-vindo de volta!';
-      clearMsg('authMsg');
-    }
+    const { data, error } = await db.auth.signInWithPassword({ email, password });
 
-    // ── LOGIN ─────────────────────────────────────────────
-    async function handleLogin() {
-      const email    = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
-      const btn      = document.getElementById('btnLogin');
-
-      clearMsg('authMsg');
-
-      if (!email || !password) {
-        showError('authMsg', 'Preenche o email e a password.');
-        return;
-      }
-
-      btn.textContent = 'A entrar...';
-      btn.disabled = true;
-
-      const { error } = await db.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        btn.textContent = 'Entrar';
-        btn.disabled = false;
-        if (error.message.includes('Invalid login')) {
-          showError('authMsg', 'Email ou password incorrectos.');
-        } else if (error.message.includes('Email not confirmed')) {
-          showError('authMsg', 'Confirma o teu email antes de entrar. Verifica a caixa de entrada.');
-        } else {
-          showError('authMsg', 'Erro ao entrar. Tenta novamente.');
-        }
-        return;
-      }
-
-      showSuccess('authMsg', '✓ Sessão iniciada! A redirecionar...');
-      const redirect = getUrlParam('redirect') || './index.html';
-      redirectAfter(redirect, 1.5);
-    }
-
-    // ── REGISTO ───────────────────────────────────────────
-    async function handleRegisto() {
-      const nome     = document.getElementById('registoNome').value.trim();
-      const email    = document.getElementById('registoEmail').value.trim();
-      const telefone = document.getElementById('registoTelefone').value.trim();
-      const password = document.getElementById('registoPassword').value;
-      const btn      = document.getElementById('btnRegisto');
-
-      clearMsg('authMsg');
-
-      if (!nome || !email || !password) {
-        showError('authMsg', 'Preenche o nome, email e password.');
-        return;
-      }
-      if (password.length < 6) {
-        showError('authMsg', 'A password deve ter pelo menos 6 caracteres.');
-        return;
-      }
-
-      btn.textContent = 'A criar conta...';
-      btn.disabled = true;
-
-      const { data, error } = await db.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: nome, phone: telefone }
-        }
-      });
-
-      if (error) {
-        btn.textContent = 'Criar Conta';
-        btn.disabled = false;
-        if (error.message.includes('already registered')) {
-          showError('authMsg', 'Este email já está registado. Faz login.');
-        } else {
-          showError('authMsg', 'Erro ao criar conta. Tenta novamente.');
-        }
-        return;
-      }
-
-      showSuccess('authMsg', '✓ Conta criada! Verifica o teu email para confirmar o registo.');
-      btn.textContent = 'Conta Criada!';
-    }
-
-    // ── RECUPERAR SENHA ───────────────────────────────────
-    async function handleRecuperar() {
-      const email = document.getElementById('recuperarEmail').value.trim();
-      const btn   = document.getElementById('btnRecuperar');
-
-      clearMsg('authMsg');
-
-      if (!email) {
-        showError('authMsg', 'Indica o teu email.');
-        return;
-      }
-
-      btn.textContent = 'A enviar...';
-      btn.disabled = true;
-
-      const { error } = await db.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/nova-password.html'
-      });
-
-      btn.textContent = 'Enviar Link';
+    if (error) {
+      mostrarErro('msgErro', traduzirErro(error.message));
       btn.disabled = false;
-
-      if (error) {
-        showError('authMsg', 'Erro ao enviar email. Verifica o endereço.');
-      } else {
-        showSuccess('authMsg', '✓ Email enviado! Verifica a tua caixa de entrada.');
-      }
+      btn.textContent = 'Entrar';
+      return;
     }
 
-    // Enter para submeter
-    document.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter') return;
-      const loginActive = document.getElementById('formLogin').classList.contains('active');
-      const registoActive = document.getElementById('formRegisto').classList.contains('active');
-      const recuperarVisible = document.getElementById('formRecuperar').style.display === 'block';
-      if (loginActive) handleLogin();
-      else if (registoActive) handleRegisto();
-      else if (recuperarVisible) handleRecuperar();
+    // Redirecionar conforme perfil
+    const { data: perfil } = await db.from('profiles').select('role').eq('id', data.user.id).single();
+
+    if (perfil?.role === 'admin' || perfil?.role === 'employee') {
+      window.location.href = 'admin.html';
+    } else {
+      window.location.href = 'index.html';
+    }
+  }
+
+  // FAZER REGISTO
+  async function fazerRegisto() {
+    const nome = document.getElementById('registoNome').value.trim();
+    const email = document.getElementById('registoEmail').value.trim();
+    const telefone = document.getElementById('registoTelefone').value.trim();
+    const password = document.getElementById('registoPassword').value;
+    const btn = document.getElementById('btnRegisto');
+
+    esconderMensagem('msgErro');
+    esconderMensagem('msgSucesso');
+
+    if (!nome || !email || !password) {
+      mostrarErro('msgErro', 'Preenche o nome, email e password.');
+      return;
+    }
+
+    if (password.length < 6) {
+      mostrarErro('msgErro', 'A password deve ter pelo menos 6 caracteres.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'A criar conta...';
+
+    const { data, error } = await db.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: nome, phone: telefone }
+      }
     });
-  </script>
+
+    if (error) {
+      mostrarErro('msgErro', traduzirErro(error.message));
+      btn.disabled = false;
+      btn.textContent = 'Criar Conta';
+      return;
+    }
+
+    mostrarSucesso('msgSucesso', '✅ Conta criada! Verifica o teu email para confirmar o registo.');
+    btn.disabled = false;
+    btn.textContent = 'Criar Conta';
+  }
+
+  // RECUPERAR PASSWORD
+  async function recuperarPassword() {
+    const email = document.getElementById('recuperarEmail').value.trim();
+    const btn = document.getElementById('btnRecuperar');
+
+    esconderMensagem('msgErro');
+    esconderMensagem('msgSucesso');
+
+    if (!email) {
+      mostrarErro('msgErro', 'Introduz o teu email.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'A enviar...';
+
+    const { error } = await db.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/perfil.html'
+    });
+
+    if (error) {
+      mostrarErro('msgErro', traduzirErro(error.message));
+    } else {
+      mostrarSucesso('msgSucesso', '✅ Email enviado! Verifica a tua caixa de entrada.');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Enviar Email';
+  }
+
+  // TRADUZIR ERROS DO SUPABASE
+  function traduzirErro(msg) {
+    if (msg.includes('Invalid login credentials')) return 'Email ou password incorrectos.';
+    if (msg.includes('Email not confirmed')) return 'Confirma o teu email antes de entrar.';
+    if (msg.includes('User already registered')) return 'Este email já está registado.';
+    if (msg.includes('Password should be at least')) return 'A password deve ter pelo menos 6 caracteres.';
+    if (msg.includes('Unable to validate email')) return 'Email inválido.';
+    return 'Ocorreu um erro. Tenta novamente.';
+  }
+
+  // VERIFICAR SE JÁ ESTÁ LOGADO
+  async function verificarSessao() {
+    const { data: { session } } = await db.auth.getSession();
+    if (session) {
+      const { data: perfil } = await db.from('profiles').select('role').eq('id', session.user.id).single();
+      if (perfil?.role === 'admin' || perfil?.role === 'employee') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'index.html';
+      }
+    }
+  }
+
+  verificarSessao();
+</script>
 
 </body>
 </html>
