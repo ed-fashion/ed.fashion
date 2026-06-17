@@ -4,18 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>E'D Fashion — Moda para Todos</title>
-  <meta name="description" content="E'D Fashion — Loja de moda online em Moçambique. Roupa, calçado e acessórios com entrega em Beira.">
+  <meta name="description" content="E'D Fashion — Loja de moda online em Moçambique. Roupa, calçado, acessórios, cabelos e electrónica. Entrega em todo Moçambique.">
   <link rel="stylesheet" href="main.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
 
-    /* ============================
-       BANNER PRINCIPAL
-       ============================ */
     .banner {
       background: linear-gradient(135deg, var(--rosa) 0%, #c4186f 50%, var(--verde) 100%);
       color: white;
-      padding: 60px 20px;
+      padding: 70px 20px;
       text-align: center;
       position: relative;
       overflow: hidden;
@@ -34,24 +31,25 @@
     .banner-conteudo { position: relative; z-index: 1; }
 
     .banner h1 {
-      font-size: 36px;
+      font-size: 38px;
       font-weight: 800;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       text-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
     .banner p {
       font-size: 16px;
-      opacity: 0.9;
-      margin-bottom: 28px;
-      max-width: 500px;
+      opacity: 0.92;
+      margin-bottom: 30px;
+      max-width: 560px;
       margin-left: auto;
       margin-right: auto;
+      line-height: 1.6;
     }
 
     .banner-btns {
       display: flex;
-      gap: 12px;
+      gap: 14px;
       justify-content: center;
       flex-wrap: wrap;
     }
@@ -59,21 +57,25 @@
     .btn-banner-principal {
       background: white;
       color: var(--rosa);
-      padding: 12px 28px;
+      padding: 13px 30px;
       border-radius: 25px;
       font-weight: 700;
       font-size: 15px;
       text-decoration: none;
-      transition: transform 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     }
 
-    .btn-banner-principal:hover { transform: scale(1.05); }
+    .btn-banner-principal:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
 
     .btn-banner-secundario {
       background: transparent;
       color: white;
-      border: 2px solid white;
-      padding: 12px 28px;
+      border: 2px solid rgba(255,255,255,0.8);
+      padding: 13px 30px;
       border-radius: 25px;
       font-weight: 700;
       font-size: 15px;
@@ -86,30 +88,7 @@
       color: var(--rosa);
     }
 
-    /* ============================
-       BARRA DE DESTAQUES
-       ============================ */
-    .barra-destaques {
-      background: var(--rosa);
-      color: white;
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      padding: 12px 20px;
-      flex-wrap: wrap;
-    }
-
-    .barra-destaques span {
-      font-size: 13px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* ============================
-       SECÇÃO GENÉRICA
-       ============================ */
+    /* CATEGORIAS */
     .seccao {
       max-width: 1200px;
       margin: 0 auto;
@@ -129,9 +108,7 @@
       color: var(--preto);
     }
 
-    .seccao-titulo h2 span {
-      color: var(--rosa);
-    }
+    .seccao-titulo h2 span { color: var(--rosa); }
 
     .ver-todos {
       font-size: 13px;
@@ -142,55 +119,57 @@
 
     .ver-todos:hover { text-decoration: underline; }
 
-    /* ============================
-       CATEGORIAS
-       ============================ */
     .categorias-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px;
     }
 
     .categoria-card {
       background: white;
       border-radius: 14px;
-      padding: 20px 12px;
+      padding: 18px 10px;
       text-align: center;
       box-shadow: var(--sombra);
       cursor: pointer;
       transition: all 0.2s;
       text-decoration: none;
       display: block;
+      border: 2px solid transparent;
     }
 
     .categoria-card:hover {
       transform: translateY(-4px);
+      border-color: var(--rosa);
       box-shadow: 0 8px 24px rgba(233,30,140,0.15);
     }
 
     .categoria-icone {
-      font-size: 32px;
+      font-size: 30px;
       margin-bottom: 8px;
       display: block;
     }
 
     .categoria-nome {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--preto);
     }
 
-    /* ============================
-       BANNER ENCOMENDA
-       ============================ */
+    /* BANNER ENCOMENDA */
+    .banner-encomenda-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+    }
+
     .banner-encomenda {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      margin: 0 20px;
       border-radius: 16px;
-      padding: 30px;
+      padding: 32px;
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 24px;
       flex-wrap: wrap;
     }
 
@@ -205,30 +184,14 @@
 
     .banner-encomenda-texto p {
       color: #aaa;
-      font-size: 13px;
+      font-size: 14px;
       line-height: 1.5;
-    }
-
-    .banner-encomenda-logos {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .loja-badge {
-      background: rgba(255,255,255,0.1);
-      color: white;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      border: 1px solid rgba(255,255,255,0.2);
     }
 
     .btn-encomenda {
       background: var(--rosa);
       color: white;
-      padding: 12px 24px;
+      padding: 13px 26px;
       border-radius: 25px;
       font-weight: 700;
       font-size: 14px;
@@ -239,17 +202,18 @@
 
     .btn-encomenda:hover { background: #c4186f; }
 
-    /* ============================
-       PRODUTOS VAZIO
-       ============================ */
+    /* PRODUTOS */
     .produtos-vazio {
       text-align: center;
       padding: 60px 20px;
       color: var(--cinza);
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--sombra);
     }
 
     .produtos-vazio .icone-vazio {
-      font-size: 60px;
+      font-size: 56px;
       margin-bottom: 16px;
       display: block;
     }
@@ -266,37 +230,32 @@
       margin-bottom: 20px;
     }
 
-    /* ============================
-       WHATSAPP FIXO
-       ============================ */
+    /* WHATSAPP FIXO */
     .btn-whatsapp-fixo {
       position: fixed;
       bottom: 24px;
       right: 24px;
       background: #25D366;
       color: white;
-      width: 56px;
-      height: 56px;
+      width: 58px;
+      height: 58px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 28px;
-      box-shadow: 0 4px 16px rgba(37,211,102,0.4);
+      box-shadow: 0 4px 20px rgba(37,211,102,0.5);
       text-decoration: none;
       z-index: 999;
       transition: transform 0.2s;
     }
 
-    .btn-whatsapp-fixo:hover { transform: scale(1.1); }
+    .btn-whatsapp-fixo:hover { transform: scale(1.12); }
 
-    /* ============================
-       RESPONSIVIDADE
-       ============================ */
     @media (max-width: 768px) {
       .banner h1 { font-size: 26px; }
-      .barra-destaques { gap: 16px; }
-      .banner-encomenda { margin: 0 12px; }
+      .banner p { font-size: 14px; }
+      .banner-encomenda { flex-direction: column; text-align: center; }
     }
 
   </style>
@@ -306,21 +265,13 @@
 <!-- NAVBAR -->
 <div id="navbar"></div>
 
-<!-- BARRA DE DESTAQUES -->
-<div class="barra-destaques">
-  <span>🚚 Entrega em Beira</span>
-  <span>📦 Stock disponível</span>
-  <span>💳 M-Pesa · e-Mola · Transferência</span>
-  <span>✅ Qualidade garantida</span>
-</div>
-
 <!-- BANNER PRINCIPAL -->
 <div class="banner">
   <div class="banner-conteudo">
     <h1>Moda para Todos ✨</h1>
-    <p>Descobre as últimas tendências em roupa, calçado e acessórios. Entrega em Beira e arredores.</p>
+    <p>Descobre as últimas tendências em roupa, calçado, acessórios, cabelos e muito mais. Estamos localizados na Beira e fazemos chegar a todo Moçambique.</p>
     <div class="banner-btns">
-      <a href="#produtos" class="btn-banner-principal">Ver Produtos</a>
+      <a href="#produtos" class="btn-banner-principal">🛍️ Ver Produtos</a>
       <a href="encomenda.html" class="btn-banner-secundario">📦 Por Encomenda</a>
     </div>
   </div>
@@ -332,52 +283,55 @@
     <h2>Comprar por <span>Categoria</span></h2>
   </div>
   <div class="categorias-grid">
-    <a href="index.html?cat=feminino" class="categoria-card">
+    <a href="catalogo.html?cat=feminino" class="categoria-card">
       <span class="categoria-icone">👗</span>
       <span class="categoria-nome">Feminino</span>
     </a>
-    <a href="index.html?cat=masculino" class="categoria-card">
+    <a href="catalogo.html?cat=masculino" class="categoria-card">
       <span class="categoria-icone">👔</span>
       <span class="categoria-nome">Masculino</span>
     </a>
-    <a href="index.html?cat=crianca" class="categoria-card">
+    <a href="catalogo.html?cat=crianca" class="categoria-card">
       <span class="categoria-icone">🧒</span>
       <span class="categoria-nome">Criança</span>
     </a>
-    <a href="index.html?cat=calcado" class="categoria-card">
+    <a href="catalogo.html?cat=calcado" class="categoria-card">
       <span class="categoria-icone">👠</span>
       <span class="categoria-nome">Calçado</span>
     </a>
-    <a href="index.html?cat=acessorios" class="categoria-card">
+    <a href="catalogo.html?cat=acessorios" class="categoria-card">
       <span class="categoria-icone">👜</span>
       <span class="categoria-nome">Acessórios</span>
     </a>
-    <a href="index.html?cat=desporto" class="categoria-card">
+    <a href="catalogo.html?cat=cabelos" class="categoria-card">
+      <span class="categoria-icone">💇</span>
+      <span class="categoria-nome">Cabelos</span>
+    </a>
+    <a href="catalogo.html?cat=electronica" class="categoria-card">
+      <span class="categoria-icone">📱</span>
+      <span class="categoria-nome">Electrónica</span>
+    </a>
+    <a href="catalogo.html?cat=desporto" class="categoria-card">
       <span class="categoria-icone">🏃</span>
       <span class="categoria-nome">Desporto</span>
     </a>
-    <a href="index.html?cat=casa" class="categoria-card">
+    <a href="catalogo.html?cat=casa" class="categoria-card">
       <span class="categoria-icone">🏠</span>
       <span class="categoria-nome">Casa</span>
     </a>
-    <a href="index.html?cat=promocoes" class="categoria-card">
+    <a href="catalogo.html?cat=promocoes" class="categoria-card">
       <span class="categoria-icone">🏷️</span>
       <span class="categoria-nome">Promoções</span>
     </a>
   </div>
 </div>
 
-<!-- BANNER ENCOMENDA INTERNACIONAL -->
-<div class="seccao" style="padding-top:0">
+<!-- BANNER ENCOMENDA -->
+<div class="banner-encomenda-wrap">
   <div class="banner-encomenda">
     <div class="banner-encomenda-texto">
       <h3>📦 Produtos por Encomenda</h3>
-      <p>Encontra qualquer produto na Shein, AliExpress ou Pinduoduo e nós importamos para ti.</p>
-      <div class="banner-encomenda-logos" style="margin-top:12px">
-        <span class="loja-badge">Shein</span>
-        <span class="loja-badge">AliExpress</span>
-        <span class="loja-badge">Pinduoduo</span>
-      </div>
+      <p>Encontra qualquer produto da Shein e nós importamos para ti. Rápido, seguro e com acompanhamento do processo.</p>
     </div>
     <a href="encomenda.html" class="btn-encomenda">Saber Mais →</a>
   </div>
@@ -389,95 +343,39 @@
     <h2>Produtos em <span>Destaque</span></h2>
     <a href="catalogo.html" class="ver-todos">Ver todos →</a>
   </div>
-  <div id="produtosDestaque">
-    <!-- Carregado via JS -->
-  </div>
+  <div id="produtosDestaque"></div>
 </div>
 
-<!-- PRODUTOS MAIS VENDIDOS -->
+<!-- MAIS VENDIDOS -->
 <div class="seccao" style="padding-top:0">
   <div class="seccao-titulo">
     <h2>Mais <span>Vendidos</span></h2>
     <a href="catalogo.html" class="ver-todos">Ver todos →</a>
   </div>
-  <div id="maisVendidos">
-    <!-- Carregado via JS -->
-  </div>
+  <div id="maisVendidos"></div>
 </div>
 
 <!-- FOOTER -->
 <div id="footer"></div>
 
-<!-- BOTÃO WHATSAPP FIXO -->
-<a href="https://wa.me/258866464666" target="_blank" class="btn-whatsapp-fixo" title="Falar connosco no WhatsApp">
-  💬
-</a>
+<!-- WHATSAPP FIXO COM MENSAGEM -->
+<a href="https://wa.me/258866464666?text=Olá%20E'D%20Fashion!%20Gostaria%20de%20saber%20mais%20sobre%20os%20vossos%20produtos%20😊"
+   target="_blank"
+   class="btn-whatsapp-fixo"
+   title="Falar connosco no WhatsApp">💬</a>
 
 <script src="supabase.js"></script>
 <script src="utils.js"></script>
 <script src="components.js"></script>
 <script>
 
-  // CARREGAR NAVBAR E FOOTER
   carregarNavbar();
   carregarFooter();
 
-  // CARREGAR PRODUTOS EM DESTAQUE
-  async function carregarProdutosDestaque() {
-    const { data: produtos, error } = await db
-      .from('products')
-      .select('*')
-      .eq('status', 'active')
-      .eq('is_featured', true)
-      .limit(8);
-
-    const container = document.getElementById('produtosDestaque');
-
-    if (error || !produtos || produtos.length === 0) {
-      container.innerHTML = `
-        <div class="produtos-vazio">
-          <span class="icone-vazio">🛍️</span>
-          <h3>Em breve novos produtos!</h3>
-          <p>Estamos a preparar o catálogo. Volta em breve.</p>
-          <a href="encomenda.html" class="btn btn-rosa">Ver produtos por encomenda</a>
-        </div>`;
-      return;
-    }
-
-    container.innerHTML = `<div class="produtos-grid">${produtos.map(renderProdutoCard).join('')}</div>`;
-  }
-
-  // CARREGAR MAIS VENDIDOS
-  async function carregarMaisVendidos() {
-    const { data: produtos, error } = await db
-      .from('products')
-      .select('*')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .limit(8);
-
-    const container = document.getElementById('maisVendidos');
-
-    if (error || !produtos || produtos.length === 0) {
-      container.innerHTML = `
-        <div class="produtos-vazio">
-          <span class="icone-vazio">⭐</span>
-          <h3>Em breve!</h3>
-          <p>Os produtos mais vendidos aparecerão aqui.</p>
-        </div>`;
-      return;
-    }
-
-    container.innerHTML = `<div class="produtos-grid">${produtos.map(renderProdutoCard).join('')}</div>`;
-  }
-
-  // RENDER CARD DE PRODUTO
   function renderProdutoCard(p) {
     const temPromocao = p.sale_price && p.sale_price < p.price;
     const precoFinal = temPromocao ? p.sale_price : p.price;
-    const desconto = temPromocao
-      ? Math.round((1 - p.sale_price / p.price) * 100)
-      : 0;
+    const desconto = temPromocao ? Math.round((1 - p.sale_price / p.price) * 100) : 0;
 
     return `
       <div class="produto-card" onclick="window.location.href='produto.html?id=${p.id}'">
@@ -493,7 +391,47 @@
       </div>`;
   }
 
-  // VERIFICAR SESSÃO E ACTUALIZAR NAVBAR
+  function mostrarVazio(containerId, icone, titulo, texto) {
+    document.getElementById(containerId).innerHTML = `
+      <div class="produtos-vazio">
+        <span class="icone-vazio">${icone}</span>
+        <h3>${titulo}</h3>
+        <p>${texto}</p>
+      </div>`;
+  }
+
+  async function carregarProdutosDestaque() {
+    const { data: produtos } = await db
+      .from('products')
+      .select('*')
+      .eq('status', 'active')
+      .eq('is_featured', true)
+      .limit(8);
+
+    if (!produtos || produtos.length === 0) {
+      mostrarVazio('produtosDestaque', '🛍️', 'Em breve novos produtos!', 'Estamos a preparar o catálogo. Volta em breve.');
+      return;
+    }
+    document.getElementById('produtosDestaque').innerHTML =
+      `<div class="produtos-grid">${produtos.map(renderProdutoCard).join('')}</div>`;
+  }
+
+  async function carregarMaisVendidos() {
+    const { data: produtos } = await db
+      .from('products')
+      .select('*')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(8);
+
+    if (!produtos || produtos.length === 0) {
+      mostrarVazio('maisVendidos', '⭐', 'Em breve!', 'Os produtos mais vendidos aparecerão aqui.');
+      return;
+    }
+    document.getElementById('maisVendidos').innerHTML =
+      `<div class="produtos-grid">${produtos.map(renderProdutoCard).join('')}</div>`;
+  }
+
   async function verificarSessao() {
     const { data: { session } } = await db.auth.getSession();
     const navPerfil = document.getElementById('navPerfil');
@@ -503,12 +441,10 @@
     }
   }
 
-  // INICIAR
   verificarSessao();
   carregarProdutosDestaque();
   carregarMaisVendidos();
 
 </script>
-
 </body>
 </html>
