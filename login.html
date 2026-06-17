@@ -261,7 +261,7 @@
   }
 
   // FAZER LOGIN
-  async function fazerLogin() {
+async function fazerLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
     const btn = document.getElementById('btnLogin');
@@ -286,6 +286,22 @@
       return;
     }
 
+    const { data: perfil } = await db
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single();
+
+    // Redirecionar
+    const destino = localStorage.getItem('ed_redirect') || 'index.html';
+    localStorage.removeItem('ed_redirect');
+
+    if (perfil?.role === 'admin' || perfil?.role === 'employee') {
+      window.location.href = 'admin.html';
+    } else {
+      window.location.href = destino;
+    }
+  }
     // Redirecionar conforme perfil
     const { data: perfil } = await db.from('profiles').select('role').eq('id', data.user.id).single();
 
@@ -349,7 +365,7 @@
     btn.textContent = 'Criar Conta';
   }
 
-  // RECUPERAR PASSWORD
+ // RECUPERAR PASSWORD
   async function recuperarPassword() {
     const email = document.getElementById('recuperarEmail').value.trim();
     const btn = document.getElementById('btnRecuperar');
@@ -366,11 +382,11 @@
     btn.textContent = 'A enviar...';
 
     const { error } = await db.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/perfil.html'
+      redirectTo: 'https://ed-fashion.github.io/ed.fashion/nova-password.html'
     });
 
     if (error) {
-      mostrarErro('msgErro', traduzirErro(error.message));
+      mostrarErro('msgErro', 'Erro ao enviar. Verifica o email introduzido.');
     } else {
       mostrarSucesso('msgSucesso', '✅ Email enviado! Verifica a tua caixa de entrada.');
     }
