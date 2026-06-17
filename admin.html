@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — E'D Fashion Admin</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="admin-layout">
+
+  <!-- NAVEGAÇÃO -->
+  <div id="adminNav"></div>
+
+  <!-- CONTEÚDO -->
+  <div class="admin-conteudo">
+
+    <div class="admin-page-titulo">📊 Dashboard</div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icone rosa">👗</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiProdutos">—</div>
+          <div class="kpi-label">Produtos Activos</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icone azul">👥</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiClientes">—</div>
+          <div class="kpi-label">Clientes Registados</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icone amarelo">🛒</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiPendentes">—</div>
+          <div class="kpi-label">Encomendas Pendentes</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icone verde">💰</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiReceita">—</div>
+          <div class="kpi-label">Receita do Mês</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icone vermelho">⚠️</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiStockBaixo">—</div>
+          <div class="kpi-label">Stock Baixo / Esgotado</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icone rosa">📦</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiEncomendas">—</div>
+          <div class="kpi-label">Total de Encomendas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATALHOS RÁPIDOS -->
+    <div class="admin-card" style="margin-bottom:24px">
+      <div class="admin-card-header">
+        <h3>⚡ Acções Rápidas</h3>
+      </div>
+      <div style="padding:20px; display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="admin-produtos.html?acao=novo" class="btn-admin btn-admin-rosa">➕ Novo Produto</a>
+        <a href="admin-encomendas.html" class="btn-admin btn-admin-outline">🛒 Ver Encomendas</a>
+        <a href="admin-stock.html" class="btn-admin btn-admin-outline">📦 Gerir Stock</a>
+        <a href="admin-clientes.html" class="btn-admin btn-admin-outline">👥 Ver Clientes</a>
+        <a href="admin-promocoes.html?acao=novo" class="btn-admin btn-admin-verde">🏷️ Nova Promoção</a>
+      </div>
+    </div>
+
+    <!-- ÚLTIMAS ENCOMENDAS -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h3>🛒 Últimas Encomendas</h3>
+        <a href="admin-encomendas.html" class="btn-admin btn-admin-outline">Ver todas</a>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Nº Encomenda</th>
+              <th>Cliente</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Data</th>
+              <th>Acção</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaEncomendas">
+            <tr>
+              <td colspan="6" style="text-align:center; padding:40px; color:#888;">
+                A carregar...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- STOCK BAIXO -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h3>⚠️ Produtos com Stock Baixo</h3>
+        <a href="admin-stock.html" class="btn-admin btn-admin-outline">Ver stock</a>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Quantidade</th>
+              <th>Limite Mínimo</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaStockBaixo">
+            <tr>
+              <td colspan="4" style="text-align:center; padding:40px; color:#888;">
+                A carregar...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="admin-nav.js"></script>
+<script>
+
+  async function iniciar() {
+    const ok = await verificarAdmin();
+    if (!ok) return;
+
+    carregarAdminNav('dashboard');
+    carregarKPIs();
+    carregarUltimasEncomendas();
+    carregarStockBaixo();
+  }
+
+  async function carregarKPIs() {
+    // Produtos activos
+    const { count: produtos } = await db
+      .from('products')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'active');
+    document.getElementById('kpiProdutos').textContent = produtos || 0;
+
+    // Clientes
+    const { count: clientes } = await db
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'customer');
+    document.getElementById('kpiClientes').textContent = clientes || 0;
+
+    // Encomendas pendentes
+    const { count: pendentes } = await db
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .in('status', ['pending', 'awaiting_payment']);
+    document.getElementById('kpiPendentes').textContent = pendentes || 0;
+
+    // Total de encomendas
+    const { count: totalEncomendas } = await db
+      .from('orders')
+      .select('*', { count: 'exact', head: true });
+    document.getElementById('kpiEncomendas').textContent = totalEncomendas || 0;
+
+    // Receita do mês
+    const inicioMes = new Date();
+    inicioMes.setDate(1);
+    inicioMes.setHours(0, 0, 0, 0);
+
+    const { data: receita } = await db
+      .from('orders')
+      .select('total')
+      .eq('status', 'delivered')
+      .gte('created_at', inicioMes.toISOString());
+
+    const totalReceita = (receita || []).reduce((sum, o) => sum + (o.total || 0), 0);
+    document.getElementById('kpiReceita').textContent = formatMZN(totalReceita);
+
+    // Stock baixo
+    const { count: stockBaixo } = await db
+      .from('product_stock')
+      .select('*', { count: 'exact', head: true })
+      .lte('quantity', 5);
+    document.getElementById('kpiStockBaixo').textContent = stockBaixo || 0;
+  }
+
+  async function carregarUltimasEncomendas() {
+    const { data: encomendas } = await db
+      .from('orders')
+      .select(`
+        id, order_number, total, status, created_at,
+        profiles (full_name)
+      `)
+      .order('created_at', { ascending: false })
+      .limit(8);
+
+    const tbody = document.getElementById('tabelaEncomendas');
+
+    if (!encomendas || encomendas.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">Nenhuma encomenda ainda.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = encomendas.map(e => `
+      <tr>
+        <td><strong>${e.order_number}</strong></td>
+        <td>${e.profiles?.full_name || 'Cliente'}</td>
+        <td><strong>${formatMZN(e.total)}</strong></td>
+        <td>${badgeStatus(e.status)}</td>
+        <td>${formatData(e.created_at)}</td>
+        <td>
+          <a href="admin-encomendas.html?id=${e.id}" class="btn-admin btn-admin-outline">Ver</a>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function carregarStockBaixo() {
+    const { data: stock } = await db
+      .from('product_stock')
+      .select(`
+        quantity, low_stock_threshold,
+        products (name)
+      `)
+      .lte('quantity', 5)
+      .order('quantity', { ascending: true })
+      .limit(8);
+
+    const tbody = document.getElementById('tabelaStockBaixo');
+
+    if (!stock || stock.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:40px;color:#888;">✅ Todos os produtos têm stock suficiente.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = stock.map(s => `
+      <tr>
+        <td>${s.products?.name || '—'}</td>
+        <td><strong>${s.quantity}</strong></td>
+        <td>${s.low_stock_threshold}</td>
+        <td>${s.quantity === 0
+          ? '<span class="status-badge status-cancelled">Esgotado</span>'
+          : '<span class="status-badge status-awaiting">Stock Baixo</span>'
+        }</td>
+      </tr>
+    `).join('');
+  }
+
+  function badgeStatus(status) {
+    const map = {
+      pending: ['status-pending', 'Pendente'],
+      awaiting_payment: ['status-awaiting', 'Aguarda Pagamento'],
+      paid: ['status-paid', 'Pago'],
+      preparing: ['status-preparing', 'Em Preparação'],
+      shipped: ['status-shipped', 'Enviado'],
+      delivered: ['status-delivered', 'Entregue'],
+      cancelled: ['status-cancelled', 'Cancelado']
+    };
+    const [cls, label] = map[status] || ['status-draft', status];
+    return `<span class="status-badge ${cls}">${label}</span>`;
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>
