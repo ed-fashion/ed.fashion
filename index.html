@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E'D Fashion — Moda para Todos</title>
+  <meta name="description" content="E'D Fashion — A tua loja de moda em Moçambique. Elegância ao teu alcance." />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="./assets/logo.png" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./css/main.css" />
+
+  <style>
+    /* ── HERO ───────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #fff0f7 0%, #f0fae0 100%);
+      padding: 80px 0 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 320px; height: 320px;
+      background: radial-gradient(circle, rgba(212,0,106,0.08), transparent 70%);
+      border-radius: 50%;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -60px;
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(122,185,41,0.08), transparent 70%);
+      border-radius: 50%;
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .hero-tag {
+      display: inline-block;
+      background: var(--rosa-claro);
+      color: var(--rosa);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+    .hero h1 { margin-bottom: 16px; color: var(--preto); }
+    .hero h1 span { color: var(--rosa); }
+    .hero p {
+      font-size: 17px;
+      color: var(--cinza-escuro);
+      max-width: 520px;
+      margin: 0 auto 32px;
+      line-height: 1.7;
+    }
+    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── CATEGORIAS ─────────────────────────────────────── */
+    .cats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .cat-card {
+      background: var(--branco);
+      border-radius: var(--radius-lg);
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform var(--transicao), box-shadow var(--transicao);
+      box-shadow: var(--sombra);
+      border: 2px solid transparent;
+    }
+    .cat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--sombra-hover);
+      border-color: var(--rosa-claro);
+    }
+    .cat-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .cat-card h4 { font-size: 13px; color: var(--cinza-escuro); }
+
+    /* ── PRODUTOS ───────────────────────────────────────── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .section-header h2 { color: var(--preto); }
+    .section-header a { font-size: 14px; color: var(--rosa); font-weight: 600; }
+    .section-header a:hover { text-decoration: underline; }
+
+    .produtos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .produto-card {
+      background: var(--branco);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--sombra);
+      overflow: hidden;
+      transition: transform var(--transicao), box-shadow var(--transicao);
+      cursor: pointer;
+    }
+    .produto-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--sombra-hover);
+    }
+    .produto-img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: var(--cinza-claro);
+      object-fit: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cinza);
+      font-size: 13px;
+      position: relative;
+    }
+    .produto-img img { width: 100%; height: 100%; object-fit: cover; }
+    .produto-badge-promo {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: var(--rosa);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .produto-fav {
+      position: absolute;
+      top: 10px; right: 10px;
+      width: 32px; height: 32px;
+      background: white;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: background var(--transicao);
+    }
+    .produto-fav:hover { background: var(--rosa-claro); }
+    .produto-fav svg { width: 16px; height: 16px; stroke: var(--rosa); fill: none; stroke-width: 2; }
+    .produto-fav.active svg { fill: var(--rosa); }
+
+    .produto-info { padding: 14px 16px; }
+    .produto-nome {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--preto);
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .produto-preco { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+    .preco-atual { font-size: 16px; font-weight: 700; color: var(--rosa); }
+    .preco-original { font-size: 13px; color: var(--cinza); text-decoration: line-through; }
+    .produto-info .btn { margin-top: 12px; width: 100%; justify-content: center; font-size: 13px; padding: 9px; }
+
+    /* ── BANNER ENCOMENDAS ──────────────────────────────── */
+    .banner-encomendas {
+      background: linear-gradient(135deg, var(--preto) 0%, #2d1a2e 100%);
+      border-radius: var(--radius-lg);
+      padding: 48px 40px;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .banner-encomendas h2 { color: white; margin-bottom: 12px; }
+    .banner-encomendas p { color: rgba(255,255,255,0.7); font-size: 15px; max-width: 440px; line-height: 1.7; }
+    .banner-encomendas .btn-rosa { margin-top: 20px; }
+
+    /* ── COMO FUNCIONA ──────────────────────────────────── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      margin-top: 36px;
+    }
+    .step-card {
+      text-align: center;
+      padding: 28px 20px;
+    }
+    .step-num {
+      width: 48px; height: 48px;
+      background: var(--rosa);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0 auto 16px;
+    }
+    .step-card h4 { margin-bottom: 8px; }
+    .step-card p { font-size: 14px; color: var(--cinza); line-height: 1.6; }
+
+    /* ── LOADING PRODUTOS ───────────────────────────────── */
+    #produtosDestaque { min-height: 200px; }
+
+    @media (max-width: 768px) {
+      .hero { padding: 60px 0 40px; }
+      .banner-encomendas { padding: 32px 24px; }
+      .cats-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .cats-grid { grid-template-columns: repeat(2, 1fr); }
+      .produtos-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav id="navbar"></nav>
+
+  <main>
+
+    <!-- ── HERO ─────────────────────────────────────────── -->
+    <section class="hero">
+      <div class="container hero-content">
+        <span class="hero-tag">✨ Nova Coleção Disponível</span>
+        <h1>Moda que te <span>define</span></h1>
+        <p>Descobre as últimas tendências em moda feminina, masculina e infantil. Qualidade e elegância ao teu alcance em Moçambique.</p>
+        <div class="hero-btns">
+          <a href="./catalogo.html" class="btn btn-rosa btn-lg">Ver Catálogo</a>
+          <a href="./encomendas.html" class="btn btn-outline btn-lg">Encomendar da Shein</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CATEGORIAS ────────────────────────────────────── -->
+    <section class="section-sm">
+      <div class="container">
+        <div class="section-header">
+          <h2>Categorias</h2>
+          <a href="./catalogo.html">Ver todas →</a>
+        </div>
+        <div class="cats-grid" id="categoriasGrid">
+          <!-- Carregado via JS -->
+          <div class="loading"><div class="spinner"></div> A carregar...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PRODUTOS EM DESTAQUE ───────────────────────────── -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Em Destaque</h2>
+          <a href="./catalogo.html">Ver todos →</a>
+        </div>
+        <div class="produtos-grid" id="produtosDestaque">
+          <div class="loading"><div class="spinner"></div> A carregar produtos...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BANNER ENCOMENDAS ─────────────────────────────── -->
+    <section class="section-sm">
+      <div class="container">
+        <div class="banner-encomendas">
+          <div>
+            <h2>Compra na Shein, recebe em Beira</h2>
+            <p>Não sabes como encomendar da Shein ou AliExpress? Nós tratamos de tudo por ti. Envia o link do produto e nós importamos.</p>
+            <a href="./encomendas.html" class="btn btn-rosa">Saber Como Funciona</a>
+          </div>
+          <div style="font-size: 72px; opacity: 0.3;">🌍</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── COMO FUNCIONA ─────────────────────────────────── -->
+    <section class="section" style="background: var(--branco);">
+      <div class="container">
+        <div class="text-center">
+          <h2>Como Funcionar</h2>
+          <p class="text-cinza" style="margin-top: 8px;">Comprar na E'D Fashion é simples e seguro</p>
+        </div>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <h4>Escolhe o produto</h4>
+            <p>Navega pelo catálogo e encontra o que procuras.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <h4>Adiciona ao carrinho</h4>
+            <p>Selecciona tamanho, cor e quantidade.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <h4>Escolhe o pagamento</h4>
+            <p>M-Pesa, e-Mola, transferência ou dinheiro.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <h4>Recebe em casa</h4>
+            <p>Entregamos na tua porta ou levanta na loja.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer id="footer"></footer>
+
+  <!-- ── SCRIPTS ───────────────────────────────────────── -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./js/supabase.js"></script>
+  <script src="./js/utils.js"></script>
+  <script src="./js/components.js"></script>
+
+  <script>
+    // ── CATEGORIAS ────────────────────────────────────────
+    async function loadCategorias() {
+      const grid = document.getElementById('categoriasGrid');
+
+      const { data, error } = await db
+        .from('categories')
+        .select('id, name, slug, icon')
+        .eq('is_active', true)
+        .is('parent_id', null)
+        .order('sort_order');
+
+      if (error || !data?.length) {
+        grid.innerHTML = `<p class="text-cinza text-sm">Categorias em breve.</p>`;
+        return;
+      }
+
+      grid.innerHTML = data.map(cat => `
+        <div class="cat-card" onclick="window.location.href='./catalogo.html?cat=${cat.slug}'">
+          <span class="cat-icon">${cat.icon || '🛍️'}</span>
+          <h4>${cat.name}</h4>
+        </div>
+      `).join('');
+    }
+
+    // ── PRODUTOS EM DESTAQUE ──────────────────────────────
+    async function loadProdutosDestaque() {
+      const grid = document.getElementById('produtosDestaque');
+
+      const { data, error } = await db
+        .from('products')
+        .select(`
+          id, name, slug, price, sale_price,
+          product_media (url, is_primary)
+        `)
+        .eq('status', 'active')
+        .eq('is_featured', true)
+        .order('created_at', { ascending: false })
+        .limit(8);
+
+      if (error || !data?.length) {
+        grid.innerHTML = `<p class="text-cinza text-sm">Produtos em breve.</p>`;
+        return;
+      }
+
+      grid.innerHTML = data.map(p => {
+        const img = p.product_media?.find(m => m.is_primary)?.url || null;
+        const preco = p.sale_price || p.price;
+        const temPromo = p.sale_price && p.sale_price < p.price;
+
+        return `
+          <div class="produto-card" onclick="window.location.href='./produto.html?id=${p.id}'">
+            <div class="produto-img">
+              ${img
+                ? `<img src="${img}" alt="${p.name}" loading="lazy" />`
+                : `<span>Sem imagem</span>`
+              }
+              ${temPromo ? `<span class="produto-badge-promo">Promoção</span>` : ''}
+              <button class="produto-fav" onclick="event.stopPropagation(); toggleFav('${p.id}', this)" title="Favorito">
+                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </button>
+            </div>
+            <div class="produto-info">
+              <div class="produto-nome">${p.name}</div>
+              <div class="produto-preco">
+                <span class="preco-atual">${formatMZN(preco)}</span>
+                ${temPromo ? `<span class="preco-original">${formatMZN(p.price)}</span>` : ''}
+              </div>
+              <button class="btn btn-rosa" onclick="event.stopPropagation(); addToCart('${p.id}', '${p.name}', ${preco})">
+                + Carrinho
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ── CARRINHO (LOCAL STORAGE) ──────────────────────────
+    function addToCart(id, nome, preco) {
+      let cart = JSON.parse(localStorage.getItem('ed_cart') || '[]');
+      const existing = cart.find(i => i.id === id);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ id, nome, preco, qty: 1 });
+      }
+      localStorage.setItem('ed_cart', JSON.stringify(cart));
+      updateCartBadge();
+      // feedback visual rápido
+      const btn = event.target;
+      const original = btn.textContent;
+      btn.textContent = '✓ Adicionado';
+      btn.style.background = 'var(--verde)';
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.style.background = '';
+      }, 1500);
+    }
+
+    // ── FAVORITOS ─────────────────────────────────────────
+    function toggleFav(id, btn) {
+      let favs = JSON.parse(localStorage.getItem('ed_favs') || '[]');
+      if (favs.includes(id)) {
+        favs = favs.filter(f => f !== id);
+        btn.classList.remove('active');
+      } else {
+        favs.push(id);
+        btn.classList.add('active');
+      }
+      localStorage.setItem('ed_favs', JSON.stringify(favs));
+    }
+
+    // ── INICIALIZAR ───────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCategorias();
+      loadProdutosDestaque();
+    });
+  </script>
+
+</body>
+</html>
