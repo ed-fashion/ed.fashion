@@ -342,9 +342,15 @@
               <input type="number" id="prodPrazo" placeholder="Ex: 21" min="0">
             </div>
             <div class="form-grupo">
-              <label>Adiantamento / 1ª Prestação (%)</label>
-              <input type="number" id="prodSinal" placeholder="Ex: 50" min="0" max="100">
-            </div>
+  <label>Adiantamento / 1ª Prestação (%)</label>
+  <input type="number" id="prodSinal" placeholder="Ex: 50" min="0" max="100"
+    oninput="calcularAdiantamento()">
+</div>
+<div class="form-grupo">
+  <label>Valor do Adiantamento</label>
+  <input type="text" id="valorAdiantamento" placeholder="Calculado automaticamente" readonly
+    style="background:var(--cinza-claro); color:var(--rosa); font-weight:700;">
+</div>
           </div>
         </div>
       </div>
