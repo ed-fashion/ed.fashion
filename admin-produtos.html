@@ -27,11 +27,11 @@
       font-size: 13px;
       outline: none;
       transition: border-color 0.2s;
+      background: white;
     }
 
     .filtros-bar input:focus,
     .filtros-bar select:focus { border-color: var(--rosa); }
-
     .filtros-bar input { flex: 1; min-width: 200px; }
 
     .produto-imagem-preview {
@@ -59,7 +59,6 @@
 
     .upload-area:hover { border-color: var(--rosa); background: var(--rosa-claro); }
     .upload-area.drag { border-color: var(--rosa); background: var(--rosa-claro); }
-
     .upload-area .icone { font-size: 36px; margin-bottom: 8px; display: block; }
     .upload-area p { font-size: 13px; color: var(--cinza); margin: 0; }
     .upload-area strong { color: var(--rosa); }
@@ -80,9 +79,7 @@
       color: var(--preto);
     }
 
-    .secao-form-corpo {
-      padding: 24px;
-    }
+    .secao-form-corpo { padding: 24px; }
 
     .form-grid-2 {
       display: grid;
@@ -95,6 +92,8 @@
       grid-template-columns: 1fr 1fr 1fr;
       gap: 16px;
     }
+
+    .form-grupo { margin-bottom: 16px; }
 
     .form-grupo label {
       display: block;
@@ -123,8 +122,13 @@
     .form-grupo input:focus,
     .form-grupo select:focus,
     .form-grupo textarea:focus { border-color: var(--rosa); }
-
     .form-grupo textarea { resize: vertical; min-height: 100px; }
+
+    .form-grupo input[readonly] {
+      background: var(--cinza-claro);
+      color: var(--rosa);
+      font-weight: 700;
+    }
 
     .form-acoes {
       display: flex;
@@ -132,6 +136,7 @@
       padding: 20px 24px;
       border-top: 1px solid #F0F2F5;
       background: #FAFAFA;
+      flex-wrap: wrap;
     }
 
     .produto-thumb {
@@ -170,6 +175,18 @@
       transition: width 0.3s;
     }
 
+    .adiantamento-info {
+      background: var(--rosa-claro);
+      border: 1px solid var(--rosa);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--rosa);
+      font-weight: 700;
+      margin-top: 8px;
+      display: none;
+    }
+
     @media (max-width: 768px) {
       .form-grid-2 { grid-template-columns: 1fr; }
       .form-grid-3 { grid-template-columns: 1fr 1fr; }
@@ -199,7 +216,6 @@
       <div class="msg-erro" id="msgErroLista"></div>
       <div class="msg-sucesso" id="msgSucessoLista"></div>
 
-      <!-- Filtros -->
       <div class="filtros-bar">
         <input type="text" id="filtroPesquisa" placeholder="🔍 Pesquisar produto..." oninput="filtrarProdutos()">
         <select id="filtroCategoria" onchange="filtrarProdutos()">
@@ -218,7 +234,6 @@
         </select>
       </div>
 
-      <!-- Tabela -->
       <div class="admin-card">
         <div class="admin-card-header">
           <h3>Lista de Produtos</h3>
@@ -263,7 +278,7 @@
       <div class="secao-form">
         <div class="secao-form-titulo">📋 Informação Principal</div>
         <div class="secao-form-corpo">
-          <div class="form-grupo" style="margin-bottom:16px">
+          <div class="form-grupo">
             <label>Nome do Produto *</label>
             <input type="text" id="prodNome" placeholder="Ex: Vestido Floral Elegante">
           </div>
@@ -282,7 +297,7 @@
               </select>
             </div>
           </div>
-          <div class="form-grupo" style="margin-bottom:16px">
+          <div class="form-grupo">
             <label>Descrição Curta</label>
             <textarea id="prodDescCurta" placeholder="Breve descrição do produto (aparece na listagem)" rows="2"></textarea>
           </div>
@@ -300,18 +315,20 @@
           <div class="form-grid-3">
             <div class="form-grupo">
               <label>Preço Normal (MT) *</label>
-              <input type="number" id="prodPreco" placeholder="0.00" min="0" step="0.01">
+              <input type="number" id="prodPreco" placeholder="0.00" min="0" step="0.01"
+                oninput="calcularAdiantamento(); calcularMargem()">
             </div>
             <div class="form-grupo">
               <label>Preço Promocional (MT)</label>
-              <input type="number" id="prodPrecoPromo" placeholder="0.00 (opcional)" min="0" step="0.01">
+              <input type="number" id="prodPrecoPromo" placeholder="Deixar vazio se não houver" min="0" step="0.01">
             </div>
             <div class="form-grupo">
               <label>Custo do Produto (MT)</label>
-              <input type="number" id="prodCusto" placeholder="0.00 (interno)" min="0" step="0.01">
+              <input type="number" id="prodCusto" placeholder="Uso interno" min="0" step="0.01"
+                oninput="calcularMargem()">
             </div>
           </div>
-          <div id="margemInfo" style="font-size:13px; color:var(--cinza); margin-top:8px;"></div>
+          <div id="margemInfo" style="font-size:13px; color:var(--cinza); margin-top:4px;"></div>
         </div>
       </div>
 
@@ -325,7 +342,7 @@
               <input type="number" id="prodQuantidade" placeholder="0" min="0">
             </div>
             <div class="form-grupo">
-              <label>Alerta de Stock Baixo</label>
+              <label>Alerta de Stock Baixo (unidades)</label>
               <input type="number" id="prodStockMinimo" placeholder="5" min="0" value="5">
             </div>
           </div>
@@ -338,20 +355,16 @@
         <div class="secao-form-corpo">
           <div class="form-grid-2">
             <div class="form-grupo">
-              <label>Prazo Estimado (dias)</label>
+              <label>Prazo Estimado de Entrega (dias)</label>
               <input type="number" id="prodPrazo" placeholder="Ex: 21" min="0">
             </div>
             <div class="form-grupo">
-  <label>Adiantamento / 1ª Prestação (%)</label>
-  <input type="number" id="prodSinal" placeholder="Ex: 50" min="0" max="100"
-    oninput="calcularAdiantamento()">
-</div>
-<div class="form-grupo">
-  <label>Valor do Adiantamento</label>
-  <input type="text" id="valorAdiantamento" placeholder="Calculado automaticamente" readonly
-    style="background:var(--cinza-claro); color:var(--rosa); font-weight:700;">
-</div>
+              <label>Adiantamento / 1ª Prestação (%)</label>
+              <input type="number" id="prodSinal" placeholder="Ex: 50" min="0" max="100"
+                oninput="calcularAdiantamento()">
+            </div>
           </div>
+          <div class="adiantamento-info" id="adiantamentoInfo"></div>
         </div>
       </div>
 
@@ -359,8 +372,10 @@
       <div class="secao-form">
         <div class="secao-form-titulo">🖼️ Imagem do Produto</div>
         <div class="secao-form-corpo">
-          <img id="imagemPreview" class="produto-imagem-preview" style="display:none">
-          <div class="upload-area" id="uploadArea" onclick="document.getElementById('inputImagem').click()"
+          <img id="imagemPreview" class="produto-imagem-preview" style="display:none"
+            onerror="this.style.display='none'; document.getElementById('uploadArea').style.display='block'">
+          <div class="upload-area" id="uploadArea"
+            onclick="document.getElementById('inputImagem').click()"
             ondragover="event.preventDefault(); this.classList.add('drag')"
             ondragleave="this.classList.remove('drag')"
             ondrop="handleDrop(event)">
@@ -368,15 +383,21 @@
             <p><strong>Clica para seleccionar</strong> ou arrasta a imagem aqui</p>
             <p>JPG, PNG ou WEBP — máx. 5 MB</p>
           </div>
-          <input type="file" id="inputImagem" accept="image/*" style="display:none" onchange="previewImagem(event)">
+          <input type="file" id="inputImagem" accept="image/*" style="display:none"
+            onchange="previewImagem(event)">
           <div class="progress-bar" id="progressBar">
             <div class="progress-bar-fill" id="progressFill"></div>
           </div>
-          <div style="margin-top:10px">
-            <label style="font-size:12px; font-weight:700; color:var(--cinza); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">
-              Ou cola o URL da imagem
-            </label>
-            <input type="text" id="prodImagemUrl" placeholder="https://..." oninput="previewUrl()">
+          <div style="margin-top:12px">
+            <div class="form-grupo">
+              <label>Ou cola o URL da imagem</label>
+              <input type="text" id="prodImagemUrl" placeholder="https://..." oninput="previewUrl()">
+            </div>
+          </div>
+          <div style="margin-top:8px">
+            <button class="btn-admin btn-admin-outline" onclick="limparImagem()" style="font-size:12px">
+              🗑️ Remover imagem
+            </button>
           </div>
         </div>
       </div>
@@ -402,10 +423,12 @@
               </select>
             </div>
           </div>
+          <div style="font-size:13px; color:var(--cinza); margin-top:4px;">
+            💡 Coloca em destaque os produtos que queres mostrar na página inicial da loja.
+          </div>
         </div>
       </div>
 
-      <!-- Acções do formulário -->
       <div class="form-acoes">
         <button class="btn-admin btn-admin-rosa" onclick="guardarProduto()" id="btnGuardar">
           💾 Guardar Produto
@@ -434,15 +457,17 @@
     carregarAdminNav('produtos');
     await carregarCategorias();
     await carregarProdutos();
-
-    // Se veio com ?acao=novo
     const params = new URLSearchParams(window.location.search);
     if (params.get('acao') === 'novo') mostrarFormNovo();
   }
 
-  // CARREGAR CATEGORIAS
   async function carregarCategorias() {
-    const { data } = await db.from('categories').select('*').eq('is_active', true).order('sort_order');
+    const { data } = await db
+      .from('categories')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order');
+
     const selects = ['filtroCategoria', 'prodCategoria'];
     selects.forEach(id => {
       const sel = document.getElementById(id);
@@ -459,7 +484,6 @@
     });
   }
 
-  // CARREGAR PRODUTOS
   async function carregarProdutos() {
     const { data, error } = await db
       .from('products')
@@ -470,12 +494,10 @@
       mostrarErro('msgErroLista', 'Erro ao carregar produtos.');
       return;
     }
-
     todosProdutos = data || [];
     renderTabela(todosProdutos);
   }
 
-  // RENDER TABELA
   function renderTabela(produtos) {
     const tbody = document.getElementById('tabelaProdutos');
     document.getElementById('totalProdutos').textContent = `${produtos.length} produto(s)`;
@@ -494,27 +516,29 @@
     tbody.innerHTML = produtos.map(p => {
       const stock = p.product_stock?.quantity ?? '—';
       const temPromo = p.sale_price && p.sale_price < p.price;
-
       return `
         <tr>
           <td>
             ${p.image_url
-              ? `<img src="${p.image_url}" class="produto-thumb" alt="${p.name}">`
+              ? `<img src="${p.image_url}" class="produto-thumb" alt="${p.name}"
+                   onerror="this.style.display='none'">`
               : `<div class="sem-imagem">👗</div>`}
           </td>
           <td>
-            <strong>${p.name}</strong>
+            <strong style="font-size:13px">${p.name}</strong>
             ${temPromo ? `<br><small style="color:var(--rosa);">Promoção activa</small>` : ''}
+            ${p.is_featured ? `<br><small style="color:var(--verde);">⭐ Destaque</small>` : ''}
           </td>
           <td>${p.categories?.name || '—'}</td>
           <td>
             ${temPromo
-              ? `<span style="text-decoration:line-through;color:var(--cinza);font-size:11px">${formatMZN(p.price)}</span><br><strong style="color:var(--rosa)">${formatMZN(p.sale_price)}</strong>`
+              ? `<span style="text-decoration:line-through;color:var(--cinza);font-size:11px">${formatMZN(p.price)}</span>
+                 <br><strong style="color:var(--rosa)">${formatMZN(p.sale_price)}</strong>`
               : `<strong>${formatMZN(p.price)}</strong>`}
           </td>
           <td>
             ${p.availability_type === 'pre_order'
-              ? '—'
+              ? '<span style="color:var(--cinza);font-size:12px;">N/A</span>'
               : `<strong style="color:${stock === 0 ? '#DC2626' : stock <= 5 ? '#D97706' : '#16A34A'}">${stock}</strong>`}
           </td>
           <td>
@@ -526,7 +550,9 @@
           <td>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button class="btn-admin btn-admin-outline" onclick="editarProduto('${p.id}')">✏️ Editar</button>
-              <button class="btn-admin btn-admin-vermelho" onclick="arquivarProduto('${p.id}', '${p.status}')">
+              <button class="btn-admin btn-admin-vermelho"
+                onclick="arquivarProduto('${p.id}', '${p.status}')"
+                title="${p.status === 'archived' ? 'Reactivar' : 'Arquivar'}">
                 ${p.status === 'archived' ? '♻️' : '🗄️'}
               </button>
             </div>
@@ -535,7 +561,6 @@
     }).join('');
   }
 
-  // FILTRAR
   function filtrarProdutos() {
     const pesquisa = document.getElementById('filtroPesquisa').value.toLowerCase();
     const categoria = document.getElementById('filtroCategoria').value;
@@ -553,7 +578,6 @@
     renderTabela(filtrados);
   }
 
-  // MOSTRAR FORMULÁRIO NOVO
   function mostrarFormNovo() {
     limparForm();
     document.getElementById('formTitulo').textContent = '➕ Novo Produto';
@@ -561,7 +585,6 @@
     mostrarVista('vistaForm');
   }
 
-  // EDITAR PRODUTO
   async function editarProduto(id) {
     const { data: p } = await db
       .from('products')
@@ -582,11 +605,11 @@
     document.getElementById('prodPreco').value = p.price || '';
     document.getElementById('prodPrecoPromo').value = p.sale_price || '';
     document.getElementById('prodCusto').value = p.cost_price || '';
-    document.getElementById('prodQuantidade').value = p.product_stock?.quantity || 0;
+    document.getElementById('prodQuantidade').value = p.product_stock?.quantity ?? 0;
     document.getElementById('prodStockMinimo').value = p.product_stock?.low_stock_threshold || 5;
     document.getElementById('prodPrazo').value = p.estimated_delivery_days || '';
     document.getElementById('prodSinal').value = p.deposit_percentage || '';
-    document.getElementById('prodStatus').value = p.status || 'draft';
+    document.getElementById('prodStatus').value = p.status || 'active';
     document.getElementById('prodDestaque').value = p.is_featured ? 'true' : 'false';
     document.getElementById('prodImagemUrl').value = p.image_url || '';
 
@@ -599,10 +622,11 @@
     }
 
     toggleEncomenda();
+    calcularAdiantamento();
+    calcularMargem();
     mostrarVista('vistaForm');
   }
 
-  // GUARDAR PRODUTO
   async function guardarProduto() {
     const btn = document.getElementById('btnGuardar');
     const id = document.getElementById('produtoId').value;
@@ -614,15 +638,19 @@
     const categoriaId = document.getElementById('prodCategoria').value;
     const tipo = document.getElementById('prodTipo').value;
     const preco = parseFloat(document.getElementById('prodPreco').value);
+    const precoPromo = parseFloat(document.getElementById('prodPrecoPromo').value);
 
     if (!nome) { mostrarErro('msgErroForm', 'O nome do produto é obrigatório.'); return; }
     if (!categoriaId) { mostrarErro('msgErroForm', 'Selecciona uma categoria.'); return; }
     if (!preco || preco <= 0) { mostrarErro('msgErroForm', 'Introduz um preço válido.'); return; }
+    if (precoPromo && precoPromo >= preco) {
+      mostrarErro('msgErroForm', 'O preço promocional deve ser menor que o preço normal.');
+      return;
+    }
 
     btn.disabled = true;
     btn.textContent = 'A guardar...';
 
-    // Upload de imagem se houver ficheiro
     let imageUrl = document.getElementById('prodImagemUrl').value.trim() || imagemUrlActual;
 
     if (imagemFicheiro) {
@@ -630,21 +658,21 @@
       const nomeFile = `produto_${Date.now()}.${ext}`;
 
       document.getElementById('progressBar').style.display = 'block';
-      document.getElementById('progressFill').style.width = '50%';
+      document.getElementById('progressFill').style.width = '40%';
 
-      const { data: upload, error: uploadErr } = await db.storage
+      const { error: uploadErr } = await db.storage
         .from('produtos')
         .upload(nomeFile, imagemFicheiro, { upsert: true });
 
       if (uploadErr) {
-        mostrarErro('msgErroForm', 'Erro ao fazer upload da imagem.');
+        mostrarErro('msgErroForm', 'Erro ao fazer upload da imagem: ' + uploadErr.message);
         btn.disabled = false;
         btn.textContent = '💾 Guardar Produto';
+        document.getElementById('progressBar').style.display = 'none';
         return;
       }
 
       document.getElementById('progressFill').style.width = '100%';
-
       const { data: urlData } = db.storage.from('produtos').getPublicUrl(nomeFile);
       imageUrl = urlData.publicUrl;
     }
@@ -653,13 +681,12 @@
 
     const dadosProduto = {
       name: nome,
-      slug: id ? undefined : slug,
       category_id: categoriaId,
       availability_type: tipo,
-      short_description: document.getElementById('prodDescCurta').value.trim(),
-      full_description: document.getElementById('prodDescDetalhada').value.trim(),
+      short_description: document.getElementById('prodDescCurta').value.trim() || null,
+      full_description: document.getElementById('prodDescDetalhada').value.trim() || null,
       price: preco,
-      sale_price: parseFloat(document.getElementById('prodPrecoPromo').value) || null,
+      sale_price: precoPromo && precoPromo > 0 ? precoPromo : null,
       cost_price: parseFloat(document.getElementById('prodCusto').value) || null,
       estimated_delivery_days: parseInt(document.getElementById('prodPrazo').value) || 0,
       deposit_percentage: parseFloat(document.getElementById('prodSinal').value) || 0,
@@ -669,23 +696,33 @@
       updated_at: new Date().toISOString()
     };
 
-    if (id) delete dadosProduto.slug;
-
     let produtoFinal;
 
     if (id) {
-      const { data, error } = await db.from('products').update(dadosProduto).eq('id', id).select().single();
+      const { data, error } = await db
+        .from('products')
+        .update(dadosProduto)
+        .eq('id', id)
+        .select()
+        .single();
+
       if (error) {
-        mostrarErro('msgErroForm', 'Erro ao actualizar produto: ' + error.message);
+        mostrarErro('msgErroForm', 'Erro ao actualizar: ' + error.message);
         btn.disabled = false;
         btn.textContent = '💾 Guardar Produto';
         return;
       }
       produtoFinal = data;
     } else {
-      const { data, error } = await db.from('products').insert(dadosProduto).select().single();
+      dadosProduto.slug = slug;
+      const { data, error } = await db
+        .from('products')
+        .insert(dadosProduto)
+        .select()
+        .single();
+
       if (error) {
-        mostrarErro('msgErroForm', 'Erro ao criar produto: ' + error.message);
+        mostrarErro('msgErroForm', 'Erro ao criar: ' + error.message);
         btn.disabled = false;
         btn.textContent = '💾 Guardar Produto';
         return;
@@ -693,7 +730,6 @@
       produtoFinal = data;
     }
 
-    // Gerir stock
     if (tipo === 'stock') {
       const quantidade = parseInt(document.getElementById('prodQuantidade').value) || 0;
       const minimo = parseInt(document.getElementById('prodStockMinimo').value) || 5;
@@ -712,23 +748,20 @@
     btn.textContent = '💾 Guardar Produto';
 
     await carregarProdutos();
-
     setTimeout(() => mostrarLista(), 1500);
   }
 
-  // ARQUIVAR / REACTIVAR
   async function arquivarProduto(id, statusActual) {
     const novoStatus = statusActual === 'archived' ? 'active' : 'archived';
-    const confirmacao = confirm(novoStatus === 'archived'
+    const msg = novoStatus === 'archived'
       ? 'Arquivar este produto? Deixará de aparecer na loja.'
-      : 'Reactivar este produto?');
-    if (!confirmacao) return;
-
+      : 'Reactivar este produto?';
+    if (!confirm(msg)) return;
     await db.from('products').update({ status: novoStatus }).eq('id', id);
     await carregarProdutos();
   }
 
-  // PREVIEW DE IMAGEM
+  // IMAGEM
   function previewImagem(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -755,9 +788,11 @@
       preview.style.display = 'block';
       document.getElementById('uploadArea').style.display = 'none';
       imagemFicheiro = null;
+      imagemUrlActual = url;
     } else {
       preview.style.display = 'none';
       document.getElementById('uploadArea').style.display = 'block';
+      imagemUrlActual = '';
     }
   }
 
@@ -778,11 +813,50 @@
     }
   }
 
+  function limparImagem() {
+    imagemFicheiro = null;
+    imagemUrlActual = '';
+    document.getElementById('prodImagemUrl').value = '';
+    document.getElementById('imagemPreview').style.display = 'none';
+    document.getElementById('uploadArea').style.display = 'block';
+    document.getElementById('inputImagem').value = '';
+  }
+
   // TOGGLE ENCOMENDA
   function toggleEncomenda() {
     const tipo = document.getElementById('prodTipo').value;
     document.getElementById('secaoStock').style.display = tipo === 'stock' ? 'block' : 'none';
     document.getElementById('secaoEncomenda').style.display = tipo === 'pre_order' ? 'block' : 'none';
+  }
+
+  // CALCULAR ADIANTAMENTO
+  function calcularAdiantamento() {
+    const preco = parseFloat(document.getElementById('prodPreco').value) || 0;
+    const percentagem = parseFloat(document.getElementById('prodSinal').value) || 0;
+    const info = document.getElementById('adiantamentoInfo');
+    if (!info) return;
+    if (preco > 0 && percentagem > 0) {
+      const valor = (preco * percentagem) / 100;
+      info.textContent = `💰 O cliente paga ${formatMZN(valor)} de adiantamento (${percentagem}% de ${formatMZN(preco)})`;
+      info.style.display = 'block';
+    } else {
+      info.style.display = 'none';
+    }
+  }
+
+  // CALCULAR MARGEM
+  function calcularMargem() {
+    const preco = parseFloat(document.getElementById('prodPreco').value) || 0;
+    const custo = parseFloat(document.getElementById('prodCusto').value) || 0;
+    const info = document.getElementById('margemInfo');
+    if (!info) return;
+    if (preco > 0 && custo > 0) {
+      const margem = preco - custo;
+      const percentagem = ((margem / preco) * 100).toFixed(1);
+      info.innerHTML = `📊 Margem de lucro: <strong style="color:${margem > 0 ? '#16A34A' : '#DC2626'}">${formatMZN(margem)} (${percentagem}%)</strong>`;
+    } else {
+      info.textContent = '';
+    }
   }
 
   // VISTAS
@@ -797,7 +871,6 @@
     mostrarVista('vistaLista');
   }
 
-  // LIMPAR FORMULÁRIO
   function limparForm() {
     document.getElementById('produtoId').value = '';
     document.getElementById('prodNome').value = '';
@@ -819,6 +892,9 @@
     document.getElementById('uploadArea').style.display = 'block';
     document.getElementById('progressBar').style.display = 'none';
     document.getElementById('progressFill').style.width = '0%';
+    document.getElementById('margemInfo').textContent = '';
+    const adInfo = document.getElementById('adiantamentoInfo');
+    if (adInfo) adInfo.style.display = 'none';
     imagemFicheiro = null;
     imagemUrlActual = '';
     toggleEncomenda();
