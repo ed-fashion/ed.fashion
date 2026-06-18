@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>As Minhas Encomendas — E'D Fashion</title>
+  <link rel="stylesheet" href="main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .encomendas-layout {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .page-titulo {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--preto);
+      margin-bottom: 24px;
+    }
+
+    /* FILTROS */
+    .filtros-encomendas {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .filtro-btn {
+      padding: 8px 18px;
+      border-radius: 20px;
+      border: 1.5px solid #ddd;
+      background: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--cinza-escuro);
+    }
+
+    .filtro-btn:hover { border-color: var(--rosa); color: var(--rosa); }
+    .filtro-btn.activo { background: var(--rosa); color: white; border-color: var(--rosa); }
+
+    /* CARD DE ENCOMENDA */
+    .encomenda-card {
+      background: white;
+      border-radius: 14px;
+      box-shadow: var(--sombra);
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    .encomenda-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+
+    .encomenda-card-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid #F0F2F5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .encomenda-card-header:hover { background: #FAFAFA; }
+
+    .encomenda-numero {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--preto);
+    }
+
+    .encomenda-data {
+      font-size: 12px;
+      color: var(--cinza);
+      margin-top: 2px;
+    }
+
+    .encomenda-header-dir {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .encomenda-total {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--rosa);
+    }
+
+    .encomenda-toggle {
+      color: var(--cinza);
+      font-size: 20px;
+      transition: transform 0.3s;
+    }
+
+    .encomenda-toggle.aberto { transform: rotate(180deg); }
+
+    /* DETALHE */
+    .encomenda-detalhe {
+      display: none;
+    }
+
+    .encomenda-detalhe.aberto { display: block; }
+
+    /* PROGRESSO */
+    .progresso-wrap {
+      padding: 24px;
+      border-bottom: 1px solid #F0F2F5;
+    }
+
+    .progresso-titulo {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+    }
+
+    .progresso-linha {
+      display: flex;
+      gap: 0;
+      position: relative;
+    }
+
+    .progresso-etapa {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .progresso-etapa::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      width: 100%;
+      height: 3px;
+      background: #eee;
+      z-index: 0;
+    }
+
+    .progresso-etapa:last-child::before { display: none; }
+
+    .progresso-etapa.concluida::before { background: var(--verde); }
+    .progresso-etapa.actual::before { background: linear-gradient(to right, var(--verde), #eee); }
+
+    .etapa-circulo {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      position: relative;
+      z-index: 2;
+      flex-shrink: 0;
+      border: 3px solid #eee;
+      transition: all 0.3s;
+    }
+
+    .progresso-etapa.concluida .etapa-circulo {
+      background: var(--verde);
+      border-color: var(--verde);
+    }
+
+    .progresso-etapa.actual .etapa-circulo {
+      background: var(--rosa);
+      border-color: var(--rosa);
+      box-shadow: 0 0 0 4px var(--rosa-claro);
+      animation: pulsar 2s infinite;
+    }
+
+    .progresso-etapa.cancelada .etapa-circulo {
+      background: #DC2626;
+      border-color: #DC2626;
+    }
+
+    @keyframes pulsar {
+      0%, 100% { box-shadow: 0 0 0 4px var(--rosa-claro); }
+      50% { box-shadow: 0 0 0 8px rgba(233,30,140,0.1); }
+    }
+
+    .etapa-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--cinza);
+      margin-top: 8px;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .progresso-etapa.concluida .etapa-label { color: var(--verde); }
+    .progresso-etapa.actual .etapa-label { color: var(--rosa); font-weight: 700; }
+
+    .etapa-data {
+      font-size: 10px;
+      color: var(--cinza);
+      margin-top: 3px;
+      text-align: center;
+    }
+
+    /* MENSAGEM DE ESTADO */
+    .estado-mensagem {
+      margin: 16px 24px 0;
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .estado-awaiting_payment {
+      background: #FEF3C7;
+      color: #92400E;
+      border: 1px solid #D97706;
+    }
+
+    .estado-paid {
+      background: #DCFCE7;
+      color: #166534;
+      border: 1px solid #16A34A;
+    }
+
+    .estado-preparing {
+      background: #DBEAFE;
+      color: #1e3a5f;
+      border: 1px solid #2563EB;
+    }
+
+    .estado-shipped {
+      background: #EDE9FE;
+      color: #4c1d95;
+      border: 1px solid #7C3AED;
+    }
+
+    .estado-delivered {
+      background: #DCFCE7;
+      color: #166534;
+      border: 1px solid #16A34A;
+    }
+
+    .estado-cancelled {
+      background: #FEE2E2;
+      color: #991b1b;
+      border: 1px solid #DC2626;
+    }
+
+    /* ITENS */
+    .encomenda-itens {
+      padding: 20px 24px;
+      border-bottom: 1px solid #F0F2F5;
+    }
+
+    .encomenda-itens h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 14px;
+    }
+
+    .encomenda-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid #F5F5F5;
+    }
+
+    .encomenda-item:last-child { border-bottom: none; }
+
+    .encomenda-item-img {
+      width: 52px;
+      height: 65px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: var(--cinza-claro);
+      flex-shrink: 0;
+    }
+
+    .encomenda-item-sem-img {
+      width: 52px;
+      height: 65px;
+      background: var(--cinza-claro);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .encomenda-item-info { flex: 1; min-width: 0; }
+
+    .encomenda-item-nome {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--preto);
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .encomenda-item-qtd {
+      font-size: 12px;
+      color: var(--cinza);
+    }
+
+    .encomenda-item-tipo {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .tipo-stock { background: #DCFCE7; color: #16A34A; }
+    .tipo-encomenda { background: #DBEAFE; color: #2563EB; }
+
+    .encomenda-item-preco {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--rosa);
+      flex-shrink: 0;
+    }
+
+    /* ACÇÕES */
+    .encomenda-acoes {
+      padding: 16px 24px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #FAFAFA;
+    }
+
+    /* RESUMO FINANCEIRO */
+    .encomenda-resumo {
+      padding: 16px 24px;
+      border-top: 1px solid #F0F2F5;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .resumo-tabela {
+      min-width: 220px;
+    }
+
+    .resumo-linha {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      font-size: 13px;
+      color: var(--cinza-escuro);
+      margin-bottom: 6px;
+    }
+
+    .resumo-linha.total {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--preto);
+      padding-top: 8px;
+      border-top: 1px solid #eee;
+      margin-top: 6px;
+    }
+
+    .resumo-linha.total span:last-child { color: var(--rosa); }
+
+    /* VAZIO */
+    .encomendas-vazio {
+      background: white;
+      border-radius: 14px;
+      box-shadow: var(--sombra);
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .encomendas-vazio .icone { font-size: 64px; display: block; margin-bottom: 16px; }
+    .encomendas-vazio h3 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .encomendas-vazio p { font-size: 14px; color: var(--cinza); margin-bottom: 24px; }
+
+    /* RESPONSIVIDADE */
+    @media (max-width: 600px) {
+      .progresso-linha { gap: 0; }
+      .etapa-circulo { width: 30px; height: 30px; font-size: 12px; }
+      .etapa-label { font-size: 9px; }
+      .encomenda-card-header { flex-direction: column; align-items: flex-start; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div class="encomendas-layout">
+
+  <div style="margin-bottom:8px;">
+    <a href="perfil.html" style="color:var(--cinza); font-size:13px; text-decoration:none;">← Voltar ao perfil</a>
+  </div>
+
+  <h1 class="page-titulo">📦 As Minhas Encomendas</h1>
+
+  <!-- Filtros -->
+  <div class="filtros-encomendas">
+    <button class="filtro-btn activo" onclick="filtrar('todas', this)">Todas</button>
+    <button class="filtro-btn" onclick="filtrar('awaiting_payment', this)">Aguarda Pagamento</button>
+    <button class="filtro-btn" onclick="filtrar('paid', this)">Pagas</button>
+    <button class="filtro-btn" onclick="filtrar('preparing', this)">Em Preparação</button>
+    <button class="filtro-btn" onclick="filtrar('shipped', this)">Enviadas</button>
+    <button class="filtro-btn" onclick="filtrar('delivered', this)">Entregues</button>
+    <button class="filtro-btn" onclick="filtrar('cancelled', this)">Canceladas</button>
+  </div>
+
+  <div class="msg-erro" id="msgErro"></div>
+
+  <div id="listaEncomendas">
+    <div style="text-align:center; padding:60px; color:var(--cinza);">
+      <div style="font-size:40px; margin-bottom:12px;">⏳</div>
+      <p>A carregar encomendas...</p>
+    </div>
+  </div>
+
+</div>
+
+<div id="footer"></div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="components.js"></script>
+<script>
+
+  let todasEncomendas = [];
+  let filtroActivo = 'todas';
+  let encomendasAbertas = {};
+
+  const ETAPAS = [
+    { key: 'pending',           icone: '📋', label: 'Recebida' },
+    { key: 'awaiting_payment',  icone: '💳', label: 'Aguarda\nPagamento' },
+    { key: 'paid',              icone: '✅', label: 'Pago' },
+    { key: 'preparing',         icone: '🔧', label: 'Em\nPreparação' },
+    { key: 'shipped',           icone: '🚚', label: 'Enviado' },
+    { key: 'delivered',         icone: '🏠', label: 'Entregue' }
+  ];
+
+  const MENSAGENS_ESTADO = {
+    pending: {
+      icone: '📋',
+      texto: 'A tua encomenda foi recebida e está a ser processada.'
+    },
+    awaiting_payment: {
+      icone: '💳',
+      texto: 'Estamos à espera do teu pagamento. Após efectuares o pagamento, envia o comprovativo via WhatsApp para processarmos a tua encomenda rapidamente.'
+    },
+    paid: {
+      icone: '✅',
+      texto: 'Pagamento confirmado! A tua encomenda está a ser preparada. Entraremos em contacto em breve.'
+    },
+    preparing: {
+      icone: '🔧',
+      texto: 'A tua encomenda está a ser preparada com cuidado. Receberás uma notificação quando for enviada.'
+    },
+    shipped: {
+      icone: '🚚',
+      texto: 'A tua encomenda está a caminho! Entraremos em contacto para combinar a entrega.'
+    },
+    delivered: {
+      icone: '🏠',
+      texto: 'Encomenda entregue! Esperamos que gostes dos teus produtos. Obrigado por escolheres a E\'D Fashion!'
+    },
+    cancelled: {
+      icone: '❌',
+      texto: 'Esta encomenda foi cancelada. Se tens dúvidas, contacta-nos via WhatsApp.'
+    }
+  };
+
+  async function iniciar() {
+    carregarNavbar();
+    carregarFooter();
+
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) {
+      localStorage.setItem('ed_redirect', 'encomendas-cliente.html');
+      window.location.href = 'login.html';
+      return;
+    }
+
+    await carregarEncomendas(session.user.id);
+
+    // Auto-abrir se vier de checkout
+    const params = new URLSearchParams(window.location.search);
+    const idAbrir = params.get('id');
+    if (idAbrir) {
+      setTimeout(() => toggleEncomenda(idAbrir), 500);
+    }
+  }
+
+  async function carregarEncomendas(userId) {
+    const { data, error } = await db
+      .from('orders')
+      .select(`
+        *,
+        order_items (
+          id, quantity, unit_price, availability_type,
+          products (id, name, image_url)
+        ),
+        payments (method, status, amount),
+        order_status_history (new_status, created_at, notes)
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      mostrarErro('msgErro', 'Erro ao carregar encomendas.');
+      return;
+    }
+
+    todasEncomendas = data || [];
+    renderEncomendas();
+  }
+
+  function filtrar(status, btn) {
+    filtroActivo = status;
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    renderEncomendas();
+  }
+
+  function renderEncomendas() {
+    const lista = filtroActivo === 'todas'
+      ? todasEncomendas
+      : todasEncomendas.filter(e => e.status === filtroActivo);
+
+    const container = document.getElementById('listaEncomendas');
+
+    if (lista.length === 0) {
+      container.innerHTML = `
+        <div class="encomendas-vazio">
+          <span class="icone">📦</span>
+          <h3>${filtroActivo === 'todas' ? 'Ainda não tens encomendas' : 'Nenhuma encomenda neste estado'}</h3>
+          <p>${filtroActivo === 'todas'
+            ? 'Quando fizeres a tua primeira compra, aparecerá aqui.'
+            : 'Experimenta outro filtro.'}</p>
+          ${filtroActivo === 'todas'
+            ? `<a href="catalogo.html" class="btn btn-rosa">🛍️ Ver Produtos</a>`
+            : ''}
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = lista.map(e => renderEncomendaCard(e)).join('');
+  }
+
+  function renderEncomendaCard(encomenda) {
+    const aberto = encomendasAbertas[encomenda.id];
+    const isCancelada = encomenda.status === 'cancelled';
+    const pagamento = encomenda.payments?.[0];
+    const historico = encomenda.order_status_history || [];
+
+    return `
+      <div class="encomenda-card" id="card-${encomenda.id}">
+
+        <!-- CABEÇALHO -->
+        <div class="encomenda-card-header" onclick="toggleEncomenda('${encomenda.id}')">
+          <div>
+            <div class="encomenda-numero">${encomenda.order_number}</div>
+            <div class="encomenda-data">
+              ${formatData(encomenda.created_at)} •
+              ${encomenda.order_items?.length || 0} produto(s)
+              ${pagamento ? '• ' + traduzirMetodo(pagamento.method) : ''}
+            </div>
+          </div>
+          <div class="encomenda-header-dir">
+            ${badgeStatus(encomenda.status)}
+            <span class="encomenda-total">${formatMZN(encomenda.total)}</span>
+            <span class="encomenda-toggle ${aberto ? 'aberto' : ''}">▾</span>
+          </div>
+        </div>
+
+        <!-- DETALHE -->
+        <div class="encomenda-detalhe ${aberto ? 'aberto' : ''}">
+
+          <!-- BARRA DE PROGRESSO -->
+          ${!isCancelada ? renderProgresso(encomenda, historico) : ''}
+
+          <!-- MENSAGEM DE ESTADO -->
+          ${renderMensagemEstado(encomenda, pagamento)}
+
+          <!-- ITENS -->
+          <div class="encomenda-itens">
+            <h4>Produtos</h4>
+            ${(encomenda.order_items || []).map(item => `
+              <div class="encomenda-item">
+                ${item.products?.image_url
+                  ? `<img src="${item.products.image_url}" class="encomenda-item-img"
+                       alt="${item.products?.name || ''}"
+                       onerror="this.style.display='none'">`
+                  : `<div class="encomenda-item-sem-img">👗</div>`}
+                <div class="encomenda-item-info">
+                  <div class="encomenda-item-nome">${item.products?.name || 'Produto'}</div>
+                  <div class="encomenda-item-qtd">Quantidade: ${item.quantity}</div>
+                  <span class="encomenda-item-tipo ${item.availability_type === 'pre_order' ? 'tipo-encomenda' : 'tipo-stock'}">
+                    ${item.availability_type === 'pre_order' ? '📦 Por Encomenda' : '✅ Em Stock'}
+                  </span>
+                </div>
+                <div class="encomenda-item-preco">${formatMZN(item.unit_price * item.quantity)}</div>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- RESUMO FINANCEIRO -->
+          <div class="encomenda-resumo">
+            <div class="resumo-tabela">
+              <div class="resumo-linha">
+                <span>Subtotal</span>
+                <span>${formatMZN(encomenda.subtotal)}</span>
+              </div>
+              ${encomenda.discount > 0 ? `
+              <div class="resumo-linha">
+                <span>Desconto</span>
+                <span style="color:#16A34A">− ${formatMZN(encomenda.discount)}</span>
+              </div>` : ''}
+              <div class="resumo-linha total">
+                <span>Total</span>
+                <span>${formatMZN(encomenda.total)}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACÇÕES -->
+          <div class="encomenda-acoes">
+            ${encomenda.status === 'awaiting_payment' ? `
+              <a href="${gerarLinkWhatsApp(encomenda)}" target="_blank"
+                 class="btn-admin btn-admin-verde"
+                 style="background:#25D366; color:white; border:none;">
+                💬 Enviar Comprovativo
+              </a>` : ''}
+            ${encomenda.status === 'awaiting_payment' || encomenda.status === 'pending' ? `
+              <button class="btn-admin btn-admin-vermelho"
+                onclick="cancelarEncomenda('${encomenda.id}')">
+                ❌ Cancelar Encomenda
+              </button>` : ''}
+            <a href="catalogo.html" class="btn-admin btn-admin-outline">
+              🛍️ Continuar a Comprar
+            </a>
+          </div>
+
+        </div>
+      </div>`;
+  }
+
+  function renderProgresso(encomenda, historico) {
+    const ordemEtapas = ['pending', 'awaiting_payment', 'paid', 'preparing', 'shipped', 'delivered'];
+    const idxActual = ordemEtapas.indexOf(encomenda.status);
+
+    return `
+      <div class="progresso-wrap">
+        <div class="progresso-titulo">Estado da Encomenda</div>
+        <div class="progresso-linha">
+          ${ETAPAS.map((etapa, idx) => {
+            const idxEtapa = ordemEtapas.indexOf(etapa.key);
+            const concluida = idxEtapa < idxActual;
+            const actual = idxEtapa === idxActual;
+
+            const entradaHistorico = historico.find(h => h.new_status === etapa.key);
+            const dataEtapa = entradaHistorico ? formatData(entradaHistorico.created_at) : '';
+
+            return `
+              <div class="progresso-etapa ${concluida ? 'concluida' : actual ? 'actual' : ''}">
+                <div class="etapa-circulo">
+                  ${concluida ? '✓' : etapa.icone}
+                </div>
+                <div class="etapa-label">${etapa.label}</div>
+                ${dataEtapa ? `<div class="etapa-data">${dataEtapa}</div>` : ''}
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+
+  function renderMensagemEstado(encomenda, pagamento) {
+    const info = MENSAGENS_ESTADO[encomenda.status];
+    if (!info) return '';
+
+    return `
+      <div class="estado-mensagem estado-${encomenda.status}">
+        <strong>${info.icone} ${info.texto}</strong>
+        ${encomenda.status === 'awaiting_payment' && pagamento
+          ? `<br><br>💳 Método de pagamento: <strong>${traduzirMetodo(pagamento.method)}</strong><br>
+             💰 Valor a pagar: <strong>${formatMZN(encomenda.total)}</strong>`
+          : ''}
+      </div>`;
+  }
+
+  function gerarLinkWhatsApp(encomenda) {
+    const msg = encodeURIComponent(
+      `Olá E'D Fashion! 👋\n\n` +
+      `Estou a enviar o comprovativo de pagamento.\n\n` +
+      `*Nº Encomenda:* ${encomenda.order_number}\n` +
+      `*Total pago:* ${formatMZN(encomenda.total)}\n\n` +
+      `Segue em anexo o comprovativo. 📎`
+    );
+    return `https://wa.me/258866464666?text=${msg}`;
+  }
+
+  async function cancelarEncomenda(id) {
+    if (!confirm('Tens a certeza que queres cancelar esta encomenda?\nEsta acção não pode ser desfeita.')) return;
+
+    const { error } = await db
+      .from('orders')
+      .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) {
+      alert('Erro ao cancelar. Tenta novamente.');
+      return;
+    }
+
+    const { data: { session } } = await db.auth.getSession();
+    await db.from('order_status_history').insert({
+      order_id: id,
+      old_status: 'awaiting_payment',
+      new_status: 'cancelled',
+      changed_by: session.user.id,
+      notes: 'Cancelado pelo cliente'
+    });
+
+    await carregarEncomendas(session.user.id);
+  }
+
+  function toggleEncomenda(id) {
+    encomendasAbertas[id] = !encomendasAbertas[id];
+    renderEncomendas();
+
+    if (encomendasAbertas[id]) {
+      setTimeout(() => {
+        document.getElementById('card-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }
+
+  function badgeStatus(status) {
+    const map = {
+      pending:            ['status-draft',     '📋 Recebida'],
+      awaiting_payment:   ['status-awaiting',  '💳 Aguarda Pagamento'],
+      paid:               ['status-paid',      '✅ Pago'],
+      preparing:          ['status-preparing', '🔧 Em Preparação'],
+      shipped:            ['status-shipped',   '🚚 Enviado'],
+      delivered:          ['status-delivered', '🏠 Entregue'],
+      cancelled:          ['status-cancelled', '❌ Cancelado']
+    };
+    const [cls, label] = map[status] || ['status-draft', status];
+    return `<span class="status-badge ${cls}">${label}</span>`;
+  }
+
+  function traduzirMetodo(metodo) {
+    const map = {
+      mpesa: 'M-Pesa',
+      emola: 'e-Mola',
+      bank_transfer: 'Transferência Bancária',
+      cash: 'Dinheiro'
+    };
+    return map[metodo] || metodo;
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>
