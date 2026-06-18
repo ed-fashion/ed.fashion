@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Encomendas — E'D Fashion Admin</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .vista { display: none; }
+    .vista.activa { display: block; }
+
+    /* FILTROS */
+    .filtros-estados {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .filtro-estado-btn {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1.5px solid #ddd;
+      background: white;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--cinza-escuro);
+      white-space: nowrap;
+    }
+
+    .filtro-estado-btn:hover { border-color: var(--rosa); color: var(--rosa); }
+    .filtro-estado-btn.activo { background: var(--rosa); color: white; border-color: var(--rosa); }
+
+    /* DETALHE DA ENCOMENDA */
+    .detalhe-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .detalhe-secao {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .detalhe-secao-titulo {
+      padding: 14px 20px;
+      border-bottom: 1px solid #F0F2F5;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--preto);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detalhe-secao-corpo { padding: 20px; }
+
+    /* PROGRESSO ADMIN */
+    .progresso-admin {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+    }
+
+    .prog-etapa {
+      flex: 1;
+      text-align: center;
+      position: relative;
+    }
+
+    .prog-etapa::after {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      width: 100%;
+      height: 3px;
+      background: #eee;
+      z-index: 0;
+    }
+
+    .prog-etapa:last-child::after { display: none; }
+    .prog-etapa.concluida::after { background: var(--verde); }
+
+    .prog-circulo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      margin: 0 auto 6px;
+      position: relative;
+      z-index: 1;
+      border: 3px solid #eee;
+    }
+
+    .prog-etapa.concluida .prog-circulo { background: var(--verde); border-color: var(--verde); }
+    .prog-etapa.actual .prog-circulo { background: var(--rosa); border-color: var(--rosa); box-shadow: 0 0 0 4px var(--rosa-claro); }
+    .prog-etapa.cancelada .prog-circulo { background: #DC2626; border-color: #DC2626; }
+
+    .prog-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--cinza);
+      line-height: 1.3;
+    }
+
+    .prog-etapa.concluida .prog-label { color: var(--verde); }
+    .prog-etapa.actual .prog-label { color: var(--rosa); font-weight: 700; }
+
+    /* MUDAR ESTADO */
+    .mudar-estado-wrap {
+      background: #F8F9FA;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .mudar-estado-wrap label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .estados-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .estado-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #ddd;
+      background: white;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--cinza-escuro);
+    }
+
+    .estado-btn:hover { border-color: var(--rosa); color: var(--rosa); }
+    .estado-btn.actual { background: var(--rosa); color: white; border-color: var(--rosa); cursor: default; }
+    .estado-btn.proximo { border-color: var(--verde); color: var(--verde); font-weight: 700; }
+    .estado-btn.proximo:hover { background: var(--verde); color: white; }
+
+    /* NOTAS */
+    .nota-wrap textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      resize: vertical;
+      min-height: 80px;
+      font-family: var(--fonte);
+      transition: border-color 0.2s;
+    }
+
+    .nota-wrap textarea:focus { border-color: var(--rosa); }
+
+    /* ITENS */
+    .admin-item-encomenda {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid #F0F2F5;
+    }
+
+    .admin-item-encomenda:last-child { border-bottom: none; }
+
+    .admin-item-img {
+      width: 52px;
+      height: 65px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: var(--cinza-claro);
+      flex-shrink: 0;
+    }
+
+    .admin-item-sem-img {
+      width: 52px;
+      height: 65px;
+      background: var(--cinza-claro);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    /* DADOS ENTREGA */
+    .dados-linha {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .dados-linha .label {
+      font-weight: 700;
+      color: var(--cinza);
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+
+    .dados-linha .valor { color: var(--preto); }
+
+    /* RESUMO LATERAL */
+    .resumo-lateral-admin {
+      position: sticky;
+      top: 20px;
+    }
+
+    .kpi-mini {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-mini-card {
+      background: white;
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      text-align: center;
+    }
+
+    .kpi-mini-valor {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--preto);
+      display: block;
+    }
+
+    .kpi-mini-label {
+      font-size: 11px;
+      color: var(--cinza);
+      margin-top: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .detalhe-grid { grid-template-columns: 1fr; }
+      .resumo-lateral-admin { position: static; }
+    }
+
+    @media (max-width: 600px) {
+      .filtros-estados { gap: 6px; }
+      .filtro-estado-btn { font-size: 11px; padding: 6px 12px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <div id="adminNav"></div>
+
+  <div class="admin-conteudo">
+
+    <!-- VISTA: LISTA -->
+    <div class="vista activa" id="vistaLista">
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+        <div class="admin-page-titulo" style="margin:0">🛒 Encomendas</div>
+      </div>
+
+      <!-- KPIs Mini -->
+      <div class="kpi-mini" style="grid-template-columns: repeat(4, 1fr); margin-bottom:24px;">
+        <div class="kpi-mini-card">
+          <span class="kpi-mini-valor" id="kpiTodas">—</span>
+          <div class="kpi-mini-label">Total</div>
+        </div>
+        <div class="kpi-mini-card">
+          <span class="kpi-mini-valor" style="color:#D97706" id="kpiPendentes">—</span>
+          <div class="kpi-mini-label">Pendentes</div>
+        </div>
+        <div class="kpi-mini-card">
+          <span class="kpi-mini-valor" style="color:#16A34A" id="kpiPagas">—</span>
+          <div class="kpi-mini-label">Pagas</div>
+        </div>
+        <div class="kpi-mini-card">
+          <span class="kpi-mini-valor" style="color:var(--rosa)" id="kpiReceita">—</span>
+          <div class="kpi-mini-label">Receita Total</div>
+        </div>
+      </div>
+
+      <div class="msg-sucesso" id="msgSucessoLista"></div>
+      <div class="msg-erro" id="msgErroLista"></div>
+
+      <!-- Filtros -->
+      <div class="filtros-estados">
+        <button class="filtro-estado-btn activo" onclick="filtrar('todas', this)">Todas</button>
+        <button class="filtro-estado-btn" onclick="filtrar('awaiting_payment', this)">💳 Aguarda Pagamento</button>
+        <button class="filtro-estado-btn" onclick="filtrar('paid', this)">✅ Pagas</button>
+        <button class="filtro-estado-btn" onclick="filtrar('preparing', this)">🔧 Em Preparação</button>
+        <button class="filtro-estado-btn" onclick="filtrar('shipped', this)">🚚 Enviadas</button>
+        <button class="filtro-estado-btn" onclick="filtrar('delivered', this)">🏠 Entregues</button>
+        <button class="filtro-estado-btn" onclick="filtrar('cancelled', this)">❌ Canceladas</button>
+      </div>
+
+      <!-- Pesquisa -->
+      <div style="margin-bottom:16px;">
+        <input type="text" id="pesquisaEncomenda"
+          placeholder="🔍 Pesquisar por nº encomenda ou nome do cliente..."
+          oninput="pesquisar()"
+          style="width:100%; padding:10px 14px; border:1.5px solid #ddd; border-radius:8px; font-size:14px; outline:none;">
+      </div>
+
+      <!-- Tabela -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>Lista de Encomendas</h3>
+          <span id="totalEncomendas" style="font-size:13px; color:var(--cinza);"></span>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Nº Encomenda</th>
+                <th>Cliente</th>
+                <th>Produtos</th>
+                <th>Total</th>
+                <th>Pagamento</th>
+                <th>Estado</th>
+                <th>Data</th>
+                <th>Acção</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaEncomendas">
+              <tr><td colspan="8" style="text-align:center;padding:40px;color:#888;">A carregar...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISTA: DETALHE -->
+    <div class="vista" id="vistaDetalhe">
+
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
+        <button class="btn-admin btn-admin-outline" onclick="voltarLista()">← Voltar</button>
+        <div class="admin-page-titulo" style="margin:0" id="detalheTitulo">Encomenda</div>
+      </div>
+
+      <div class="msg-sucesso" id="msgSucessoDetalhe"></div>
+      <div class="msg-erro" id="msgErroDetalhe"></div>
+
+      <div class="detalhe-grid">
+
+        <!-- COLUNA PRINCIPAL -->
+        <div>
+
+          <!-- PROGRESSO -->
+          <div class="detalhe-secao">
+            <div class="detalhe-secao-titulo">📊 Estado da Encomenda</div>
+            <div class="detalhe-secao-corpo">
+              <div id="progressoAdmin"></div>
+
+              <!-- MUDAR ESTADO -->
+              <div class="mudar-estado-wrap">
+                <label>Alterar Estado</label>
+                <div class="estados-btns" id="estadosBtns"></div>
+              </div>
+
+              <!-- NOTA -->
+              <div class="nota-wrap">
+                <label style="font-size:12px; font-weight:700; color:var(--cinza); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">
+                  Nota interna (opcional)
+                </label>
+                <textarea id="notaEstado" placeholder="Ex: Cliente confirmou pagamento via WhatsApp às 14h..."></textarea>
+                <div style="margin-top:8px;">
+                  <button class="btn-admin btn-admin-rosa" onclick="guardarEstado()" id="btnGuardarEstado">
+                    💾 Guardar Alteração
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PRODUTOS -->
+          <div class="detalhe-secao">
+            <div class="detalhe-secao-titulo">🛍️ Produtos da Encomenda</div>
+            <div class="detalhe-secao-corpo" id="detalheItens">
+              <p style="color:var(--cinza); font-size:13px;">A carregar...</p>
+            </div>
+          </div>
+
+          <!-- HISTÓRICO -->
+          <div class="detalhe-secao">
+            <div class="detalhe-secao-titulo">📋 Histórico de Estados</div>
+            <div class="detalhe-secao-corpo" id="detalheHistorico">
+              <p style="color:var(--cinza); font-size:13px;">A carregar...</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COLUNA LATERAL -->
+        <div class="resumo-lateral-admin">
+
+          <!-- RESUMO FINANCEIRO -->
+          <div class="detalhe-secao">
+            <div class="detalhe-secao-titulo">💰 Resumo Financeiro</div>
+            <div class="detalhe-secao-corpo" id="detalheResumo">
+              <p style="color:var(--cinza); font-size:13px;">A carregar...</p>
+            </div>
+          </div>
+
+          <!-- DADOS DO CLIENTE -->
+          <div class="detalhe-secao">
+            <div class="detalhe-secao-titulo">👤 Cliente</div>
+            <div class="detalhe-secao-corpo" id="detalheCliente">
+              <p style="color:var(--cinza); font-size:13px;">A carregar...</p>
+            </div>
+          </div>
+
+          <!-- DADOS DE ENTREGA -->
+          <div class="detalhe-secao">
+            <div class="detalhe-secao-titulo">📍 Dados de Entrega</div>
+            <div class="detalhe-secao-corpo" id="detalheEntrega">
+              <p style="color:var(--cinza); font-size:13px;">A carregar...</p>
+            </div>
+          </div>
+
+          <!-- ACÇÕES RÁPIDAS -->
+          <div class="detalhe-secao">
+            <div class="detalhe-secao-titulo">⚡ Acções Rápidas</div>
+            <div class="detalhe-secao-corpo" id="detalheAcoes"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="admin-nav.js"></script>
+<script>
+
+  let todasEncomendas = [];
+  let filtroActivo = 'todas';
+  let encomendaActual = null;
+  let estadoSeleccionado = '';
+
+  const ORDEM_ESTADOS = [
+    'pending', 'awaiting_payment', 'paid', 'preparing', 'shipped', 'delivered'
+  ];
+
+  const INFO_ESTADOS = {
+    pending:           { icone: '📋', label: 'Recebida',          cor: 'status-draft' },
+    awaiting_payment:  { icone: '💳', label: 'Aguarda Pagamento', cor: 'status-awaiting' },
+    paid:              { icone: '✅', label: 'Pago',              cor: 'status-paid' },
+    preparing:         { icone: '🔧', label: 'Em Preparação',     cor: 'status-preparing' },
+    shipped:           { icone: '🚚', label: 'Enviado',           cor: 'status-shipped' },
+    delivered:         { icone: '🏠', label: 'Entregue',          cor: 'status-delivered' },
+    cancelled:         { icone: '❌', label: 'Cancelado',         cor: 'status-cancelled' }
+  };
+
+  async function iniciar() {
+    const ok = await verificarAdmin();
+    if (!ok) return;
+    carregarAdminNav('encomendas');
+    await carregarEncomendas();
+
+    const params = new URLSearchParams(window.location.search);
+    const idAbrir = params.get('id');
+    if (idAbrir) abrirDetalhe(idAbrir);
+  }
+
+  async function carregarEncomendas() {
+    const { data, error } = await db
+      .from('orders')
+      .select(`
+        *,
+        profiles (full_name, phone),
+        order_items (id, quantity, unit_price, availability_type, products(name, image_url)),
+        payments (method, status, amount)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      mostrarErro('msgErroLista', 'Erro ao carregar encomendas.');
+      return;
+    }
+
+    todasEncomendas = data || [];
+    actualizarKPIs();
+    renderTabela();
+  }
+
+  function actualizarKPIs() {
+    document.getElementById('kpiTodas').textContent = todasEncomendas.length;
+    document.getElementById('kpiPendentes').textContent =
+      todasEncomendas.filter(e => ['pending','awaiting_payment'].includes(e.status)).length;
+    document.getElementById('kpiPagas').textContent =
+      todasEncomendas.filter(e => e.status === 'paid').length;
+    const receita = todasEncomendas
+      .filter(e => ['paid','preparing','shipped','delivered'].includes(e.status))
+      .reduce((s, e) => s + (e.total || 0), 0);
+    document.getElementById('kpiReceita').textContent = formatMZN(receita);
+  }
+
+  function filtrar(status, btn) {
+    filtroActivo = status;
+    document.querySelectorAll('.filtro-estado-btn').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    renderTabela();
+  }
+
+  function pesquisar() {
+    renderTabela();
+  }
+
+  function renderTabela() {
+    const pesquisa = document.getElementById('pesquisaEncomenda').value.toLowerCase();
+
+    let lista = filtroActivo === 'todas'
+      ? todasEncomendas
+      : todasEncomendas.filter(e => e.status === filtroActivo);
+
+    if (pesquisa) {
+      lista = lista.filter(e =>
+        e.order_number.toLowerCase().includes(pesquisa) ||
+        e.profiles?.full_name?.toLowerCase().includes(pesquisa)
+      );
+    }
+
+    document.getElementById('totalEncomendas').textContent = `${lista.length} encomenda(s)`;
+
+    const tbody = document.getElementById('tabelaEncomendas');
+
+    if (lista.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="8">
+          <div class="admin-vazio">
+            <span class="icone">🛒</span>
+            <h3>Nenhuma encomenda encontrada</h3>
+          </div>
+        </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = lista.map(e => {
+      const info = INFO_ESTADOS[e.status] || {};
+      const pagamento = e.payments?.[0];
+      const numItens = e.order_items?.length || 0;
+
+      return `
+        <tr style="cursor:pointer" onclick="abrirDetalhe('${e.id}')">
+          <td><strong>${e.order_number}</strong></td>
+          <td>
+            <strong>${e.profiles?.full_name || 'Cliente'}</strong>
+            ${e.profiles?.phone ? `<br><small style="color:var(--cinza)">${e.profiles.phone}</small>` : ''}
+          </td>
+          <td>${numItens} produto(s)</td>
+          <td><strong style="color:var(--rosa)">${formatMZN(e.total)}</strong></td>
+          <td>${pagamento ? traduzirMetodo(pagamento.method) : '—'}</td>
+          <td><span class="status-badge ${info.cor}">${info.icone} ${info.label}</span></td>
+          <td style="white-space:nowrap">${formatData(e.created_at)}</td>
+          <td>
+            <button class="btn-admin btn-admin-outline" onclick="event.stopPropagation(); abrirDetalhe('${e.id}')">
+              Ver →
+            </button>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  async function abrirDetalhe(id) {
+    const { data: encomenda, error } = await db
+      .from('orders')
+      .select(`
+        *,
+        profiles (id, full_name, phone),
+        order_items (id, quantity, unit_price, availability_type, products(id, name, image_url)),
+        payments (method, status, amount),
+        order_status_history (id, old_status, new_status, notes, created_at, profiles(full_name))
+      `)
+      .eq('id', id)
+      .single();
+
+    if (error || !encomenda) {
+      mostrarErro('msgErroLista', 'Erro ao carregar encomenda.');
+      return;
+    }
+
+    encomendaActual = encomenda;
+    estadoSeleccionado = encomenda.status;
+
+    document.getElementById('detalheTitulo').textContent = `🛒 ${encomenda.order_number}`;
+
+    renderDetalheProgresso(encomenda);
+    renderDetalheItens(encomenda);
+    renderDetalheResumo(encomenda);
+    renderDetalheCliente(encomenda);
+    renderDetalheEntrega(encomenda);
+    renderDetalheHistorico(encomenda);
+    renderDetalheAcoes(encomenda);
+
+    mostrarVista('vistaDetalhe');
+  }
+
+  function renderDetalheProgresso(encomenda) {
+    const isCancelada = encomenda.status === 'cancelled';
+    const idxActual = ORDEM_ESTADOS.indexOf(encomenda.status);
+
+    // Barra de progresso
+    const etapasProgresso = [
+      { key: 'pending', icone: '📋', label: 'Recebida' },
+      { key: 'awaiting_payment', icone: '💳', label: 'Aguarda\nPagamento' },
+      { key: 'paid', icone: '✅', label: 'Pago' },
+      { key: 'preparing', icone: '🔧', label: 'Em\nPreparação' },
+      { key: 'shipped', icone: '🚚', label: 'Enviado' },
+      { key: 'delivered', icone: '🏠', label: 'Entregue' }
+    ];
+
+    let htmlProgresso = `<div class="progresso-admin">`;
+    etapasProgresso.forEach((etapa, idx) => {
+      const idxEtapa = ORDEM_ESTADOS.indexOf(etapa.key);
+      const concluida = idxEtapa < idxActual;
+      const actual = idxEtapa === idxActual && !isCancelada;
+      htmlProgresso += `
+        <div class="prog-etapa ${concluida ? 'concluida' : actual ? 'actual' : isCancelada ? 'cancelada' : ''}">
+          <div class="prog-circulo">${concluida ? '✓' : etapa.icone}</div>
+          <div class="prog-label">${etapa.label}</div>
+        </div>`;
+    });
+    htmlProgresso += `</div>`;
+
+    // Botões de estado
+    const todosEstados = [...ORDEM_ESTADOS, 'cancelled'];
+    let htmlEstados = '';
+    todosEstados.forEach(estado => {
+      const info = INFO_ESTADOS[estado] || {};
+      const isActual = estado === encomenda.status;
+      const idxE = ORDEM_ESTADOS.indexOf(estado);
+      const isProximo = !isCancelada && idxE === idxActual + 1;
+
+      htmlEstados += `
+        <button class="estado-btn ${isActual ? 'actual' : isProximo ? 'proximo' : ''}"
+          onclick="seleccionarEstado('${estado}')"
+          ${isActual ? 'disabled' : ''}>
+          ${info.icone} ${info.label}
+          ${isProximo ? ' ←' : ''}
+        </button>`;
+    });
+
+    document.getElementById('progressoAdmin').innerHTML = htmlProgresso;
+    document.getElementById('estadosBtns').innerHTML = htmlEstados;
+  }
+
+  function seleccionarEstado(estado) {
+    estadoSeleccionado = estado;
+    document.querySelectorAll('.estado-btn').forEach(btn => btn.classList.remove('seleccionado-temp'));
+    event.target.style.background = '#FFF3F8';
+    event.target.style.borderColor = 'var(--rosa)';
+  }
+
+  async function guardarEstado() {
+    if (!encomendaActual || !estadoSeleccionado) return;
+    if (estadoSeleccionado === encomendaActual.status) {
+      mostrarErro('msgErroDetalhe', 'Selecciona um estado diferente do actual.');
+      return;
+    }
+
+    const btn = document.getElementById('btnGuardarEstado');
+    btn.disabled = true;
+    btn.textContent = 'A guardar...';
+
+    esconderMensagem('msgErroDetalhe');
+    esconderMensagem('msgSucessoDetalhe');
+
+    const nota = document.getElementById('notaEstado').value.trim();
+    const { data: { session } } = await db.auth.getSession();
+
+    const { error } = await db
+      .from('orders')
+      .update({
+        status: estadoSeleccionado,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', encomendaActual.id);
+
+    if (error) {
+      mostrarErro('msgErroDetalhe', 'Erro ao actualizar estado.');
+      btn.disabled = false;
+      btn.textContent = '💾 Guardar Alteração';
+      return;
+    }
+
+    // Registar no histórico
+    await db.from('order_status_history').insert({
+      order_id: encomendaActual.id,
+      old_status: encomendaActual.status,
+      new_status: estadoSeleccionado,
+      changed_by: session.user.id,
+      notes: nota || null
+    });
+
+    // Se passou para pago, actualizar pagamento
+    if (estadoSeleccionado === 'paid' && encomendaActual.payments?.[0]) {
+      await db.from('payments')
+        .update({
+          status: 'approved',
+          approved_at: new Date().toISOString(),
+          approved_by: session.user.id
+        })
+        .eq('order_id', encomendaActual.id);
+    }
+
+    mostrarSucesso('msgSucessoDetalhe', `✅ Estado alterado para "${INFO_ESTADOS[estadoSeleccionado]?.label}" com sucesso!`);
+    document.getElementById('notaEstado').value = '';
+    btn.disabled = false;
+    btn.textContent = '💾 Guardar Alteração';
+
+    await carregarEncomendas();
+    await abrirDetalhe(encomendaActual.id);
+  }
+
+  function renderDetalheItens(encomenda) {
+    const itens = encomenda.order_items || [];
+    if (itens.length === 0) {
+      document.getElementById('detalheItens').innerHTML =
+        '<p style="color:var(--cinza);font-size:13px;">Nenhum produto registado.</p>';
+      return;
+    }
+
+    document.getElementById('detalheItens').innerHTML = itens.map(item => `
+      <div class="admin-item-encomenda">
+        ${item.products?.image_url
+          ? `<img src="${item.products.image_url}" class="admin-item-img" alt="${item.products?.name || ''}"
+               onerror="this.style.display='none'">`
+          : `<div class="admin-item-sem-img">👗</div>`}
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:13px; font-weight:600; color:var(--preto); margin-bottom:4px;">
+            ${item.products?.name || 'Produto removido'}
+          </div>
+          <div style="font-size:12px; color:var(--cinza);">
+            Qtd: ${item.quantity} × ${formatMZN(item.unit_price)}
+          </div>
+          <span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; display:inline-block; margin-top:4px;
+            ${item.availability_type === 'pre_order'
+              ? 'background:#DBEAFE; color:#2563EB;'
+              : 'background:#DCFCE7; color:#16A34A;'}">
+            ${item.availability_type === 'pre_order' ? '📦 Por Encomenda' : '✅ Em Stock'}
+          </span>
+        </div>
+        <div style="font-size:14px; font-weight:700; color:var(--rosa); flex-shrink:0;">
+          ${formatMZN(item.unit_price * item.quantity)}
+        </div>
+      </div>`).join('');
+  }
+
+  function renderDetalheResumo(encomenda) {
+    const pagamento = encomenda.payments?.[0];
+    document.getElementById('detalheResumo').innerHTML = `
+      <div class="dados-linha">
+        <span class="label">Subtotal</span>
+        <span class="valor">${formatMZN(encomenda.subtotal)}</span>
+      </div>
+      ${encomenda.discount > 0 ? `
+      <div class="dados-linha">
+        <span class="label">Desconto</span>
+        <span class="valor" style="color:#16A34A">− ${formatMZN(encomenda.discount)}</span>
+      </div>` : ''}
+      <div class="dados-linha" style="padding-top:10px; border-top:1px solid #eee; margin-top:4px;">
+        <span class="label" style="font-size:15px; font-weight:800; color:var(--preto);">Total</span>
+        <span class="valor" style="font-size:18px; font-weight:800; color:var(--rosa);">${formatMZN(encomenda.total)}</span>
+      </div>
+      ${pagamento ? `
+      <div style="margin-top:14px; padding-top:14px; border-top:1px solid #eee;">
+        <div class="dados-linha">
+          <span class="label">Método</span>
+          <span class="valor">${traduzirMetodo(pagamento.method)}</span>
+        </div>
+        <div class="dados-linha">
+          <span class="label">Pagamento</span>
+          <span class="valor">
+            <span class="status-badge ${pagamento.status === 'approved' ? 'status-paid' : 'status-awaiting'}">
+              ${pagamento.status === 'approved' ? '✅ Aprovado' : '⏳ Pendente'}
+            </span>
+          </span>
+        </div>
+      </div>` : ''}`;
+  }
+
+  function renderDetalheCliente(encomenda) {
+    const cliente = encomenda.profiles;
+    document.getElementById('detalheCliente').innerHTML = `
+      <div class="dados-linha">
+        <span class="label">Nome</span>
+        <span class="valor"><strong>${cliente?.full_name || 'Desconhecido'}</strong></span>
+      </div>
+      <div class="dados-linha">
+        <span class="label">Telefone</span>
+        <span class="valor">${cliente?.phone || '—'}</span>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+        ${cliente?.phone ? `
+        <a href="https://wa.me/258${cliente.phone.replace(/\D/g,'')}?text=${encodeURIComponent('Olá! Estamos a contactar sobre a vossa encomenda ' + encomenda.order_number + '.')}"
+           target="_blank" class="btn-admin btn-admin-verde"
+           style="background:#25D366; color:white; border:none; font-size:12px;">
+          💬 WhatsApp
+        </a>` : ''}
+        <a href="admin-clientes.html" class="btn-admin btn-admin-outline" style="font-size:12px;">
+          👤 Ver Perfil
+        </a>
+      </div>`;
+  }
+
+  function renderDetalheEntrega(encomenda) {
+    const morada = encomenda.shipping_address || {};
+    document.getElementById('detalheEntrega').innerHTML = `
+      <div class="dados-linha">
+        <span class="label">Nome</span>
+        <span class="valor">${morada.nome || '—'}</span>
+      </div>
+      <div class="dados-linha">
+        <span class="label">Telefone</span>
+        <span class="valor">${morada.telefone || '—'}</span>
+      </div>
+      <div class="dados-linha">
+        <span class="label">Bairro</span>
+        <span class="valor">${morada.bairro || '—'}</span>
+      </div>
+      <div class="dados-linha">
+        <span class="label">Cidade</span>
+        <span class="valor">${morada.cidade || '—'}</span>
+      </div>
+      <div class="dados-linha">
+        <span class="label">Província</span>
+        <span class="valor">${morada.provincia || '—'}</span>
+      </div>
+      ${morada.notas ? `
+      <div class="dados-linha">
+        <span class="label">Notas</span>
+        <span class="valor" style="font-style:italic; color:var(--cinza-escuro);">${morada.notas}</span>
+      </div>` : ''}`;
+  }
+
+  function renderDetalheHistorico(encomenda) {
+    const historico = (encomenda.order_status_history || [])
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    if (historico.length === 0) {
+      document.getElementById('detalheHistorico').innerHTML =
+        '<p style="color:var(--cinza);font-size:13px;">Sem histórico disponível.</p>';
+      return;
+    }
+
+    document.getElementById('detalheHistorico').innerHTML = historico.map(h => {
+      const info = INFO_ESTADOS[h.new_status] || {};
+      return `
+        <div style="display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:1px solid #F5F5F5;">
+          <div style="width:32px; height:32px; border-radius:50%; background:var(--cinza-claro); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;">
+            ${info.icone || '📋'}
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:600; color:var(--preto);">
+              ${h.old_status ? `${INFO_ESTADOS[h.old_status]?.label || h.old_status} → ` : ''}${info.label || h.new_status}
+            </div>
+            ${h.notes ? `<div style="font-size:12px; color:var(--cinza); margin-top:2px; font-style:italic;">${h.notes}</div>` : ''}
+            <div style="font-size:11px; color:var(--cinza); margin-top:4px;">
+              ${formatData(h.created_at)}
+              ${h.profiles?.full_name ? '· ' + h.profiles.full_name : ''}
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderDetalheAcoes(encomenda) {
+    const morada = encomenda.shipping_address || {};
+    const whatsappMsg = encodeURIComponent(
+      `Olá ${morada.nome || ''}! 👋\n\n` +
+      `Estamos a contactar sobre a vossa encomenda *${encomenda.order_number}*.\n\n` +
+      `Estado actual: *${INFO_ESTADOS[encomenda.status]?.label || encomenda.status}*\n\n` +
+      `Qualquer dúvida, estamos aqui! 😊`
+    );
+
+    document.getElementById('detalheAcoes').innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${morada.telefone ? `
+        <a href="https://wa.me/258${morada.telefone.replace(/\D/g,'')}?text=${whatsappMsg}"
+           target="_blank" class="btn-admin btn-admin-outline"
+           style="text-align:center; justify-content:center; display:flex; align-items:center; gap:6px;">
+          💬 Notificar Cliente (WhatsApp)
+        </a>` : ''}
+        ${encomenda.status !== 'cancelled' && encomenda.status !== 'delivered' ? `
+        <button class="btn-admin btn-admin-vermelho"
+          style="width:100%; justify-content:center;"
+          onclick="cancelarEncomenda('${encomenda.id}')">
+          ❌ Cancelar Encomenda
+        </button>` : ''}
+      </div>`;
+  }
+
+  async function cancelarEncomenda(id) {
+    if (!confirm('Cancelar esta encomenda? Esta acção não pode ser desfeita.')) return;
+
+    const { data: { session } } = await db.auth.getSession();
+    const nota = prompt('Motivo do cancelamento (opcional):') || 'Cancelado pelo administrador';
+
+    await db.from('orders').update({ status: 'cancelled', updated_at: new Date().toISOString() }).eq('id', id);
+    await db.from('order_status_history').insert({
+      order_id: id,
+      old_status: encomendaActual.status,
+      new_status: 'cancelled',
+      changed_by: session.user.id,
+      notes: nota
+    });
+
+    mostrarSucesso('msgSucessoDetalhe', '✅ Encomenda cancelada.');
+    await carregarEncomendas();
+    await abrirDetalhe(id);
+  }
+
+  function traduzirMetodo(metodo) {
+    const map = { mpesa: 'M-Pesa', emola: 'e-Mola', bank_transfer: 'Transferência', cash: 'Dinheiro' };
+    return map[metodo] || metodo;
+  }
+
+  function mostrarVista(vistaId) {
+    document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
+    document.getElementById(vistaId).classList.add('activa');
+    window.scrollTo(0, 0);
+  }
+
+  function voltarLista() {
+    encomendaActual = null;
+    mostrarVista('vistaLista');
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>
