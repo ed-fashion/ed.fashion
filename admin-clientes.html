@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clientes — E'D Fashion Admin</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .vista { display: none; }
+    .vista.activa { display: block; }
+
+    .cliente-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--rosa-claro);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--rosa);
+      flex-shrink: 0;
+    }
+
+    .cliente-avatar.grande {
+      width: 72px;
+      height: 72px;
+      font-size: 28px;
+    }
+
+    .detalhe-secao {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .detalhe-secao-titulo {
+      padding: 14px 20px;
+      border-bottom: 1px solid #F0F2F5;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--preto);
+    }
+
+    .detalhe-secao-corpo { padding: 20px; }
+
+    .detalhe-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .dados-linha {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .dados-linha .label {
+      font-weight: 700;
+      color: var(--cinza);
+      min-width: 100px;
+      flex-shrink: 0;
+    }
+
+    .dados-linha .valor { color: var(--preto); }
+
+    .stat-card {
+      background: var(--cinza-claro);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-valor {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--preto);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--cinza);
+      margin-top: 4px;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .role-admin { background: #FEF3C7; color: #D97706; }
+    .role-employee { background: #DBEAFE; color: #2563EB; }
+    .role-customer { background: var(--rosa-claro); color: var(--rosa); }
+
+    @media (max-width: 768px) {
+      .detalhe-grid { grid-template-columns: 1fr; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <div id="adminNav"></div>
+
+  <div class="admin-conteudo">
+
+    <!-- VISTA: LISTA -->
+    <div class="vista activa" id="vistaLista">
+
+      <div class="admin-page-titulo">👥 Clientes</div>
+
+      <div class="msg-erro" id="msgErroLista"></div>
+
+      <!-- KPIs -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:16px; margin-bottom:24px;">
+        <div class="kpi-card">
+          <div class="kpi-icone azul">👥</div>
+          <div class="kpi-info">
+            <div class="kpi-valor" id="kpiTotal">—</div>
+            <div class="kpi-label">Total de Clientes</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icone verde">🆕</div>
+          <div class="kpi-info">
+            <div class="kpi-valor" id="kpiNovos">—</div>
+            <div class="kpi-label">Novos este Mês</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icone rosa">🛒</div>
+          <div class="kpi-info">
+            <div class="kpi-valor" id="kpiComCompras">—</div>
+            <div class="kpi-label">Com Encomendas</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pesquisa -->
+      <div style="margin-bottom:16px;">
+        <input type="text" id="pesquisaCliente"
+          placeholder="🔍 Pesquisar por nome, email ou telefone..."
+          oninput="pesquisar()"
+          style="width:100%; padding:10px 14px; border:1.5px solid #ddd; border-radius:8px; font-size:14px; outline:none;">
+      </div>
+
+      <!-- Filtro por role -->
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+        <button class="filtro-estado-btn activo" onclick="filtrar('todos', this)"
+          style="padding:7px 16px; border-radius:20px; border:1.5px solid #ddd; background:var(--rosa); color:white; border-color:var(--rosa); font-size:12px; font-weight:600; cursor:pointer;">
+          Todos
+        </button>
+        <button class="filtro-estado-btn" onclick="filtrar('customer', this)"
+          style="padding:7px 16px; border-radius:20px; border:1.5px solid #ddd; background:white; font-size:12px; font-weight:600; cursor:pointer; color:var(--cinza-escuro);">
+          🛍️ Clientes
+        </button>
+        <button class="filtro-estado-btn" onclick="filtrar('employee', this)"
+          style="padding:7px 16px; border-radius:20px; border:1.5px solid #ddd; background:white; font-size:12px; font-weight:600; cursor:pointer; color:var(--cinza-escuro);">
+          👔 Funcionários
+        </button>
+        <button class="filtro-estado-btn" onclick="filtrar('admin', this)"
+          style="padding:7px 16px; border-radius:20px; border:1.5px solid #ddd; background:white; font-size:12px; font-weight:600; cursor:pointer; color:var(--cinza-escuro);">
+          ⭐ Admins
+        </button>
+      </div>
+
+      <!-- Tabela -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>Lista de Utilizadores</h3>
+          <span id="totalClientes" style="font-size:13px; color:var(--cinza);"></span>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Telefone</th>
+                <th>Perfil</th>
+                <th>Encomendas</th>
+                <th>Total Gasto</th>
+                <th>Registado em</th>
+                <th>Acção</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaClientes">
+              <tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">A carregar...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISTA: DETALHE -->
+    <div class="vista" id="vistaDetalhe">
+
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
+        <button class="btn-admin btn-admin-outline" onclick="voltarLista()">← Voltar</button>
+        <div class="admin-page-titulo" style="margin:0" id="detalheTitulo">Cliente</div>
+      </div>
+
+      <div class="msg-erro" id="msgErroDetalhe"></div>
+      <div class="msg-sucesso" id="msgSucessoDetalhe"></div>
+
+      <div class="detalhe-grid">
+
+        <!-- COLUNA PRINCIPAL -->
+        <div>
+
+          <!-- PERFIL -->
+          <div class="detalhe-secao">
+            <div class="detalhe-secao-titulo">👤 Informações do Cliente</div>
+            <div class="detalhe-secao-corpo">
+              <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+                <div class="cliente-avatar grande" id="detalheAvatar">?</div>
+                <div>
+                  <div style="font-size:20px; font-weight:800; color:var(--preto);" id="detalheNome">—</div>
+                  <div style="font-size:13px; color:var(--cinza); margin-top:4px;" id="detalheEmail">—</div>
+                  <div style="margin-top:8px;" id="detalheBadge"></div>
+                </div>
+              </div>
+
+              <div class="dados-linha">
+                <span class="label">Telefone</span>
+                <span class="valor" id="detalheTelefone">—</span>
+              </div>
+              <div class="dados-linha">
+                <span class="label">Registado</span>
+                <span class="valor" id="detalheData">—</span>
+              </div>
+
+              <!-- Alterar perfil -->
+              <div style="border-top:1px solid #F0F2F5; padding-top:16px; margin-top:8px;">
+                <label style="font-size:12px; font-weight:700; color:var(--cinza); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">
+                  Alterar Perfil de Acesso
+                </label>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                  <select id="novoRole" style="padding:8px 12px; border:1.5px solid #ddd; border-radius:8px; font-size:13px; outline:none;">
+                    <option value="customer">🛍️ Cliente</option>
+                    <option value="employee">👔 Funcionário</option>
+                    <option value="admin">⭐ Administrador</option>
+                  </select>
+                  <button class="btn-admin btn-admin-rosa" onclick="alterarRole()">
+                    Guardar
+                  </button>
+                </div>
+                <div style="font-size:11px; color:var(--cinza); margin-top:6px;">
+                  ⚠️ Funcionários e Admins têm acesso ao painel de gestão.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ENCOMENDAS DO CLIENTE -->
+          <div class="detalhe-secao">
+            <div class="detalhe-secao-titulo">📦 Encomendas</div>
+            <div class="detalhe-secao-corpo" id="detalheEncomendas">
+              <p style="color:var(--cinza); font-size:13px;">A carregar...</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COLUNA LATERAL -->
+        <div>
+
+          <!-- ESTATÍSTICAS -->
+          <div class="detalhe-secao">
+            <div class="detalhe-secao-titulo">📊 Estatísticas</div>
+            <div class="detalhe-secao-corpo">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div class="stat-card">
+                  <span class="stat-valor" id="statEncomendas">—</span>
+                  <div class="stat-label">Encomendas</div>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-valor" id="statEntregues">—</span>
+                  <div class="stat-label">Entregues</div>
+                </div>
+                <div class="stat-card" style="grid-column:span 2;">
+                  <span class="stat-valor" style="color:var(--rosa)" id="statGasto">—</span>
+                  <div class="stat-label">Total Gasto</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACÇÕES -->
+          <div class="detalhe-secao">
+            <div class="detalhe-secao-titulo">⚡ Acções</div>
+            <div class="detalhe-secao-corpo" id="detalheAcoes"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="admin-nav.js"></script>
+<script>
+
+  let todosClientes = [];
+  let filtroActivo = 'todos';
+  let clienteActual = null;
+
+  async function iniciar() {
+    const ok = await verificarAdmin();
+    if (!ok) return;
+    carregarAdminNav('clientes');
+    await carregarClientes();
+  }
+
+  async function carregarClientes() {
+    const { data: perfis, error } = await db
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      mostrarErro('msgErroLista', 'Erro ao carregar clientes.');
+      return;
+    }
+
+    // Carregar estatísticas de encomendas
+    const { data: encomendas } = await db
+      .from('orders')
+      .select('user_id, status, total');
+
+    todosClientes = (perfis || []).map(p => {
+      const encomendasCliente = (encomendas || []).filter(e => e.user_id === p.id);
+      const totalGasto = encomendasCliente
+        .filter(e => ['paid','preparing','shipped','delivered'].includes(e.status))
+        .reduce((s, e) => s + (e.total || 0), 0);
+
+      return { ...p, numEncomendas: encomendasCliente.length, totalGasto };
+    });
+
+    actualizarKPIs();
+    renderTabela();
+  }
+
+  function actualizarKPIs() {
+    const agora = new Date();
+    const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
+
+    document.getElementById('kpiTotal').textContent =
+      todosClientes.filter(c => c.role === 'customer').length;
+
+    document.getElementById('kpiNovos').textContent =
+      todosClientes.filter(c => c.role === 'customer' && new Date(c.created_at) >= inicioMes).length;
+
+    document.getElementById('kpiComCompras').textContent =
+      todosClientes.filter(c => c.role === 'customer' && c.numEncomendas > 0).length;
+  }
+
+  function filtrar(role, btn) {
+    filtroActivo = role;
+    document.querySelectorAll('[onclick^="filtrar"]').forEach(b => {
+      b.style.background = 'white';
+      b.style.color = 'var(--cinza-escuro)';
+      b.style.borderColor = '#ddd';
+    });
+    btn.style.background = 'var(--rosa)';
+    btn.style.color = 'white';
+    btn.style.borderColor = 'var(--rosa)';
+    renderTabela();
+  }
+
+  function pesquisar() { renderTabela(); }
+
+  function renderTabela() {
+    const pesquisa = document.getElementById('pesquisaCliente').value.toLowerCase();
+
+    let lista = filtroActivo === 'todos'
+      ? todosClientes
+      : todosClientes.filter(c => c.role === filtroActivo);
+
+    if (pesquisa) {
+      lista = lista.filter(c =>
+        c.full_name?.toLowerCase().includes(pesquisa) ||
+        c.phone?.toLowerCase().includes(pesquisa)
+      );
+    }
+
+    document.getElementById('totalClientes').textContent = `${lista.length} utilizador(es)`;
+
+    const tbody = document.getElementById('tabelaClientes');
+
+    if (lista.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="7">
+          <div class="admin-vazio">
+            <span class="icone">👥</span>
+            <h3>Nenhum cliente encontrado</h3>
+          </div>
+        </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = lista.map(c => `
+      <tr style="cursor:pointer" onclick="abrirDetalhe('${c.id}')">
+        <td>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="cliente-avatar">${(c.full_name || '?').charAt(0).toUpperCase()}</div>
+            <div>
+              <strong>${c.full_name || 'Sem nome'}</strong>
+            </div>
+          </div>
+        </td>
+        <td>${c.phone || '—'}</td>
+        <td>${badgeRole(c.role)}</td>
+        <td>
+          <strong style="color:${c.numEncomendas > 0 ? 'var(--rosa)' : 'var(--cinza)'}">
+            ${c.numEncomendas}
+          </strong>
+        </td>
+        <td><strong>${formatMZN(c.totalGasto)}</strong></td>
+        <td style="white-space:nowrap">${formatData(c.created_at)}</td>
+        <td>
+          <button class="btn-admin btn-admin-outline"
+            onclick="event.stopPropagation(); abrirDetalhe('${c.id}')">
+            Ver →
+          </button>
+        </td>
+      </tr>`).join('');
+  }
+
+  async function abrirDetalhe(id) {
+    const cliente = todosClientes.find(c => c.id === id);
+    if (!cliente) return;
+
+    clienteActual = cliente;
+
+    // Carregar encomendas do cliente
+    const { data: encomendas } = await db
+      .from('orders')
+      .select('*, order_items(id)')
+      .eq('user_id', id)
+      .order('created_at', { ascending: false });
+
+    const listaEncomendas = encomendas || [];
+    const totalGasto = listaEncomendas
+      .filter(e => ['paid','preparing','shipped','delivered'].includes(e.status))
+      .reduce((s, e) => s + (e.total || 0), 0);
+    const entregues = listaEncomendas.filter(e => e.status === 'delivered').length;
+
+    // Preencher cabeçalho
+    document.getElementById('detalheTitulo').textContent = `👤 ${cliente.full_name || 'Cliente'}`;
+    document.getElementById('detalheAvatar').textContent = (cliente.full_name || '?').charAt(0).toUpperCase();
+    document.getElementById('detalheNome').textContent = cliente.full_name || 'Sem nome';
+    document.getElementById('detalheEmail').textContent = '— email não disponível —';
+    document.getElementById('detalheTelefone').textContent = cliente.phone || '—';
+    document.getElementById('detalheData').textContent = formatData(cliente.created_at);
+    document.getElementById('detalheBadge').innerHTML = badgeRole(cliente.role);
+    document.getElementById('novoRole').value = cliente.role;
+
+    // Estatísticas
+    document.getElementById('statEncomendas').textContent = listaEncomendas.length;
+    document.getElementById('statEntregues').textContent = entregues;
+    document.getElementById('statGasto').textContent = formatMZN(totalGasto);
+
+    // Encomendas
+    renderEncomendasCliente(listaEncomendas);
+
+    // Acções
+    document.getElementById('detalheAcoes').innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${cliente.phone ? `
+        <a href="https://wa.me/258${cliente.phone.replace(/\D/g,'')}?text=${encodeURIComponent('Olá ' + (cliente.full_name?.split(' ')[0] || '') + '! 👋 É a E\'D Fashion.')}"
+           target="_blank" class="btn-admin btn-admin-outline"
+           style="text-align:center; justify-content:center; display:flex; align-items:center; gap:6px;">
+          💬 Contactar via WhatsApp
+        </a>` : ''}
+        <a href="admin-encomendas.html" class="btn-admin btn-admin-outline"
+           style="text-align:center; justify-content:center; display:flex; align-items:center; gap:6px;">
+          📦 Ver Todas as Encomendas
+        </a>
+      </div>`;
+
+    mostrarVista('vistaDetalhe');
+  }
+
+  function renderEncomendasCliente(encomendas) {
+    const container = document.getElementById('detalheEncomendas');
+
+    if (encomendas.length === 0) {
+      container.innerHTML = `
+        <div style="text-align:center; padding:30px; color:var(--cinza);">
+          <span style="font-size:40px; display:block; margin-bottom:8px;">🛒</span>
+          <p>Este cliente ainda não fez nenhuma encomenda.</p>
+        </div>`;
+      return;
+    }
+
+    const statusMap = {
+      pending:           ['status-draft',     '📋 Recebida'],
+      awaiting_payment:  ['status-awaiting',  '💳 Aguarda Pagamento'],
+      paid:              ['status-paid',      '✅ Pago'],
+      preparing:         ['status-preparing', '🔧 Em Preparação'],
+      shipped:           ['status-shipped',   '🚚 Enviado'],
+      delivered:         ['status-delivered', '🏠 Entregue'],
+      cancelled:         ['status-cancelled', '❌ Cancelado']
+    };
+
+    container.innerHTML = encomendas.map(e => {
+      const [cls, label] = statusMap[e.status] || ['status-draft', e.status];
+      return `
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid #F0F2F5; gap:12px; flex-wrap:wrap;">
+          <div>
+            <strong style="font-size:14px;">${e.order_number}</strong>
+            <div style="font-size:12px; color:var(--cinza); margin-top:2px;">${formatData(e.created_at)}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span class="status-badge ${cls}">${label}</span>
+            <strong style="color:var(--rosa);">${formatMZN(e.total)}</strong>
+            <a href="admin-encomendas.html?id=${e.id}" class="btn-admin btn-admin-outline" style="font-size:12px;">
+              Ver →
+            </a>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function alterarRole() {
+    if (!clienteActual) return;
+    const novoRole = document.getElementById('novoRole').value;
+
+    if (novoRole === clienteActual.role) {
+      mostrarErro('msgErroDetalhe', 'Selecciona um perfil diferente do actual.');
+      return;
+    }
+
+    const confirmacao = confirm(
+      `Alterar o perfil de "${clienteActual.full_name}" para "${traduzirRole(novoRole)}"?\n\n` +
+      (novoRole !== 'customer' ? '⚠️ Este utilizador terá acesso ao painel de gestão.' : '')
+    );
+
+    if (!confirmacao) return;
+
+    const { error } = await db
+      .from('profiles')
+      .update({ role: novoRole })
+      .eq('id', clienteActual.id);
+
+    if (error) {
+      mostrarErro('msgErroDetalhe', 'Erro ao alterar perfil.');
+      return;
+    }
+
+    mostrarSucesso('msgSucessoDetalhe', `✅ Perfil alterado para ${traduzirRole(novoRole)} com sucesso!`);
+    clienteActual.role = novoRole;
+    document.getElementById('detalheBadge').innerHTML = badgeRole(novoRole);
+    await carregarClientes();
+  }
+
+  function badgeRole(role) {
+    const map = {
+      admin:    ['role-admin',    '⭐ Administrador'],
+      employee: ['role-employee', '👔 Funcionário'],
+      customer: ['role-customer', '🛍️ Cliente']
+    };
+    const [cls, label] = map[role] || ['role-customer', role];
+    return `<span class="role-badge ${cls}">${label}</span>`;
+  }
+
+  function traduzirRole(role) {
+    const map = { admin: 'Administrador', employee: 'Funcionário', customer: 'Cliente' };
+    return map[role] || role;
+  }
+
+  function mostrarVista(vistaId) {
+    document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
+    document.getElementById(vistaId).classList.add('activa');
+    window.scrollTo(0, 0);
+  }
+
+  function voltarLista() {
+    clienteActual = null;
+    mostrarVista('vistaLista');
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>
