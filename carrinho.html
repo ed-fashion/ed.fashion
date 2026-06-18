@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrinho — E'D Fashion</title>
+  <link rel="stylesheet" href="main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .carrinho-layout {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .carrinho-titulo {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--preto);
+      margin-bottom: 20px;
+    }
+
+    /* ITENS */
+    .carrinho-itens {
+      background: white;
+      border-radius: 14px;
+      box-shadow: var(--sombra);
+      overflow: hidden;
+    }
+
+    .carrinho-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #F0F2F5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .carrinho-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--preto);
+    }
+
+    .limpar-carrinho {
+      font-size: 12px;
+      color: var(--cinza);
+      cursor: pointer;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .limpar-carrinho:hover { color: #DC2626; }
+
+    .carrinho-item {
+      display: flex;
+      gap: 16px;
+      padding: 20px 24px;
+      border-bottom: 1px solid #F0F2F5;
+      align-items: center;
+      transition: background 0.2s;
+    }
+
+    .carrinho-item:last-child { border-bottom: none; }
+    .carrinho-item:hover { background: #FAFAFA; }
+
+    .item-imagem {
+      width: 80px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: var(--cinza-claro);
+      flex-shrink: 0;
+    }
+
+    .item-sem-imagem {
+      width: 80px;
+      height: 100px;
+      background: var(--cinza-claro);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+
+    .item-info { flex: 1; min-width: 0; }
+
+    .item-nome {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--preto);
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .item-tipo {
+      font-size: 11px;
+      color: var(--cinza);
+      margin-bottom: 10px;
+    }
+
+    .item-tipo.encomenda { color: var(--verde); font-weight: 600; }
+
+    .item-preco {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--rosa);
+    }
+
+    .item-controlo {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .quantidade-controlo {
+      display: flex;
+      align-items: center;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .qtd-btn {
+      width: 32px;
+      height: 32px;
+      background: var(--cinza-claro);
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      color: var(--preto);
+    }
+
+    .qtd-btn:hover { background: #ddd; }
+
+    .qtd-valor {
+      width: 40px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--preto);
+      border: none;
+      outline: none;
+      background: white;
+    }
+
+    .item-remover {
+      background: none;
+      border: none;
+      color: var(--cinza);
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s;
+      padding: 4px 0;
+    }
+
+    .item-remover:hover { color: #DC2626; }
+
+    .item-subtotal {
+      font-size: 13px;
+      color: var(--cinza);
+      text-align: right;
+    }
+
+    /* VAZIO */
+    .carrinho-vazio {
+      background: white;
+      border-radius: 14px;
+      box-shadow: var(--sombra);
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .carrinho-vazio .icone { font-size: 64px; display: block; margin-bottom: 16px; }
+    .carrinho-vazio h3 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .carrinho-vazio p { font-size: 14px; color: var(--cinza); margin-bottom: 24px; }
+
+    /* RESUMO */
+    .carrinho-resumo {
+      background: white;
+      border-radius: 14px;
+      box-shadow: var(--sombra);
+      position: sticky;
+      top: 80px;
+      overflow: hidden;
+    }
+
+    .resumo-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #F0F2F5;
+    }
+
+    .resumo-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--preto);
+    }
+
+    .resumo-corpo { padding: 20px; }
+
+    .resumo-linha {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: var(--cinza-escuro);
+    }
+
+    .resumo-linha.total {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--preto);
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 2px solid #F0F2F5;
+      margin-bottom: 0;
+    }
+
+    .resumo-linha.total span:last-child { color: var(--rosa); }
+
+    .resumo-linha .desconto { color: #16A34A; font-weight: 600; }
+
+    /* CUPÃO */
+    .cupao-wrap {
+      margin-bottom: 20px;
+    }
+
+    .cupao-wrap label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .cupao-input-wrap {
+      display: flex;
+      gap: 0;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .cupao-input-wrap:focus-within { border-color: var(--rosa); }
+
+    .cupao-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      font-family: var(--fonte);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cupao-btn {
+      padding: 10px 16px;
+      background: var(--rosa);
+      color: white;
+      border: none;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .cupao-btn:hover { background: #c4186f; }
+
+    .cupao-aplicado {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #DCFCE7;
+      border: 1px solid #16A34A;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #16A34A;
+      font-weight: 600;
+    }
+
+    .cupao-remover {
+      background: none;
+      border: none;
+      color: #16A34A;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    /* BOTÕES RESUMO */
+    .btn-finalizar {
+      width: 100%;
+      padding: 14px;
+      background: var(--rosa);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-finalizar:hover { background: #c4186f; transform: translateY(-1px); }
+    .btn-finalizar:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+    .btn-continuar {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      color: var(--cinza-escuro);
+      border: 1.5px solid #ddd;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+    }
+
+    .btn-continuar:hover { border-color: var(--rosa); color: var(--rosa); }
+
+    /* MÉTODOS DE PAGAMENTO */
+    .metodos-pagamento {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .metodo-badge {
+      background: var(--cinza-claro);
+      color: var(--cinza);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* RESPONSIVIDADE */
+    @media (max-width: 768px) {
+      .carrinho-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .carrinho-resumo { position: static; }
+
+      .carrinho-item {
+        flex-wrap: wrap;
+        padding: 16px;
+      }
+
+      .item-controlo {
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div style="max-width:1100px; margin:24px auto; padding:0 20px;">
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
+    <a href="catalogo.html" style="color:var(--cinza); font-size:13px; text-decoration:none;">← Continuar a comprar</a>
+  </div>
+  <h1 class="carrinho-titulo">🛒 O Meu Carrinho</h1>
+</div>
+
+<div id="conteudoCarrinho">
+  <div style="text-align:center; padding:60px 20px; color:var(--cinza);">
+    <div style="font-size:40px; margin-bottom:12px;">⏳</div>
+    <p>A carregar carrinho...</p>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="components.js"></script>
+<script>
+
+  let carrinho = [];
+  let cupaoActivo = null;
+  let desconto = 0;
+
+  async function iniciar() {
+    carregarNavbar();
+    carregarFooter();
+    carrinho = JSON.parse(localStorage.getItem('ed_carrinho') || '[]');
+    await sincronizarPrecos();
+    renderCarrinho();
+  }
+
+  // Sincronizar preços com a base de dados
+  async function sincronizarPrecos() {
+    if (carrinho.length === 0) return;
+
+    const ids = carrinho.map(i => i.id);
+    const { data } = await db
+      .from('products')
+      .select('id, name, price, sale_price, image_url, status, availability_type')
+      .in('id', ids);
+
+    if (!data) return;
+
+    carrinho = carrinho.map(item => {
+      const prod = data.find(p => p.id === item.id);
+      if (!prod || prod.status !== 'active') return null;
+      return {
+        ...item,
+        nome: prod.name,
+        preco: prod.sale_price && prod.sale_price < prod.price ? prod.sale_price : prod.price,
+        imagem: prod.image_url || '',
+        tipo: prod.availability_type
+      };
+    }).filter(Boolean);
+
+    guardarCarrinho();
+  }
+
+  function renderCarrinho() {
+    const container = document.getElementById('conteudoCarrinho');
+
+    if (carrinho.length === 0) {
+      container.innerHTML = `
+        <div style="max-width:1100px; margin:0 auto; padding:0 20px;">
+          <div class="carrinho-vazio">
+            <span class="icone">🛒</span>
+            <h3>O teu carrinho está vazio</h3>
+            <p>Ainda não adicionaste nenhum produto ao carrinho.</p>
+            <a href="catalogo.html" class="btn btn-rosa">🛍️ Ver Produtos</a>
+          </div>
+        </div>`;
+      return;
+    }
+
+    const subtotal = calcularSubtotal();
+    const total = subtotal - desconto;
+
+    container.innerHTML = `
+      <div class="carrinho-layout">
+
+        <!-- ITENS -->
+        <div>
+          <div class="carrinho-itens">
+            <div class="carrinho-header">
+              <h3>${carrinho.length} item(s) no carrinho</h3>
+              <span class="limpar-carrinho" onclick="limparCarrinho()">🗑️ Limpar tudo</span>
+            </div>
+            ${carrinho.map((item, idx) => renderItem(item, idx)).join('')}
+          </div>
+        </div>
+
+        <!-- RESUMO -->
+        <div class="carrinho-resumo">
+          <div class="resumo-header">
+            <h3>📋 Resumo do Pedido</h3>
+          </div>
+          <div class="resumo-corpo">
+
+            <!-- Cupão -->
+            <div class="cupao-wrap">
+              <label>Código de Cupão</label>
+              ${cupaoActivo
+                ? `<div class="cupao-aplicado">
+                    <span>✅ ${cupaoActivo.code} — ${cupaoActivo.type === 'percentage' ? cupaoActivo.value + '%' : formatMZN(cupaoActivo.value)} de desconto</span>
+                    <button class="cupao-remover" onclick="removerCupao()">×</button>
+                  </div>`
+                : `<div class="cupao-input-wrap">
+                    <input type="text" class="cupao-input" id="cupaoInput"
+                      placeholder="CÓDIGO" maxlength="20">
+                    <button class="cupao-btn" onclick="aplicarCupao()">Aplicar</button>
+                  </div>`}
+              <div class="msg-erro" id="msgErroCupao" style="margin-top:6px;"></div>
+              <div class="msg-sucesso" id="msgSucessoCupao" style="margin-top:6px;"></div>
+            </div>
+
+            <!-- Linhas de resumo -->
+            <div class="resumo-linha">
+              <span>Subtotal</span>
+              <span>${formatMZN(subtotal)}</span>
+            </div>
+            ${desconto > 0
+              ? `<div class="resumo-linha">
+                  <span>Desconto</span>
+                  <span class="desconto">− ${formatMZN(desconto)}</span>
+                </div>`
+              : ''}
+            <div class="resumo-linha">
+              <span>Entrega</span>
+              <span style="color:var(--verde); font-weight:600;">A combinar</span>
+            </div>
+            <div class="resumo-linha total">
+              <span>Total</span>
+              <span>${formatMZN(total)}</span>
+            </div>
+
+            <div style="margin-top:20px;">
+              <button class="btn-finalizar" onclick="finalizarCompra()" id="btnFinalizar">
+                ✅ Finalizar Compra
+              </button>
+              <a href="catalogo.html" class="btn-continuar">
+                ← Continuar a Comprar
+              </a>
+            </div>
+
+            <div class="metodos-pagamento">
+              <span class="metodo-badge">M-Pesa</span>
+              <span class="metodo-badge">e-Mola</span>
+              <span class="metodo-badge">Transferência</span>
+              <span class="metodo-badge">Dinheiro</span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>`;
+  }
+
+  function renderItem(item, idx) {
+    const subtotalItem = item.preco * item.quantidade;
+    return `
+      <div class="carrinho-item">
+        ${item.imagem
+          ? `<img src="${item.imagem}" class="item-imagem" alt="${item.nome}"
+               onerror="this.style.display='none'">`
+          : `<div class="item-sem-imagem">👗</div>`}
+
+        <div class="item-info">
+          <div class="item-nome">${item.nome}</div>
+          <div class="item-tipo ${item.tipo === 'pre_order' ? 'encomenda' : ''}">
+            ${item.tipo === 'pre_order' ? '📦 Por Encomenda' : '✅ Em Stock'}
+          </div>
+          <div class="item-preco">${formatMZN(item.preco)}</div>
+        </div>
+
+        <div class="item-controlo">
+          <div class="quantidade-controlo">
+            <button class="qtd-btn" onclick="alterarQuantidade(${idx}, -1)">−</button>
+            <span class="qtd-valor">${item.quantidade}</span>
+            <button class="qtd-btn" onclick="alterarQuantidade(${idx}, 1)">+</button>
+          </div>
+          <div class="item-subtotal">
+            Subtotal: <strong>${formatMZN(subtotalItem)}</strong>
+          </div>
+          <button class="item-remover" onclick="removerItem(${idx})">
+            🗑️ Remover
+          </button>
+        </div>
+      </div>`;
+  }
+
+  function alterarQuantidade(idx, delta) {
+    carrinho[idx].quantidade = Math.max(1, carrinho[idx].quantidade + delta);
+    guardarCarrinho();
+    recalcularDesconto();
+    renderCarrinho();
+  }
+
+  function removerItem(idx) {
+    carrinho.splice(idx, 1);
+    guardarCarrinho();
+    if (cupaoActivo) recalcularDesconto();
+    renderCarrinho();
+  }
+
+  function limparCarrinho() {
+    if (!confirm('Tens a certeza que queres limpar o carrinho?')) return;
+    carrinho = [];
+    cupaoActivo = null;
+    desconto = 0;
+    guardarCarrinho();
+    renderCarrinho();
+  }
+
+  function calcularSubtotal() {
+    return carrinho.reduce((sum, item) => sum + item.preco * item.quantidade, 0);
+  }
+
+  function guardarCarrinho() {
+    localStorage.setItem('ed_carrinho', JSON.stringify(carrinho));
+    atualizarContadorCarrinho();
+  }
+
+  // CUPÃO
+  async function aplicarCupao() {
+    const codigo = document.getElementById('cupaoInput')?.value?.trim().toUpperCase();
+    esconderMensagem('msgErroCupao');
+    esconderMensagem('msgSucessoCupao');
+
+    if (!codigo) {
+      mostrarErro('msgErroCupao', 'Introduz um código de cupão.');
+      return;
+    }
+
+    const { data: cupao, error } = await db
+      .from('coupons')
+      .select('*')
+      .eq('code', codigo)
+      .eq('is_active', true)
+      .single();
+
+    if (error || !cupao) {
+      mostrarErro('msgErroCupao', 'Cupão inválido ou expirado.');
+      return;
+    }
+
+    const agora = new Date();
+    if (cupao.valid_until && new Date(cupao.valid_until) < agora) {
+      mostrarErro('msgErroCupao', 'Este cupão já expirou.');
+      return;
+    }
+
+    if (cupao.usage_limit && cupao.used_count >= cupao.usage_limit) {
+      mostrarErro('msgErroCupao', 'Este cupão já atingiu o limite de utilizações.');
+      return;
+    }
+
+    const subtotal = calcularSubtotal();
+    if (cupao.min_order_value && subtotal < cupao.min_order_value) {
+      mostrarErro('msgErroCupao', `Este cupão requer um mínimo de ${formatMZN(cupao.min_order_value)}.`);
+      return;
+    }
+
+    cupaoActivo = cupao;
+    recalcularDesconto();
+    renderCarrinho();
+  }
+
+  function recalcularDesconto() {
+    if (!cupaoActivo) { desconto = 0; return; }
+    const subtotal = calcularSubtotal();
+    if (cupaoActivo.type === 'percentage') {
+      desconto = (subtotal * cupaoActivo.value) / 100;
+    } else {
+      desconto = Math.min(cupaoActivo.value, subtotal);
+    }
+  }
+
+  function removerCupao() {
+    cupaoActivo = null;
+    desconto = 0;
+    renderCarrinho();
+  }
+
+  // FINALIZAR COMPRA
+  async function finalizarCompra() {
+    const { data: { session } } = await db.auth.getSession();
+
+    if (!session) {
+      localStorage.setItem('ed_redirect', 'checkout.html');
+      window.location.href = 'login.html';
+      return;
+    }
+
+    // Guardar cupão no localStorage para o checkout usar
+    if (cupaoActivo) {
+      localStorage.setItem('ed_cupao', JSON.stringify(cupaoActivo));
+    } else {
+      localStorage.removeItem('ed_cupao');
+    }
+
+    window.location.href = 'checkout.html';
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>
