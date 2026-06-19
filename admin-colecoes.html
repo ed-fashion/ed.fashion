@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colecções — E'D Fashion Admin</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .vista { display: none; }
+    .vista.activa { display: block; }
+
+    .colecao-card {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .colecao-card-img {
+      width: 140px;
+      height: 110px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #E91E8C 0%, #8DC63F 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .colecao-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      inset: 0;
+    }
+
+    .colecao-card-corpo {
+      flex: 1;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .colecao-card-titulo { font-size: 16px; font-weight: 800; color: var(--preto); margin-bottom: 4px; }
+    .colecao-card-desc { font-size: 12px; color: var(--cinza); margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .colecao-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--cinza);
+      flex-wrap: wrap;
+    }
+
+    .colecao-card-link {
+      background: var(--cinza-claro);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+
+    .colecao-acoes-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px;
+      justify-content: center;
+      border-left: 1px solid #F0F2F5;
+      flex-shrink: 0;
+    }
+
+    /* FORM */
+    .secao-form {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .secao-form-titulo {
+      padding: 16px 24px;
+      border-bottom: 1px solid #F0F2F5;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--preto);
+    }
+
+    .secao-form-corpo { padding: 24px; }
+
+    .form-grupo { margin-bottom: 16px; }
+
+    .form-grupo label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .form-grupo input,
+    .form-grupo select,
+    .form-grupo textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      font-family: var(--fonte);
+      background: white;
+    }
+
+    .form-grupo input:focus,
+    .form-grupo textarea:focus { border-color: var(--rosa); }
+
+    .upload-area-colecao {
+      border: 2px dashed #ddd;
+      border-radius: 10px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--cinza-claro);
+      margin-bottom: 10px;
+    }
+
+    .upload-area-colecao:hover { border-color: var(--rosa); }
+
+    .imagem-preview-colecao {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    .link-gerado-box {
+      background: var(--rosa-claro);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--rosa);
+      font-weight: 600;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .link-gerado-box code {
+      font-family: monospace;
+      background: white;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+
+    /* SELECTOR DE PRODUTOS */
+    .produtos-selector-busca {
+      margin-bottom: 14px;
+    }
+
+    .produtos-selector-lista {
+      max-height: 320px;
+      overflow-y: auto;
+      border: 1.5px solid #eee;
+      border-radius: 10px;
+    }
+
+    .produto-selector-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid #F5F5F5;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .produto-selector-item:last-child { border-bottom: none; }
+    .produto-selector-item:hover { background: #FAFAFA; }
+    .produto-selector-item.seleccionado { background: var(--rosa-claro); }
+
+    .produto-selector-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--rosa);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .produto-selector-img {
+      width: 36px;
+      height: 45px;
+      object-fit: cover;
+      border-radius: 5px;
+      background: var(--cinza-claro);
+      flex-shrink: 0;
+    }
+
+    .produto-selector-info { flex: 1; min-width: 0; }
+    .produto-selector-nome { font-size: 13px; font-weight: 600; color: var(--preto); }
+    .produto-selector-preco { font-size: 12px; color: var(--rosa); font-weight: 700; }
+
+    .contador-seleccionados {
+      background: var(--preto);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 14px;
+    }
+
+    .form-acoes {
+      display: flex;
+      gap: 12px;
+      padding: 20px 24px;
+      border-top: 1px solid #F0F2F5;
+      background: #FAFAFA;
+    }
+
+    @media (max-width: 768px) {
+      .colecao-card { flex-direction: column; }
+      .colecao-card-img { width: 100%; height: 100px; }
+      .colecao-acoes-col { flex-direction: row; border-left: none; border-top: 1px solid #F0F2F5; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <div id="adminNav"></div>
+
+  <div class="admin-conteudo">
+
+    <!-- VISTA: LISTA -->
+    <div class="vista activa" id="vistaLista">
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+        <div class="admin-page-titulo" style="margin:0">🎯 Colecções</div>
+        <button class="btn-admin btn-admin-rosa" onclick="mostrarFormNovo()">➕ Nova Colecção</button>
+      </div>
+
+      <div class="msg-erro" id="msgErroLista"></div>
+      <div class="msg-sucesso" id="msgSucessoLista"></div>
+
+      <div style="font-size:13px; color:var(--cinza); margin-bottom:20px;">
+        💡 Cria agrupamentos de produtos para campanhas, promoções ou colecções temáticas. Liga um banner a cada colecção.
+      </div>
+
+      <div id="listaColecoes"></div>
+
+    </div>
+
+    <!-- VISTA: FORMULÁRIO -->
+    <div class="vista" id="vistaForm">
+
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
+        <button class="btn-admin btn-admin-outline" onclick="mostrarLista()">← Voltar</button>
+        <div class="admin-page-titulo" style="margin:0" id="formTitulo">➕ Nova Colecção</div>
+      </div>
+
+      <div class="msg-erro" id="msgErroForm"></div>
+      <div class="msg-sucesso" id="msgSucessoForm"></div>
+
+      <input type="hidden" id="colecaoId">
+
+      <!-- INFO -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">📝 Informação da Colecção</div>
+        <div class="secao-form-corpo">
+          <div class="form-grupo">
+            <label>Nome da Colecção *</label>
+            <input type="text" id="colNome" placeholder="Ex: Sexta do Bónus, Combo WhatsApp..." oninput="actualizarLinkPreview()">
+          </div>
+          <div class="form-grupo">
+            <label>Descrição</label>
+            <textarea id="colDescricao" rows="2" placeholder="Breve descrição que aparece no topo da colecção"></textarea>
+          </div>
+          <div class="link-gerado-box" id="linkPreviewBox" style="display:none">
+            <span>🔗 Link desta colecção:</span>
+            <code id="linkPreviewTexto">colecao.html?slug=...</code>
+          </div>
+        </div>
+      </div>
+
+      <!-- IMAGEM -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">🖼️ Imagem de Capa</div>
+        <div class="secao-form-corpo">
+          <img id="imagemPreviewColecao" class="imagem-preview-colecao">
+          <div class="upload-area-colecao" id="uploadAreaColecao" onclick="document.getElementById('inputImagemColecao').click()">
+            <span style="font-size:28px; display:block; margin-bottom:6px;">🖼️</span>
+            <p style="font-size:13px; color:var(--cinza); margin:0;">Clica para enviar uma imagem de capa</p>
+          </div>
+          <input type="file" id="inputImagemColecao" accept="image/*" style="display:none" onchange="previewImagemColecao(event)">
+        </div>
+      </div>
+
+      <!-- PRODUTOS -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">🛍️ Produtos desta Colecção</div>
+        <div class="secao-form-corpo">
+          <div class="contador-seleccionados" id="contadorSeleccionados">0 produtos seleccionados</div>
+
+          <div class="produtos-selector-busca">
+            <input type="text" id="buscaProdutosSelector" placeholder="🔍 Pesquisar produto para adicionar..." oninput="filtrarProdutosSelector()">
+          </div>
+
+          <div class="produtos-selector-lista" id="listaProdutosSelector">
+            <p style="padding:20px; color:var(--cinza); font-size:13px; text-align:center;">A carregar produtos...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTADO -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">⚙️ Estado</div>
+        <div class="secao-form-corpo">
+          <div class="form-grupo">
+            <label>Colecção Activa?</label>
+            <select id="colAtivo">
+              <option value="true">Sim — visível publicamente</option>
+              <option value="false">Não — escondida</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-acoes">
+        <button class="btn-admin btn-admin-rosa" onclick="guardarColecao()" id="btnGuardar">
+          💾 Guardar Colecção
+        </button>
+        <button class="btn-admin btn-admin-outline" onclick="mostrarLista()">
+          Cancelar
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="admin-nav.js"></script>
+<script>
+
+  let todasColecoes = [];
+  let todosProdutosSelector = [];
+  let produtosSeleccionados = new Set();
+  let imagemFicheiroColecao = null;
+  let imagemUrlColecaoActual = '';
+  let slugActual = '';
+
+  async function iniciar() {
+    const ok = await verificarAdmin();
+    if (!ok) return;
+    carregarAdminNav('produtos');
+    await carregarColecoes();
+    await carregarProdutosSelector();
+  }
+
+  async function carregarColecoes() {
+    const { data, error } = await db
+      .from('collections')
+      .select('*, collection_products(id)')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      mostrarErro('msgErroLista', 'Erro ao carregar colecções.');
+      return;
+    }
+
+    todasColecoes = data || [];
+    renderLista();
+  }
+
+  function renderLista() {
+    const container = document.getElementById('listaColecoes');
+
+    if (todasColecoes.length === 0) {
+      container.innerHTML = `
+        <div class="admin-vazio">
+          <span class="icone">🎯</span>
+          <h3>Nenhuma colecção criada ainda</h3>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = todasColecoes.map(c => `
+      <div class="colecao-card">
+        <div class="colecao-card-img">
+          ${c.imagem_capa ? `<img src="${c.imagem_capa}" onerror="this.style.display='none'">` : ''}
+        </div>
+        <div class="colecao-card-corpo">
+          <div class="colecao-card-titulo">${c.nome}</div>
+          <div class="colecao-card-desc">${c.descricao || '—'}</div>
+          <div class="colecao-card-meta">
+            <span class="status-badge ${c.is_active ? 'status-active' : 'status-draft'}">
+              ${c.is_active ? '✅ Activa' : '⏸️ Inactiva'}
+            </span>
+            <span>🛍️ ${c.collection_products?.length || 0} produto(s)</span>
+            <span class="colecao-card-link">colecao.html?slug=${c.slug}</span>
+          </div>
+        </div>
+        <div class="colecao-acoes-col">
+          <button class="btn-admin btn-admin-outline" onclick="editarColecao('${c.id}')">✏️ Editar</button>
+          <button class="btn-admin btn-admin-vermelho" onclick="removerColecao('${c.id}')">🗑️ Remover</button>
+        </div>
+      </div>`).join('');
+  }
+
+  async function carregarProdutosSelector() {
+    const { data } = await db
+      .from('products')
+      .select('id, name, price, image_url')
+      .eq('status', 'active')
+      .order('name');
+
+    todosProdutosSelector = data || [];
+  }
+
+  function renderProdutosSelector() {
+    const pesquisa = document.getElementById('buscaProdutosSelector').value.toLowerCase();
+    const lista = todosProdutosSelector.filter(p => !pesquisa || p.name.toLowerCase().includes(pesquisa));
+
+    const container = document.getElementById('listaProdutosSelector');
+
+    if (lista.length === 0) {
+      container.innerHTML = `<p style="padding:20px; color:var(--cinza); font-size:13px; text-align:center;">Nenhum produto encontrado.</p>`;
+      return;
+    }
+
+    container.innerHTML = lista.map(p => `
+      <div class="produto-selector-item ${produtosSeleccionados.has(p.id) ? 'seleccionado' : ''}" onclick="toggleProdutoSelector('${p.id}')">
+        <input type="checkbox" ${produtosSeleccionados.has(p.id) ? 'checked' : ''} onclick="event.stopPropagation(); toggleProdutoSelector('${p.id}')">
+        ${p.image_url
+          ? `<img src="${p.image_url}" class="produto-selector-img" onerror="this.style.display='none'">`
+          : `<div class="produto-selector-img" style="display:flex;align-items:center;justify-content:center;font-size:16px;">👗</div>`}
+        <div class="produto-selector-info">
+          <div class="produto-selector-nome">${p.name}</div>
+          <div class="produto-selector-preco">${formatMZN(p.price)}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function filtrarProdutosSelector() {
+    renderProdutosSelector();
+  }
+
+  function toggleProdutoSelector(id) {
+    if (produtosSeleccionados.has(id)) {
+      produtosSeleccionados.delete(id);
+    } else {
+      produtosSeleccionados.add(id);
+    }
+    document.getElementById('contadorSeleccionados').textContent =
+      `${produtosSeleccionados.size} produto(s) seleccionado(s)`;
+    renderProdutosSelector();
+  }
+
+  function actualizarLinkPreview() {
+    const nome = document.getElementById('colNome').value.trim();
+    const box = document.getElementById('linkPreviewBox');
+    const texto = document.getElementById('linkPreviewTexto');
+
+    if (!nome) {
+      box.style.display = 'none';
+      return;
+    }
+
+    slugActual = gerarSlug(nome);
+    texto.textContent = `colecao.html?slug=${slugActual}`;
+    box.style.display = 'flex';
+  }
+
+  function mostrarFormNovo() {
+    limparForm();
+    document.getElementById('formTitulo').textContent = '➕ Nova Colecção';
+    renderProdutosSelector();
+    mostrarVista('vistaForm');
+  }
+
+  async function editarColecao(id) {
+    const c = todasColecoes.find(x => x.id === id);
+    if (!c) return;
+
+    limparForm();
+    document.getElementById('formTitulo').textContent = '✏️ Editar Colecção';
+    document.getElementById('colecaoId').value = c.id;
+    document.getElementById('colNome').value = c.nome || '';
+    document.getElementById('colDescricao').value = c.descricao || '';
+    document.getElementById('colAtivo').value = c.is_active ? 'true' : 'false';
+    slugActual = c.slug;
+    actualizarLinkPreview();
+    document.getElementById('colNome').value = c.nome;
+
+    if (c.imagem_capa) {
+      document.getElementById('imagemPreviewColecao').src = c.imagem_capa;
+      document.getElementById('imagemPreviewColecao').style.display = 'block';
+      document.getElementById('uploadAreaColecao').style.display = 'none';
+      imagemUrlColecaoActual = c.imagem_capa;
+    }
+
+    // Carregar produtos já associados
+    const { data: produtosAssociados } = await db
+      .from('collection_products')
+      .select('product_id')
+      .eq('collection_id', c.id);
+
+    produtosSeleccionados = new Set((produtosAssociados || []).map(p => p.product_id));
+    document.getElementById('contadorSeleccionados').textContent =
+      `${produtosSeleccionados.size} produto(s) seleccionado(s)`;
+
+    renderProdutosSelector();
+    mostrarVista('vistaForm');
+  }
+
+  function previewImagemColecao(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('A imagem não pode ter mais de 5 MB.');
+      return;
+    }
+    imagemFicheiroColecao = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('imagemPreviewColecao').src = e.target.result;
+      document.getElementById('imagemPreviewColecao').style.display = 'block';
+      document.getElementById('uploadAreaColecao').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function guardarColecao() {
+    const id = document.getElementById('colecaoId').value;
+    const nome = document.getElementById('colNome').value.trim();
+
+    esconderMensagem('msgErroForm');
+    esconderMensagem('msgSucessoForm');
+
+    if (!nome) {
+      mostrarErro('msgErroForm', 'O nome da colecção é obrigatório.');
+      return;
+    }
+
+    if (produtosSeleccionados.size === 0) {
+      mostrarErro('msgErroForm', 'Selecciona pelo menos um produto.');
+      return;
+    }
+
+    const btn = document.getElementById('btnGuardar');
+    btn.disabled = true;
+    btn.textContent = 'A guardar...';
+
+    let imageUrl = imagemUrlColecaoActual;
+
+    if (imagemFicheiroColecao) {
+      const ext = imagemFicheiroColecao.name.split('.').pop();
+      const nomeFile = `colecao_${Date.now()}.${ext}`;
+
+      const { error: uploadErr } = await db.storage
+        .from('produtos')
+        .upload(nomeFile, imagemFicheiroColecao, { upsert: true });
+
+      if (uploadErr) {
+        mostrarErro('msgErroForm', 'Erro ao enviar imagem.');
+        btn.disabled = false;
+        btn.textContent = '💾 Guardar Colecção';
+        return;
+      }
+
+      const { data: urlData } = db.storage.from('produtos').getPublicUrl(nomeFile);
+      imageUrl = urlData.publicUrl;
+    }
+
+    const dados = {
+      nome,
+      descricao: document.getElementById('colDescricao').value.trim() || null,
+      imagem_capa: imageUrl || null,
+      is_active: document.getElementById('colAtivo').value === 'true'
+    };
+
+    let colecaoFinal;
+
+    if (id) {
+      const { data, error } = await db.from('collections').update(dados).eq('id', id).select().single();
+      if (error) {
+        mostrarErro('msgErroForm', 'Erro ao actualizar: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = '💾 Guardar Colecção';
+        return;
+      }
+      colecaoFinal = data;
+
+      // Remover associações antigas
+      await db.from('collection_products').delete().eq('collection_id', id);
+    } else {
+      dados.slug = gerarSlug(nome) + '-' + Date.now().toString().slice(-5);
+      const { data, error } = await db.from('collections').insert(dados).select().single();
+      if (error) {
+        const msg = error.message.includes('duplicate') ? 'Já existe uma colecção com nome semelhante.' : 'Erro ao criar: ' + error.message;
+        mostrarErro('msgErroForm', msg);
+        btn.disabled = false;
+        btn.textContent = '💾 Guardar Colecção';
+        return;
+      }
+      colecaoFinal = data;
+    }
+
+    // Inserir produtos associados
+    const associacoes = Array.from(produtosSeleccionados).map((productId, idx) => ({
+      collection_id: colecaoFinal.id,
+      product_id: productId,
+      sort_order: idx
+    }));
+
+    await db.from('collection_products').insert(associacoes);
+
+    mostrarSucesso('msgSucessoForm', `✅ Colecção ${id ? 'actualizada' : 'criada'} com sucesso!`);
+    btn.disabled = false;
+    btn.textContent = '💾 Guardar Colecção';
+
+    await carregarColecoes();
+    setTimeout(() => mostrarLista(), 1200);
+  }
+
+  async function removerColecao(id) {
+    if (!confirm('Remover esta colecção permanentemente? Os produtos não serão apagados, só a colecção.')) return;
+    await db.from('collections').delete().eq('id', id);
+    await carregarColecoes();
+  }
+
+  function mostrarVista(id) {
+    document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
+    document.getElementById(id).classList.add('activa');
+    window.scrollTo(0, 0);
+  }
+
+  function mostrarLista() {
+    mostrarVista('vistaLista');
+  }
+
+  function limparForm() {
+    document.getElementById('colecaoId').value = '';
+    document.getElementById('colNome').value = '';
+    document.getElementById('colDescricao').value = '';
+    document.getElementById('colAtivo').value = 'true';
+    document.getElementById('imagemPreviewColecao').style.display = 'none';
+    document.getElementById('uploadAreaColecao').style.display = 'block';
+    document.getElementById('linkPreviewBox').style.display = 'none';
+    document.getElementById('buscaProdutosSelector').value = '';
+    imagemFicheiroColecao = null;
+    imagemUrlColecaoActual = '';
+    produtosSeleccionados = new Set();
+    slugActual = '';
+    esconderMensagem('msgErroForm');
+    esconderMensagem('msgSucessoForm');
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>
