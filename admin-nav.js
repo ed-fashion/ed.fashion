@@ -38,6 +38,10 @@ function carregarAdminNav(paginaActiva) {
         <span class="admin-menu-icone">🏷️</span>
         <span>Promoções</span>
       </a>
+      <a href="admin-banners.html" class="admin-menu-item ${paginaActiva === 'banners' ? 'active' : ''}">
+  <span class="admin-menu-icone">🖼️</span>
+  <span>Banners</span>
+</a>
       <a href="admin-relatorios.html" class="admin-menu-item ${paginaActiva === 'relatorios' ? 'active' : ''}">
         <span class="admin-menu-icone">📈</span>
         <span>Relatórios</span>
