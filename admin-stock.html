@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock — E'D Fashion Admin</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .vista { display: none; }
+    .vista.activa { display: block; }
+
+    .stock-linha-baixo { background: #FFFBEB; }
+    .stock-linha-esgotado { background: #FEF2F2; }
+
+    .ajuste-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .ajuste-modal-overlay.visivel { display: flex; }
+
+    .ajuste-modal {
+      background: white;
+      border-radius: 14px;
+      max-width: 420px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .ajuste-modal-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid #F0F2F5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ajuste-modal-header h3 { font-size: 15px; font-weight: 700; }
+
+    .ajuste-modal-fechar {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--cinza);
+    }
+
+    .ajuste-modal-corpo { padding: 22px; }
+
+    .tipo-ajuste-btns {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tipo-ajuste-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .tipo-ajuste-btn.activo.entrada { background: #DCFCE7; border-color: #16A34A; color: #16A34A; }
+    .tipo-ajuste-btn.activo.saida { background: #FEE2E2; border-color: #DC2626; color: #DC2626; }
+    .tipo-ajuste-btn.activo.ajuste { background: #DBEAFE; border-color: #2563EB; color: #2563EB; }
+
+    .form-grupo { margin-bottom: 14px; }
+
+    .form-grupo label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .form-grupo input,
+    .form-grupo textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      font-family: var(--fonte);
+    }
+
+    .form-grupo input:focus,
+    .form-grupo textarea:focus { border-color: var(--rosa); }
+
+    .stock-actual-info {
+      background: var(--cinza-claro);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .stock-resultado {
+      background: var(--rosa-claro);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--rosa);
+      text-align: center;
+      display: none;
+    }
+
+    .stock-resultado.visivel { display: block; }
+
+    /* HISTÓRICO MODAL */
+    .historico-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #F0F2F5;
+    }
+
+    .historico-item:last-child { border-bottom: none; }
+
+    .historico-icone {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .historico-icone.entry { background: #DCFCE7; color: #16A34A; }
+    .historico-icone.exit { background: #FEE2E2; color: #DC2626; }
+    .historico-icone.adjustment { background: #DBEAFE; color: #2563EB; }
+
+    .filtros-stock {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .filtro-stock-btn {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1.5px solid #ddd;
+      background: white;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--cinza-escuro);
+      transition: all 0.2s;
+    }
+
+    .filtro-stock-btn.activo { background: var(--rosa); color: white; border-color: var(--rosa); }
+
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <div id="adminNav"></div>
+
+  <div class="admin-conteudo">
+
+    <div class="admin-page-titulo">📦 Gestão de Stock</div>
+
+    <!-- KPIs -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:16px; margin-bottom:24px;">
+      <div class="kpi-card">
+        <div class="kpi-icone azul">📦</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiTotalProdutos">—</div>
+          <div class="kpi-label">Produtos em Stock</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icone amarelo">⚠️</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiBaixo">—</div>
+          <div class="kpi-label">Stock Baixo</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icone vermelho">❌</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiEsgotado">—</div>
+          <div class="kpi-label">Esgotados</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icone verde">📊</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiUnidades">—</div>
+          <div class="kpi-label">Total de Unidades</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="msg-erro" id="msgErro"></div>
+    <div class="msg-sucesso" id="msgSucesso"></div>
+
+    <!-- Pesquisa -->
+    <div style="margin-bottom:16px;">
+      <input type="text" id="pesquisaStock"
+        placeholder="🔍 Pesquisar produto..."
+        oninput="renderTabela()"
+        style="width:100%; padding:10px 14px; border:1.5px solid #ddd; border-radius:8px; font-size:14px; outline:none;">
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-stock">
+      <button class="filtro-stock-btn activo" onclick="filtrar('todos', this)">Todos</button>
+      <button class="filtro-stock-btn" onclick="filtrar('normal', this)">✅ Normal</button>
+      <button class="filtro-stock-btn" onclick="filtrar('baixo', this)">⚠️ Stock Baixo</button>
+      <button class="filtro-stock-btn" onclick="filtrar('esgotado', this)">❌ Esgotado</button>
+    </div>
+
+    <!-- Tabela -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h3>Produtos com Gestão de Stock</h3>
+        <span id="totalStock" style="font-size:13px; color:var(--cinza);"></span>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Categoria</th>
+              <th>Stock Actual</th>
+              <th>Alerta Mínimo</th>
+              <th>Estado</th>
+              <th>Acções</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaStock">
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">A carregar...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL DE AJUSTE -->
+<div class="ajuste-modal-overlay" id="ajusteModal">
+  <div class="ajuste-modal">
+    <div class="ajuste-modal-header">
+      <h3 id="ajusteModalTitulo">Ajustar Stock</h3>
+      <button class="ajuste-modal-fechar" onclick="fecharModal()">×</button>
+    </div>
+    <div class="ajuste-modal-corpo">
+
+      <div class="stock-actual-info">
+        <span>Stock actual:</span>
+        <strong id="stockActualInfo">0 unidades</strong>
+      </div>
+
+      <div class="form-grupo">
+        <label>Tipo de Movimento</label>
+        <div class="tipo-ajuste-btns">
+          <button class="tipo-ajuste-btn entrada" onclick="seleccionarTipo('entry')" id="btnEntrada">
+            ➕ Entrada
+          </button>
+          <button class="tipo-ajuste-btn saida" onclick="seleccionarTipo('exit')" id="btnSaida">
+            ➖ Saída
+          </button>
+          <button class="tipo-ajuste-btn ajuste" onclick="seleccionarTipo('adjustment')" id="btnAjuste">
+            ✏️ Ajuste
+          </button>
+        </div>
+      </div>
+
+      <div class="form-grupo">
+        <label id="labelQuantidade">Quantidade</label>
+        <input type="number" id="quantidadeAjuste" min="0" placeholder="0" oninput="calcularResultado()">
+      </div>
+
+      <div class="stock-resultado" id="resultadoAjuste"></div>
+
+      <div class="form-grupo">
+        <label>Motivo / Nota</label>
+        <textarea id="notaAjuste" rows="2" placeholder="Ex: Nova encomenda recebida do fornecedor..."></textarea>
+      </div>
+
+      <button class="btn-admin btn-admin-rosa" style="width:100%; justify-content:center;" onclick="confirmarAjuste()" id="btnConfirmarAjuste">
+        💾 Confirmar Ajuste
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE HISTÓRICO -->
+<div class="ajuste-modal-overlay" id="historicoModal">
+  <div class="ajuste-modal" style="max-width:480px;">
+    <div class="ajuste-modal-header">
+      <h3 id="historicoModalTitulo">Histórico de Movimentos</h3>
+      <button class="ajuste-modal-fechar" onclick="fecharHistorico()">×</button>
+    </div>
+    <div class="ajuste-modal-corpo" style="max-height:60vh; overflow-y:auto;" id="historicoCorpo">
+      A carregar...
+    </div>
+  </div>
+</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="admin-nav.js"></script>
+<script>
+
+  let todoStock = [];
+  let filtroActivo = 'todos';
+  let produtoAjusteActual = null;
+  let tipoAjusteActual = 'entry';
+
+  async function iniciar() {
+    const ok = await verificarAdmin();
+    if (!ok) return;
+    carregarAdminNav('stock');
+    await carregarStock();
+  }
+
+  async function carregarStock() {
+    const { data, error } = await db
+      .from('products')
+      .select(`id, name, image_url, status, categories(name), product_stock(quantity, low_stock_threshold)`)
+      .eq('availability_type', 'stock')
+      .order('name');
+
+    if (error) {
+      mostrarErro('msgErro', 'Erro ao carregar stock.');
+      return;
+    }
+
+    todoStock = (data || []).filter(p => p.product_stock);
+    actualizarKPIs();
+    renderTabela();
+  }
+
+  function actualizarKPIs() {
+    document.getElementById('kpiTotalProdutos').textContent = todoStock.length;
+    document.getElementById('kpiBaixo').textContent =
+      todoStock.filter(p => {
+        const q = p.product_stock?.quantity ?? 0;
+        const min = p.product_stock?.low_stock_threshold ?? 5;
+        return q > 0 && q <= min;
+      }).length;
+    document.getElementById('kpiEsgotado').textContent =
+      todoStock.filter(p => (p.product_stock?.quantity ?? 0) === 0).length;
+    document.getElementById('kpiUnidades').textContent =
+      todoStock.reduce((s, p) => s + (p.product_stock?.quantity ?? 0), 0);
+  }
+
+  function filtrar(estado, btn) {
+    filtroActivo = estado;
+    document.querySelectorAll('.filtro-stock-btn').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    renderTabela();
+  }
+
+  function renderTabela() {
+    const pesquisa = document.getElementById('pesquisaStock').value.toLowerCase();
+
+    let lista = todoStock.filter(p => {
+      const q = p.product_stock?.quantity ?? 0;
+      const min = p.product_stock?.low_stock_threshold ?? 5;
+      const estado = q === 0 ? 'esgotado' : q <= min ? 'baixo' : 'normal';
+
+      const matchEstado = filtroActivo === 'todos' || estado === filtroActivo;
+      const matchPesquisa = !pesquisa || p.name.toLowerCase().includes(pesquisa);
+      return matchEstado && matchPesquisa;
+    });
+
+    document.getElementById('totalStock').textContent = `${lista.length} produto(s)`;
+
+    const tbody = document.getElementById('tabelaStock');
+
+    if (lista.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="6">
+          <div class="admin-vazio">
+            <span class="icone">📦</span>
+            <h3>Nenhum produto encontrado</h3>
+          </div>
+        </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = lista.map(p => {
+      const q = p.product_stock?.quantity ?? 0;
+      const min = p.product_stock?.low_stock_threshold ?? 5;
+      const esgotado = q === 0;
+      const baixo = q > 0 && q <= min;
+      const linhaClasse = esgotado ? 'stock-linha-esgotado' : baixo ? 'stock-linha-baixo' : '';
+
+      return `
+        <tr class="${linhaClasse}">
+          <td>
+            <div style="display:flex; align-items:center; gap:10px;">
+              ${p.image_url
+                ? `<img src="${p.image_url}" style="width:40px;height:50px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none'">`
+                : `<div style="width:40px;height:50px;background:var(--cinza-claro);border-radius:6px;display:flex;align-items:center;justify-content:center;">👗</div>`}
+              <strong style="font-size:13px;">${p.name}</strong>
+            </div>
+          </td>
+          <td>${p.categories?.name || '—'}</td>
+          <td><strong style="font-size:16px; color:${esgotado ? '#DC2626' : baixo ? '#D97706' : '#16A34A'}">${q}</strong></td>
+          <td>${min}</td>
+          <td>
+            ${esgotado
+              ? '<span class="status-badge status-cancelled">❌ Esgotado</span>'
+              : baixo
+                ? '<span class="status-badge status-awaiting">⚠️ Stock Baixo</span>'
+                : '<span class="status-badge status-active">✅ Normal</span>'}
+          </td>
+          <td>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="btn-admin btn-admin-rosa" onclick="abrirAjuste('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${q}, ${min})">
+                ⚙️ Ajustar
+              </button>
+              <button class="btn-admin btn-admin-outline" onclick="abrirHistorico('${p.id}', '${p.name.replace(/'/g, "\\'")}')">
+                📋 Histórico
+              </button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  // MODAL DE AJUSTE
+  function abrirAjuste(id, nome, quantidadeActual, minimo) {
+    produtoAjusteActual = { id, nome, quantidadeActual, minimo };
+    tipoAjusteActual = 'entry';
+
+    document.getElementById('ajusteModalTitulo').textContent = `Ajustar: ${nome}`;
+    document.getElementById('stockActualInfo').textContent = `${quantidadeActual} unidades`;
+    document.getElementById('quantidadeAjuste').value = '';
+    document.getElementById('notaAjuste').value = '';
+    document.getElementById('resultadoAjuste').classList.remove('visivel');
+
+    seleccionarTipo('entry');
+    document.getElementById('ajusteModal').classList.add('visivel');
+  }
+
+  function fecharModal() {
+    document.getElementById('ajusteModal').classList.remove('visivel');
+    produtoAjusteActual = null;
+  }
+
+  function seleccionarTipo(tipo) {
+    tipoAjusteActual = tipo;
+    document.querySelectorAll('.tipo-ajuste-btn').forEach(b => b.classList.remove('activo'));
+
+    const labels = {
+      entry: { btn: 'btnEntrada', label: 'Quantidade a Adicionar' },
+      exit: { btn: 'btnSaida', label: 'Quantidade a Remover' },
+      adjustment: { btn: 'btnAjuste', label: 'Nova Quantidade Total' }
+    };
+
+    document.getElementById(labels[tipo].btn).classList.add('activo');
+    document.getElementById('labelQuantidade').textContent = labels[tipo].label;
+    calcularResultado();
+  }
+
+  function calcularResultado() {
+    if (!produtoAjusteActual) return;
+    const valor = parseInt(document.getElementById('quantidadeAjuste').value) || 0;
+    const actual = produtoAjusteActual.quantidadeActual;
+    const resultado = document.getElementById('resultadoAjuste');
+
+    if (valor === 0) {
+      resultado.classList.remove('visivel');
+      return;
+    }
+
+    let novoTotal;
+    if (tipoAjusteActual === 'entry') novoTotal = actual + valor;
+    else if (tipoAjusteActual === 'exit') novoTotal = Math.max(0, actual - valor);
+    else novoTotal = valor;
+
+    resultado.textContent = `Novo stock: ${actual} → ${novoTotal} unidades`;
+    resultado.classList.add('visivel');
+  }
+
+  async function confirmarAjuste() {
+    if (!produtoAjusteActual) return;
+
+    const valor = parseInt(document.getElementById('quantidadeAjuste').value) || 0;
+    if (valor <= 0 && tipoAjusteActual !== 'adjustment') {
+      mostrarErro('msgErro', 'Introduz uma quantidade válida.');
+      return;
+    }
+
+    const btn = document.getElementById('btnConfirmarAjuste');
+    btn.disabled = true;
+    btn.textContent = 'A guardar...';
+
+    const actual = produtoAjusteActual.quantidadeActual;
+    let novoTotal;
+    let quantidadeMovimento;
+
+    if (tipoAjusteActual === 'entry') {
+      novoTotal = actual + valor;
+      quantidadeMovimento = valor;
+    } else if (tipoAjusteActual === 'exit') {
+      novoTotal = Math.max(0, actual - valor);
+      quantidadeMovimento = -valor;
+    } else {
+      novoTotal = valor;
+      quantidadeMovimento = valor - actual;
+    }
+
+    const { data: { session } } = await db.auth.getSession();
+    const nota = document.getElementById('notaAjuste').value.trim();
+
+    // Actualizar stock
+    const { error: errStock } = await db
+      .from('product_stock')
+      .update({ quantity: novoTotal, updated_at: new Date().toISOString() })
+      .eq('product_id', produtoAjusteActual.id);
+
+    if (errStock) {
+      mostrarErro('msgErro', 'Erro ao actualizar stock.');
+      btn.disabled = false;
+      btn.textContent = '💾 Confirmar Ajuste';
+      return;
+    }
+
+    // Registar movimento
+    await db.from('stock_movements').insert({
+      product_id: produtoAjusteActual.id,
+      type: tipoAjusteActual,
+      quantity: quantidadeMovimento,
+      notes: nota || null,
+      created_by: session.user.id
+    });
+
+    fecharModal();
+    mostrarSucesso('msgSucesso', `✅ Stock de "${produtoAjusteActual.nome}" actualizado para ${novoTotal} unidades.`);
+    await carregarStock();
+  }
+
+  // HISTÓRICO
+  async function abrirHistorico(id, nome) {
+    document.getElementById('historicoModalTitulo').textContent = `Histórico: ${nome}`;
+    document.getElementById('historicoCorpo').innerHTML = 'A carregar...';
+    document.getElementById('historicoModal').classList.add('visivel');
+
+    const { data: movimentos } = await db
+      .from('stock_movements')
+      .select('*, profiles(full_name)')
+      .eq('product_id', id)
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    if (!movimentos || movimentos.length === 0) {
+      document.getElementById('historicoCorpo').innerHTML = `
+        <div style="text-align:center; padding:30px; color:var(--cinza);">
+          <span style="font-size:36px; display:block; margin-bottom:8px;">📋</span>
+          <p>Nenhum movimento registado ainda.</p>
+        </div>`;
+      return;
+    }
+
+    const tipoInfo = {
+      entry: { icone: '➕', label: 'Entrada', classe: 'entry' },
+      exit: { icone: '➖', label: 'Saída', classe: 'exit' },
+      adjustment: { icone: '✏️', label: 'Ajuste', classe: 'adjustment' }
+    };
+
+    document.getElementById('historicoCorpo').innerHTML = movimentos.map(m => {
+      const info = tipoInfo[m.type] || tipoInfo.adjustment;
+      return `
+        <div class="historico-item">
+          <div class="historico-icone ${info.classe}">${info.icone}</div>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:600;">
+              ${info.label}: ${m.quantity > 0 ? '+' : ''}${m.quantity} unidades
+            </div>
+            ${m.notes ? `<div style="font-size:12px; color:var(--cinza); margin-top:2px;">${m.notes}</div>` : ''}
+            <div style="font-size:11px; color:var(--cinza); margin-top:4px;">
+              ${formatData(m.created_at)} ${m.profiles?.full_name ? '· ' + m.profiles.full_name : ''}
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function fecharHistorico() {
+    document.getElementById('historicoModal').classList.remove('visivel');
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>
