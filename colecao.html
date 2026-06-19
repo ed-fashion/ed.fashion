@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colecção — E'D Fashion</title>
+  <link rel="stylesheet" href="main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .colecao-hero {
+      background: linear-gradient(135deg, var(--rosa) 0%, #c4186f 50%, var(--verde) 100%);
+      color: white;
+      padding: 50px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .colecao-hero-img {
+      position: absolute;
+      inset: 0;
+      object-fit: cover;
+      opacity: 0.3;
+    }
+
+    .colecao-hero-conteudo { position: relative; z-index: 1; }
+
+    .colecao-hero h1 {
+      font-size: 30px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .colecao-hero p {
+      font-size: 14px;
+      opacity: 0.92;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .colecao-conteudo {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    .colecao-vazio {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div id="colecaoConteudo">
+  <div style="text-align:center; padding:80px 20px; color:var(--cinza);">
+    <div style="font-size:40px; margin-bottom:12px;">⏳</div>
+    <p>A carregar colecção...</p>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<a href="https://wa.me/258866464666?text=Olá%20E'D%20Fashion!%20Gostaria%20de%20saber%20mais%20sobre%20os%20vossos%20produtos%20😊"
+   target="_blank" class="btn-whatsapp-fixo" title="WhatsApp">💬</a>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="components.js"></script>
+<script>
+
+  async function iniciar() {
+    carregarNavbar();
+    carregarFooter();
+
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
+
+    if (!slug) {
+      window.location.href = 'catalogo.html';
+      return;
+    }
+
+    await carregarColecao(slug);
+  }
+
+  async function carregarColecao(slug) {
+    const { data: colecao, error } = await db
+      .from('collections')
+      .select('*, collection_products(product_id, sort_order)')
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single();
+
+    if (error || !colecao) {
+      document.getElementById('colecaoConteudo').innerHTML = `
+        <div class="colecao-vazio">
+          <span style="font-size:60px; display:block; margin-bottom:16px;">😕</span>
+          <h2 style="font-size:22px; margin-bottom:8px;">Colecção não encontrada</h2>
+          <p style="color:var(--cinza); margin-bottom:24px;">Esta colecção pode já não estar disponível.</p>
+          <a href="catalogo.html" class="btn btn-rosa">Ver Catálogo</a>
+        </div>`;
+      return;
+    }
+
+    document.title = `${colecao.nome} — E'D Fashion`;
+
+    const idsProdutos = (colecao.collection_products || [])
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map(cp => cp.product_id);
+
+    let produtos = [];
+    if (idsProdutos.length > 0) {
+      const { data } = await db
+        .from('products')
+        .select('id, name, price, sale_price, image_url, status')
+        .in('id', idsProdutos)
+        .eq('status', 'active');
+      produtos = (data || []).sort((a, b) => idsProdutos.indexOf(a.id) - idsProdutos.indexOf(b.id));
+    }
+
+    renderColecao(colecao, produtos);
+  }
+
+  function renderColecao(colecao, produtos) {
+    document.getElementById('colecaoConteudo').innerHTML = `
+      <div class="colecao-hero">
+        ${colecao.imagem_capa ? `<img src="${colecao.imagem_capa}" class="colecao-hero-img">` : ''}
+        <div class="colecao-hero-conteudo">
+          <h1>${colecao.nome}</h1>
+          ${colecao.descricao ? `<p>${colecao.descricao}</p>` : ''}
+        </div>
+      </div>
+
+      <div class="colecao-conteudo">
+        ${produtos.length === 0
+          ? `<div class="colecao-vazio">
+              <span style="font-size:50px; display:block; margin-bottom:12px;">🛍️</span>
+              <h3 style="font-size:18px; margin-bottom:8px;">Sem produtos disponíveis nesta colecção</h3>
+              <a href="catalogo.html" class="btn btn-rosa">Ver Catálogo</a>
+            </div>`
+          : `<div class="produtos-grid">${produtos.map(renderProdutoCard).join('')}</div>`}
+      </div>`;
+  }
+
+  function renderProdutoCard(p) {
+    const temPromo = p.sale_price && p.sale_price < p.price;
+    const precoFinal = temPromo ? p.sale_price : p.price;
+    const desconto = temPromo ? Math.round((1 - p.sale_price / p.price) * 100) : 0;
+
+    return `
+      <div class="produto-card" onclick="window.location.href='produto.html?id=${p.id}'">
+        ${temPromo ? `<div class="produto-card-badge">-${desconto}%</div>` : ''}
+        <img src="${p.image_url || 'assets/sem-imagem.png'}" alt="${p.name}" loading="lazy"
+             onerror="this.src='assets/sem-imagem.png'">
+        <div class="produto-card-info">
+          <div class="produto-card-nome">${p.name}</div>
+          <div>
+            ${temPromo ? `<span class="produto-card-preco-antigo">${formatMZN(p.price)}</span>` : ''}
+            <span class="produto-card-preco">${formatMZN(precoFinal)}</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>
