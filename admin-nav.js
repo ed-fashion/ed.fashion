@@ -83,6 +83,7 @@ function getTituloAdmin(pagina) {
     clientes: 'Clientes',
     fornecedores: 'Fornecedores',
     promocoes: 'Promoções',
+    banners: 'Banners',
     relatorios: 'Relatórios'
   };
   return titulos[pagina] || 'Admin';
