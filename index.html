@@ -257,7 +257,30 @@
       .banner p { font-size: 14px; }
       .banner-encomenda { flex-direction: column; text-align: center; }
     }
+.banner-slider { position: relative; }
 
+.slider-dots {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 5;
+}
+
+.slider-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+}
+
+.slider-dot.activo { background: white; width: 24px; border-radius: 5px; }
+    
   </style>
 </head>
 <body>
@@ -265,16 +288,14 @@
 <!-- NAVBAR -->
 <div id="navbar"></div>
 
-<!-- BANNER PRINCIPAL -->
-<div class="banner">
-  <div class="banner-conteudo">
-    <h1>Moda para Todos ✨</h1>
-    <p>Descobre as últimas tendências em roupa, calçado, acessórios, cabelos e muito mais. Estamos localizados na Beira e fazemos chegar a todo Moçambique.</p>
-    <div class="banner-btns">
-      <a href="#produtos" class="btn-banner-principal">🛍️ Ver Produtos</a>
-      <a href="encomenda.html" class="btn-banner-secundario">📦 Por Encomenda</a>
+<!-- SLIDER DE BANNERS -->
+<div class="banner-slider" id="bannerSlider">
+  <div class="banner" id="bannerConteudo">
+    <div class="banner-conteudo">
+      <h1>A carregar...</h1>
     </div>
   </div>
+  <div class="slider-dots" id="sliderDots"></div>
 </div>
 
 <!-- CATEGORIAS -->
@@ -371,7 +392,88 @@
 
   carregarNavbar();
   carregarFooter();
+// SLIDER DE BANNERS
+  let bannersData = [];
+  let bannerActualIdx = 0;
+  let bannerInterval = null;
 
+  async function carregarBanners() {
+    const { data } = await db
+      .from('banners')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order');
+
+    bannersData = data || [];
+
+    if (bannersData.length === 0) {
+      bannersData = [{
+        titulo: "Moda para Todos ✨",
+        subtitulo: "Descobre as últimas tendências em roupa, calçado, acessórios, cabelos e muito mais.",
+        link_url: "catalogo.html",
+        texto_botao: "Ver Produtos",
+        cor_overlay: "rosa"
+      }];
+    }
+
+    renderBanner(0);
+    renderDots();
+
+    if (bannersData.length > 1) {
+      bannerInterval = setInterval(() => {
+        bannerActualIdx = (bannerActualIdx + 1) % bannersData.length;
+        renderBanner(bannerActualIdx);
+      }, 5000);
+    }
+  }
+
+  function renderBanner(idx) {
+    const b = bannersData[idx];
+    const cores = {
+      rosa: 'linear-gradient(135deg, #E91E8C 0%, #c4186f 50%, #8DC63F 100%)',
+      verde: 'linear-gradient(135deg, #8DC63F 0%, #6ba02a 100%)',
+      escuro: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+      azul: 'linear-gradient(135deg, #2563EB 0%, #1e3a8a 100%)'
+    };
+
+    const banner = document.getElementById('bannerConteudo');
+    banner.style.background = b.imagem_url
+      ? `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('${b.imagem_url}') center/cover`
+      : cores[b.cor_overlay] || cores.rosa;
+
+    banner.innerHTML = `
+      <div class="banner-conteudo">
+        <h1>${b.titulo}</h1>
+        ${b.subtitulo ? `<p>${b.subtitulo}</p>` : ''}
+        <div class="banner-btns">
+          <a href="${b.link_url}" class="btn-banner-principal">${b.texto_botao}</a>
+        </div>
+      </div>`;
+
+    bannerActualIdx = idx;
+    renderDots();
+  }
+
+  function renderDots() {
+    if (bannersData.length <= 1) {
+      document.getElementById('sliderDots').innerHTML = '';
+      return;
+    }
+    document.getElementById('sliderDots').innerHTML = bannersData.map((_, i) => `
+      <button class="slider-dot ${i === bannerActualIdx ? 'activo' : ''}" onclick="irParaBanner(${i})"></button>
+    `).join('');
+  }
+
+  function irParaBanner(idx) {
+    clearInterval(bannerInterval);
+    renderBanner(idx);
+    bannerInterval = setInterval(() => {
+      bannerActualIdx = (bannerActualIdx + 1) % bannersData.length;
+      renderBanner(bannerActualIdx);
+    }, 5000);
+  }
+
+  carregarBanners();
   function renderProdutoCard(p) {
     const temPromocao = p.sale_price && p.sale_price < p.price;
     const precoFinal = temPromocao ? p.sale_price : p.price;
