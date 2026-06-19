@@ -38,6 +38,10 @@ function carregarAdminNav(paginaActiva) {
         <span class="admin-menu-icone">🏷️</span>
         <span>Promoções</span>
       </a>
+      <a href="admin-colecoes.html" class="admin-menu-item ${paginaActiva === 'colecoes' ? 'active' : ''}">
+  <span class="admin-menu-icone">🪩</span>
+  <span>Colecções</span>
+</a>
       <a href="admin-banners.html" class="admin-menu-item ${paginaActiva === 'banners' ? 'active' : ''}">
   <span class="admin-menu-icone">🖼️</span>
   <span>Banners</span>
@@ -83,6 +87,7 @@ function getTituloAdmin(pagina) {
     clientes: 'Clientes',
     fornecedores: 'Fornecedores',
     promocoes: 'Promoções',
+    colecoes: 'Colecções',
     banners: 'Banners',
     relatorios: 'Relatórios'
   };
