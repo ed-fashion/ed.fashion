@@ -10,7 +10,6 @@
   <style>
 
     .banner {
-      background: linear-gradient(135deg, var(--rosa) 0%, #c4186f 50%, var(--verde) 100%);
       color: white;
       padding: 70px 20px;
       text-align: center;
@@ -26,9 +25,10 @@
       width: 200%;
       height: 200%;
       background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%);
+      pointer-events: none;
     }
 
-    .banner-conteudo { position: relative; z-index: 1; }
+    .banner-conteudo { position: relative; z-index: 2; }
 
     .banner h1 {
       font-size: 38px;
@@ -87,6 +87,83 @@
       background: white;
       color: var(--rosa);
     }
+
+    /* PRODUTOS DENTRO DO BANNER */
+    .banner-produtos-wrap {
+      position: absolute;
+      right: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 14px;
+      z-index: 3;
+    }
+
+    .banner-produto-card {
+      position: relative;
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+      width: 130px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      cursor: pointer;
+      transition: transform 0.2s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .banner-produto-card:hover { transform: translateY(-3px); }
+
+    .banner-produto-card img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .banner-produto-card .nome {
+      font-size: 11px;
+      color: var(--preto);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+
+    .banner-produto-card .preco {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--rosa);
+    }
+
+    /* SLIDER */
+    .banner-slider { position: relative; }
+
+    .slider-dots {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 5;
+    }
+
+    .slider-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+
+    .slider-dot.activo { background: white; width: 24px; border-radius: 5px; }
 
     /* CATEGORIAS */
     .seccao {
@@ -256,31 +333,16 @@
       .banner h1 { font-size: 26px; }
       .banner p { font-size: 14px; }
       .banner-encomenda { flex-direction: column; text-align: center; }
+
+      .banner-produtos-wrap {
+        position: static;
+        transform: none;
+        justify-content: center;
+        margin-top: 24px;
+        flex-wrap: wrap;
+      }
     }
-.banner-slider { position: relative; }
 
-.slider-dots {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-  z-index: 5;
-}
-
-.slider-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.4);
-  cursor: pointer;
-  transition: all 0.3s;
-  border: none;
-}
-
-.slider-dot.activo { background: white; width: 24px; border-radius: 5px; }
-    
   </style>
 </head>
 <body>
@@ -340,6 +402,18 @@
       <span class="categoria-icone">🏠</span>
       <span class="categoria-nome">Casa</span>
     </a>
+    <a href="catalogo.html?cat=intima" class="categoria-card">
+      <span class="categoria-icone">👙</span>
+      <span class="categoria-nome">Íntima</span>
+    </a>
+    <a href="catalogo.html?cat=perfumes" class="categoria-card">
+      <span class="categoria-icone">💄</span>
+      <span class="categoria-nome">Perfumes</span>
+    </a>
+    <a href="catalogo.html?cat=bijuteria" class="categoria-card">
+      <span class="categoria-icone">💍</span>
+      <span class="categoria-nome">Bijuteria</span>
+    </a>
     <a href="catalogo.html?cat=promocoes" class="categoria-card">
       <span class="categoria-icone">🏷️</span>
       <span class="categoria-nome">Promoções</span>
@@ -392,7 +466,10 @@
 
   carregarNavbar();
   carregarFooter();
-// SLIDER DE BANNERS
+
+  // ============================
+  // SLIDER DE BANNERS
+  // ============================
   let bannersData = [];
   let bannerActualIdx = 0;
   let bannerInterval = null;
@@ -412,11 +489,13 @@
         subtitulo: "Descobre as últimas tendências em roupa, calçado, acessórios, cabelos e muito mais.",
         link_url: "catalogo.html",
         texto_botao: "Ver Produtos",
-        cor_overlay: "rosa"
+        cor_overlay: "rosa",
+        produto_id_1: null,
+        produto_id_2: null
       }];
     }
 
-    renderBanner(0);
+    await renderBanner(0);
     renderDots();
 
     if (bannersData.length > 1) {
@@ -427,7 +506,7 @@
     }
   }
 
-  function renderBanner(idx) {
+  async function renderBanner(idx) {
     const b = bannersData[idx];
     const cores = {
       rosa: 'linear-gradient(135deg, #E91E8C 0%, #c4186f 50%, #8DC63F 100%)',
@@ -439,7 +518,33 @@
     const banner = document.getElementById('bannerConteudo');
     banner.style.background = b.imagem_url
       ? `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('${b.imagem_url}') center/cover`
-      : cores[b.cor_overlay] || cores.rosa;
+      : (cores[b.cor_overlay] || cores.rosa);
+    banner.style.position = 'relative';
+
+    let produtosHtml = '';
+    const idsProdutos = [b.produto_id_1, b.produto_id_2].filter(Boolean);
+
+    if (idsProdutos.length > 0) {
+      const { data: produtos } = await db
+        .from('products')
+        .select('id, name, price, sale_price, image_url')
+        .in('id', idsProdutos);
+
+      if (produtos && produtos.length > 0) {
+        produtosHtml = `
+          <div class="banner-produtos-wrap">
+            ${produtos.map(p => {
+              const preco = (p.sale_price && p.sale_price < p.price) ? p.sale_price : p.price;
+              return `
+                <a href="produto.html?id=${p.id}" class="banner-produto-card">
+                  <img src="${p.image_url || 'assets/sem-imagem.png'}" onerror="this.src='assets/sem-imagem.png'">
+                  <div class="nome">${p.name}</div>
+                  <div class="preco">${formatMZN(preco)}</div>
+                </a>`;
+            }).join('')}
+          </div>`;
+      }
+    }
 
     banner.innerHTML = `
       <div class="banner-conteudo">
@@ -448,7 +553,8 @@
         <div class="banner-btns">
           <a href="${b.link_url}" class="btn-banner-principal">${b.texto_botao}</a>
         </div>
-      </div>`;
+      </div>
+      ${produtosHtml}`;
 
     bannerActualIdx = idx;
     renderDots();
@@ -473,7 +579,9 @@
     }, 5000);
   }
 
-  carregarBanners();
+  // ============================
+  // PRODUTOS
+  // ============================
   function renderProdutoCard(p) {
     const temPromocao = p.sale_price && p.sale_price < p.price;
     const precoFinal = temPromocao ? p.sale_price : p.price;
@@ -482,7 +590,8 @@
     return `
       <div class="produto-card" onclick="window.location.href='produto.html?id=${p.id}'">
         ${temPromocao ? `<div class="produto-card-badge">-${desconto}%</div>` : ''}
-        <img src="${p.image_url || 'assets/sem-imagem.png'}" alt="${p.name}" loading="lazy">
+        <img src="${p.image_url || 'assets/sem-imagem.png'}" alt="${p.name}" loading="lazy"
+             onerror="this.src='assets/sem-imagem.png'">
         <div class="produto-card-info">
           <div class="produto-card-nome">${p.name}</div>
           <div>
@@ -534,19 +643,14 @@
       `<div class="produtos-grid">${produtos.map(renderProdutoCard).join('')}</div>`;
   }
 
-  async function verificarSessao() {
-    const { data: { session } } = await db.auth.getSession();
-    const navPerfil = document.getElementById('navPerfil');
-    if (navPerfil) {
-      navPerfil.href = session ? 'perfil.html' : 'login.html';
-      navPerfil.title = session ? 'Meu Perfil' : 'Entrar';
-    }
-  }
-
-  verificarSessao();
+  // ============================
+  // INICIAR
+  // ============================
+  carregarBanners();
   carregarProdutosDestaque();
   carregarMaisVendidos();
 
 </script>
+
 </body>
 </html>
