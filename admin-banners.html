@@ -212,6 +212,93 @@
       background: #FAFAFA;
     }
 
+    /* SELECTOR DE PRODUTO PARA BANNER */
+    .produto-slot {
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .produto-slot-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .produto-selecionado-preview {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: var(--rosa-claro);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .produto-selecionado-preview.visivel { display: flex; }
+
+    .produto-selecionado-img {
+      width: 40px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 5px;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .produto-selecionado-info { flex: 1; min-width: 0; font-size: 12px; }
+    .produto-selecionado-nome { font-weight: 700; color: var(--preto); }
+    .produto-selecionado-preco { color: var(--rosa); font-weight: 700; }
+
+    .btn-remover-produto {
+      background: none;
+      border: none;
+      color: var(--cinza);
+      cursor: pointer;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .produtos-busca-lista {
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1.5px solid #eee;
+      border-radius: 8px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .produtos-busca-lista.visivel { display: block; }
+
+    .produto-busca-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-bottom: 1px solid #F5F5F5;
+    }
+
+    .produto-busca-item:hover { background: #FAFAFA; }
+    .produto-busca-item:last-child { border-bottom: none; }
+
+    .produto-busca-img {
+      width: 32px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: var(--cinza-claro);
+      flex-shrink: 0;
+    }
+
+    .produto-busca-nome { font-size: 12px; flex: 1; }
+    .produto-busca-preco { font-size: 12px; color: var(--rosa); font-weight: 700; }
+
     @media (max-width: 768px) {
       .banner-preview-card { flex-direction: column; }
       .banner-preview-img { width: 100%; height: 120px; }
@@ -240,7 +327,7 @@
       <div class="msg-sucesso" id="msgSucessoLista"></div>
 
       <div style="font-size:13px; color:var(--cinza); margin-bottom:20px;">
-        💡 Os banners aparecem em rotação automática na página inicial. Usa as flechas para reordenar.
+        💡 Os banners aparecem em rotação automática na página inicial. Podes destacar até 2 produtos directamente no banner.
       </div>
 
       <div id="listaBanners"></div>
@@ -259,6 +346,8 @@
       <div class="msg-sucesso" id="msgSucessoForm"></div>
 
       <input type="hidden" id="bannerId">
+      <input type="hidden" id="produtoId1">
+      <input type="hidden" id="produtoId2">
 
       <div class="secao-form">
         <div class="secao-form-titulo">📝 Conteúdo do Banner</div>
@@ -278,8 +367,48 @@
             </div>
             <div class="form-grupo">
               <label>Link do Botão</label>
-              <input type="text" id="bannerLink" placeholder="Ex: catalogo.html ou produto.html?id=..." value="catalogo.html">
+              <input type="text" id="bannerLink" placeholder="Ex: catalogo.html" value="catalogo.html">
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUTOS EM DESTAQUE NO BANNER -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">🏷️ Produtos em Destaque no Banner (opcional)</div>
+        <div class="secao-form-corpo">
+          <div style="font-size:12px; color:var(--cinza); margin-bottom:14px;">
+            💡 Mostra até 2 produtos com preço sobrepostos na imagem do banner — como na Shein.
+          </div>
+
+          <!-- SLOT 1 -->
+          <div class="produto-slot">
+            <div class="produto-slot-header">Produto 1</div>
+            <div class="produto-selecionado-preview" id="preview1">
+              <img class="produto-selecionado-img" id="previewImg1">
+              <div class="produto-selecionado-info">
+                <div class="produto-selecionado-nome" id="previewNome1"></div>
+                <div class="produto-selecionado-preco" id="previewPreco1"></div>
+              </div>
+              <button class="btn-remover-produto" onclick="removerProdutoSlot(1)">×</button>
+            </div>
+            <input type="text" id="buscaProduto1" placeholder="🔍 Pesquisar produto..." oninput="buscarProdutos(1)">
+            <div class="produtos-busca-lista" id="listaBusca1"></div>
+          </div>
+
+          <!-- SLOT 2 -->
+          <div class="produto-slot">
+            <div class="produto-slot-header">Produto 2</div>
+            <div class="produto-selecionado-preview" id="preview2">
+              <img class="produto-selecionado-img" id="previewImg2">
+              <div class="produto-selecionado-info">
+                <div class="produto-selecionado-nome" id="previewNome2"></div>
+                <div class="produto-selecionado-preco" id="previewPreco2"></div>
+              </div>
+              <button class="btn-remover-produto" onclick="removerProdutoSlot(2)">×</button>
+            </div>
+            <input type="text" id="buscaProduto2" placeholder="🔍 Pesquisar produto..." oninput="buscarProdutos(2)">
+            <div class="produtos-busca-lista" id="listaBusca2"></div>
           </div>
         </div>
       </div>
@@ -348,12 +477,23 @@
   let todosBanners = [];
   let imagemFicheiroBanner = null;
   let imagemUrlBannerActual = '';
+  let todosProdutosCache = [];
 
   async function iniciar() {
     const ok = await verificarAdmin();
     if (!ok) return;
-    carregarAdminNav('produtos'); // reaproveita o nav, sem item próprio por agora
+    carregarAdminNav('produtos');
     await carregarBanners();
+    await carregarProdutosCache();
+  }
+
+  async function carregarProdutosCache() {
+    const { data } = await db
+      .from('products')
+      .select('id, name, price, sale_price, image_url')
+      .eq('status', 'active')
+      .order('name');
+    todosProdutosCache = data || [];
   }
 
   async function carregarBanners() {
@@ -396,7 +536,7 @@
               ${b.is_active ? '✅ Activo' : '⏸️ Inactivo'}
             </span>
             <span>🔗 ${b.link_url}</span>
-            <span>🔘 "${b.texto_botao}"</span>
+            ${b.produto_id_1 || b.produto_id_2 ? `<span>🏷️ ${(b.produto_id_1 ? 1 : 0) + (b.produto_id_2 ? 1 : 0)} produto(s) destacado(s)</span>` : ''}
           </div>
         </div>
         <div class="banner-ordem-btns">
@@ -452,7 +592,68 @@
       imagemUrlBannerActual = b.imagem_url;
     }
 
+    if (b.produto_id_1) preencherProdutoSlot(1, b.produto_id_1);
+    if (b.produto_id_2) preencherProdutoSlot(2, b.produto_id_2);
+
     mostrarVista('vistaForm');
+  }
+
+  function preencherProdutoSlot(slot, productId) {
+    const p = todosProdutosCache.find(x => x.id === productId);
+    if (!p) return;
+
+    document.getElementById('produtoId' + slot).value = p.id;
+    document.getElementById('previewImg' + slot).src = p.image_url || 'assets/sem-imagem.png';
+    document.getElementById('previewNome' + slot).textContent = p.name;
+    const preco = (p.sale_price && p.sale_price < p.price) ? p.sale_price : p.price;
+    document.getElementById('previewPreco' + slot).textContent = formatMZN(preco);
+    document.getElementById('preview' + slot).classList.add('visivel');
+  }
+
+  function buscarProdutos(slot) {
+    const termo = document.getElementById('buscaProduto' + slot).value.toLowerCase();
+    const listaEl = document.getElementById('listaBusca' + slot);
+
+    if (!termo) {
+      listaEl.classList.remove('visivel');
+      listaEl.innerHTML = '';
+      return;
+    }
+
+    const resultados = todosProdutosCache
+      .filter(p => p.name.toLowerCase().includes(termo))
+      .slice(0, 8);
+
+    if (resultados.length === 0) {
+      listaEl.innerHTML = `<div style="padding:10px; font-size:12px; color:var(--cinza);">Nenhum produto encontrado.</div>`;
+      listaEl.classList.add('visivel');
+      return;
+    }
+
+    listaEl.innerHTML = resultados.map(p => {
+      const preco = (p.sale_price && p.sale_price < p.price) ? p.sale_price : p.price;
+      return `
+        <div class="produto-busca-item" onclick="seleccionarProdutoSlot(${slot}, '${p.id}')">
+          ${p.image_url
+            ? `<img src="${p.image_url}" class="produto-busca-img" onerror="this.style.display='none'">`
+            : `<div class="produto-busca-img"></div>`}
+          <span class="produto-busca-nome">${p.name}</span>
+          <span class="produto-busca-preco">${formatMZN(preco)}</span>
+        </div>`;
+    }).join('');
+    listaEl.classList.add('visivel');
+  }
+
+  function seleccionarProdutoSlot(slot, productId) {
+    preencherProdutoSlot(slot, productId);
+    document.getElementById('buscaProduto' + slot).value = '';
+    document.getElementById('listaBusca' + slot).classList.remove('visivel');
+    document.getElementById('listaBusca' + slot).innerHTML = '';
+  }
+
+  function removerProdutoSlot(slot) {
+    document.getElementById('produtoId' + slot).value = '';
+    document.getElementById('preview' + slot).classList.remove('visivel');
   }
 
   function seleccionarCor(cor) {
@@ -530,6 +731,8 @@
       link_url: document.getElementById('bannerLink').value.trim() || 'catalogo.html',
       cor_overlay: document.getElementById('bannerCor').value,
       imagem_url: imageUrl || null,
+      produto_id_1: document.getElementById('produtoId1').value || null,
+      produto_id_2: document.getElementById('produtoId2').value || null,
       is_active: document.getElementById('bannerAtivo').value === 'true'
     };
 
@@ -582,6 +785,10 @@
     document.getElementById('bannerAtivo').value = 'true';
     document.getElementById('imagemPreviewBanner').style.display = 'none';
     document.getElementById('uploadAreaBanner').style.display = 'block';
+    removerProdutoSlot(1);
+    removerProdutoSlot(2);
+    document.getElementById('buscaProduto1').value = '';
+    document.getElementById('buscaProduto2').value = '';
     imagemFicheiroBanner = null;
     imagemUrlBannerActual = '';
     seleccionarCor('rosa');
