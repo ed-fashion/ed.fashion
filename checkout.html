@@ -1013,8 +1013,9 @@
     if (isCompraDirecta) {
       localStorage.removeItem('ed_compra_directa');
     } else {
-      const idsSeleccionados = seleccionados.map(i => i.id);
-      const carrinhoRestante = carrinho.filter(i => !idsSeleccionados.includes(i.id));
+      const idsComprados = seleccionados.map(i => i.id);
+      const carrinhoCompleto = JSON.parse(localStorage.getItem('ed_carrinho') || '[]');
+      const carrinhoRestante = carrinhoCompleto.filter(i => !idsComprados.includes(i.id));
       localStorage.setItem('ed_carrinho', JSON.stringify(carrinhoRestante));
     }
     localStorage.removeItem('ed_cupao');
