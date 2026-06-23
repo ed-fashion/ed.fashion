@@ -12,189 +12,160 @@
     .vista.activa { display: block; }
 
     .filtros-bar {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-      align-items: center;
+      display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;
     }
-
-    .filtros-bar input,
-    .filtros-bar select {
-      padding: 9px 14px;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.2s;
-      background: white;
+    .filtros-bar input, .filtros-bar select {
+      padding: 9px 14px; border: 1.5px solid #ddd; border-radius: 8px;
+      font-size: 13px; outline: none; background: white;
     }
-
-    .filtros-bar input:focus,
-    .filtros-bar select:focus { border-color: var(--rosa); }
+    .filtros-bar input:focus, .filtros-bar select:focus { border-color: var(--rosa); }
     .filtros-bar input { flex: 1; min-width: 200px; }
 
-    .produto-imagem-preview {
-      width: 100%;
-      max-width: 300px;
-      aspect-ratio: 3/4;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 2px dashed #ddd;
-      display: block;
-      margin-bottom: 10px;
-      background: var(--cinza-claro);
-    }
-
-    .upload-area {
-      border: 2px dashed #ddd;
-      border-radius: 10px;
-      padding: 30px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: var(--cinza-claro);
-      margin-bottom: 10px;
-    }
-
-    .upload-area:hover { border-color: var(--rosa); background: var(--rosa-claro); }
-    .upload-area.drag { border-color: var(--rosa); background: var(--rosa-claro); }
-    .upload-area .icone { font-size: 36px; margin-bottom: 8px; display: block; }
-    .upload-area p { font-size: 13px; color: var(--cinza); margin: 0; }
-    .upload-area strong { color: var(--rosa); }
-
     .secao-form {
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      margin-bottom: 20px;
-      overflow: hidden;
+      background: white; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 20px; overflow: hidden;
     }
-
     .secao-form-titulo {
-      padding: 16px 24px;
-      border-bottom: 1px solid #F0F2F5;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--preto);
+      padding: 16px 24px; border-bottom: 1px solid #F0F2F5;
+      font-size: 15px; font-weight: 700; color: var(--preto);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
     }
-
     .secao-form-corpo { padding: 24px; }
 
-    .form-grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .form-grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
-    }
-
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
     .form-grupo { margin-bottom: 16px; }
-
     .form-grupo label {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--cinza);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
+      display: block; font-size: 12px; font-weight: 700; color: var(--cinza);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
     }
-
-    .form-grupo input,
-    .form-grupo select,
-    .form-grupo textarea {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-      font-family: var(--fonte);
-      background: white;
+    .form-grupo input, .form-grupo select, .form-grupo textarea {
+      width: 100%; padding: 10px 14px; border: 1.5px solid #ddd; border-radius: 8px;
+      font-size: 14px; outline: none; font-family: var(--fonte); background: white;
     }
-
-    .form-grupo input:focus,
-    .form-grupo select:focus,
-    .form-grupo textarea:focus { border-color: var(--rosa); }
+    .form-grupo input:focus, .form-grupo select:focus, .form-grupo textarea:focus { border-color: var(--rosa); }
     .form-grupo textarea { resize: vertical; min-height: 100px; }
-
-    .form-grupo input[readonly] {
-      background: var(--cinza-claro);
-      color: var(--rosa);
-      font-weight: 700;
-    }
+    .form-grupo input[readonly] { background: var(--cinza-claro); color: var(--rosa); font-weight: 700; }
 
     .form-acoes {
-      display: flex;
-      gap: 12px;
-      padding: 20px 24px;
-      border-top: 1px solid #F0F2F5;
-      background: #FAFAFA;
-      flex-wrap: wrap;
+      display: flex; gap: 12px; padding: 20px 24px;
+      border-top: 1px solid #F0F2F5; background: #FAFAFA; flex-wrap: wrap;
     }
 
     .produto-thumb {
-      width: 48px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 6px;
-      background: var(--cinza-claro);
+      width: 48px; height: 60px; object-fit: cover; border-radius: 6px; background: var(--cinza-claro);
     }
-
     .sem-imagem {
-      width: 48px;
-      height: 60px;
-      background: var(--cinza-claro);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
+      width: 48px; height: 60px; background: var(--cinza-claro); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
     }
 
-    .progress-bar {
-      width: 100%;
-      height: 6px;
-      background: #eee;
-      border-radius: 3px;
-      overflow: hidden;
-      margin-top: 8px;
-      display: none;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--rosa);
-      width: 0%;
-      transition: width 0.3s;
-    }
+    .progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin-top: 8px; display: none; }
+    .progress-bar-fill { height: 100%; background: var(--rosa); width: 0%; transition: width 0.3s; }
 
     .adiantamento-info {
-      background: var(--rosa-claro);
-      border: 1px solid var(--rosa);
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: var(--rosa);
-      font-weight: 700;
-      margin-top: 8px;
-      display: none;
+      background: var(--rosa-claro); border: 1px solid var(--rosa); border-radius: 8px;
+      padding: 10px 14px; font-size: 13px; color: var(--rosa); font-weight: 700; margin-top: 8px; display: none;
     }
+
+    /* CONVERSOR USD */
+    .conversor-box {
+      background: #EFF6FF; border: 1.5px solid #2563EB; border-radius: 10px; padding: 16px; margin-bottom: 16px;
+    }
+    .conversor-box-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+    }
+    .conversor-box-header strong { color: #2563EB; font-size: 13px; }
+    .taxa-actual {
+      font-size: 12px; color: #2563EB; background: white; padding: 4px 10px; border-radius: 6px; font-weight: 700;
+    }
+    .conversor-resultado {
+      background: white; border-radius: 8px; padding: 10px 14px; font-size: 14px; font-weight: 700;
+      color: #2563EB; margin-top: 10px; display: none;
+    }
+    .btn-editar-taxa {
+      background: none; border: none; color: #2563EB; font-size: 11px; text-decoration: underline; cursor: pointer; padding: 0;
+    }
+
+    /* IMAGENS MÚLTIPLAS */
+    .imagens-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-bottom: 14px;
+    }
+    .imagem-slot {
+      position: relative; aspect-ratio: 3/4; border-radius: 10px; overflow: hidden;
+      border: 2px solid #ddd; background: var(--cinza-claro);
+    }
+    .imagem-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .imagem-slot.principal { border-color: var(--rosa); }
+    .imagem-slot-badge {
+      position: absolute; top: 4px; left: 4px; background: var(--rosa); color: white;
+      font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+    }
+    .imagem-slot-acoes {
+      position: absolute; bottom: 0; left: 0; right: 0; display: flex; gap: 2px;
+      background: rgba(0,0,0,0.6); padding: 4px;
+    }
+    .imagem-slot-acoes button {
+      flex: 1; background: rgba(255,255,255,0.2); border: none; color: white;
+      font-size: 11px; padding: 4px 2px; cursor: pointer; border-radius: 4px;
+    }
+    .imagem-slot-acoes button:hover { background: rgba(255,255,255,0.35); }
+    .add-imagem-slot {
+      aspect-ratio: 3/4; border-radius: 10px; border: 2px dashed #ddd; background: var(--cinza-claro);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s; gap: 4px;
+    }
+    .add-imagem-slot:hover { border-color: var(--rosa); background: var(--rosa-claro); }
+    .add-imagem-slot span { font-size: 24px; }
+    .add-imagem-slot small { font-size: 10px; color: var(--cinza); }
+
+    /* VARIANTES */
+    .variante-grupo {
+      border: 1.5px solid #eee; border-radius: 10px; padding: 14px; margin-bottom: 12px;
+    }
+    .variante-grupo-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    }
+    .variante-tipo-tag {
+      background: var(--rosa-claro); color: var(--rosa); font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 20px; text-transform: uppercase;
+    }
+    .variante-linha {
+      display: grid; grid-template-columns: 1fr 100px 110px 36px; gap: 8px; margin-bottom: 8px; align-items: center;
+    }
+    .variante-linha input { padding: 8px 10px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
+    .variante-linha input:focus { border-color: var(--rosa); }
+    .btn-remover-variante {
+      width: 32px; height: 32px; border-radius: 6px; border: none; background: #FEE2E2; color: #DC2626;
+      cursor: pointer; font-size: 14px; flex-shrink: 0;
+    }
+    .btn-remover-variante:hover { background: #DC2626; color: white; }
+    .btn-add-variante-linha {
+      width: 100%; padding: 8px; border: 1.5px dashed #ddd; border-radius: 6px; background: white;
+      color: var(--cinza); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-add-variante-linha:hover { border-color: var(--rosa); color: var(--rosa); }
+    .btn-remover-grupo-variante {
+      background: none; border: none; color: var(--cinza); font-size: 12px; cursor: pointer; text-decoration: underline;
+    }
+    .variante-tipos-rapidos {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+    }
+    .tipo-rapido-btn {
+      padding: 7px 14px; border: 1.5px solid #ddd; border-radius: 20px; background: white;
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--cinza-escuro);
+    }
+    .tipo-rapido-btn:hover { border-color: var(--rosa); color: var(--rosa); background: var(--rosa-claro); }
 
     @media (max-width: 768px) {
       .form-grid-2 { grid-template-columns: 1fr; }
       .form-grid-3 { grid-template-columns: 1fr 1fr; }
       .filtros-bar input { min-width: 100%; }
+      .variante-linha { grid-template-columns: 1fr; }
     }
-
     @media (max-width: 480px) {
       .form-grid-3 { grid-template-columns: 1fr; }
+      .imagens-grid { grid-template-columns: repeat(3, 1fr); }
     }
   </style>
 </head>
@@ -243,18 +214,12 @@
           <table class="admin-table">
             <thead>
               <tr>
-                <th>Imagem</th>
-                <th>Nome</th>
-                <th>Categoria</th>
-                <th>Preço</th>
-                <th>Stock</th>
-                <th>Tipo</th>
-                <th>Estado</th>
-                <th>Acções</th>
+                <th>Imagem</th><th>Nome</th><th>Categoria</th><th>Preço</th>
+                <th>Stock</th><th>Variantes</th><th>Tipo</th><th>Estado</th><th>Acções</th>
               </tr>
             </thead>
             <tbody id="tabelaProdutos">
-              <tr><td colspan="8" style="text-align:center;padding:40px;color:#888;">A carregar...</td></tr>
+              <tr><td colspan="9" style="text-align:center;padding:40px;color:#888;">A carregar...</td></tr>
             </tbody>
           </table>
         </div>
@@ -299,24 +264,50 @@
           </div>
           <div class="form-grupo">
             <label>Descrição Curta</label>
-            <textarea id="prodDescCurta" placeholder="Breve descrição do produto (aparece na listagem)" rows="2"></textarea>
+            <textarea id="prodDescCurta" placeholder="Breve descrição (aparece na listagem)" rows="2"></textarea>
           </div>
           <div class="form-grupo">
             <label>Descrição Detalhada</label>
-            <textarea id="prodDescDetalhada" placeholder="Descrição completa do produto (aparece na página do produto)" rows="4"></textarea>
+            <textarea id="prodDescDetalhada" placeholder="Descrição completa (aparece na página do produto)" rows="4"></textarea>
           </div>
         </div>
       </div>
 
-      <!-- SECÇÃO 2: Preços -->
+      <!-- SECÇÃO 2: Conversor USD -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">💱 Conversor Dólar → Metical</div>
+        <div class="secao-form-corpo">
+          <div class="conversor-box">
+            <div class="conversor-box-header">
+              <strong>🌍 Calcular preço a partir do valor em USD</strong>
+              <span class="taxa-actual">
+                Taxa actual: 1 USD = <span id="taxaDisplay">64.00</span> MT
+                <button class="btn-editar-taxa" onclick="editarTaxa()">editar</button>
+              </span>
+            </div>
+            <div class="form-grid-2" style="margin-bottom:0;">
+              <div class="form-grupo" style="margin-bottom:0;">
+                <label>Valor em Dólares (USD)</label>
+                <input type="number" id="valorUsd" placeholder="Ex: 15.80" min="0" step="0.01" oninput="calcularConversao()">
+              </div>
+              <div class="form-grupo" style="margin-bottom:0;">
+                <label>Margem Adicional (%)</label>
+                <input type="number" id="margemConversao" placeholder="Ex: 20" min="0" value="0" oninput="calcularConversao()">
+              </div>
+            </div>
+            <div class="conversor-resultado" id="conversorResultado"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECÇÃO 3: Preços -->
       <div class="secao-form">
         <div class="secao-form-titulo">💰 Preços</div>
         <div class="secao-form-corpo">
           <div class="form-grid-3">
             <div class="form-grupo">
               <label>Preço Normal (MT) *</label>
-              <input type="number" id="prodPreco" placeholder="0.00" min="0" step="0.01"
-                oninput="calcularAdiantamento(); calcularMargem()">
+              <input type="number" id="prodPreco" placeholder="0.00" min="0" step="0.01" oninput="calcularAdiantamento(); calcularMargem()">
             </div>
             <div class="form-grupo">
               <label>Preço Promocional (MT)</label>
@@ -324,18 +315,20 @@
             </div>
             <div class="form-grupo">
               <label>Custo do Produto (MT)</label>
-              <input type="number" id="prodCusto" placeholder="Uso interno" min="0" step="0.01"
-                oninput="calcularMargem()">
+              <input type="number" id="prodCusto" placeholder="Uso interno" min="0" step="0.01" oninput="calcularMargem()">
             </div>
           </div>
           <div id="margemInfo" style="font-size:13px; color:var(--cinza); margin-top:4px;"></div>
         </div>
       </div>
 
-      <!-- SECÇÃO 3: Stock -->
+      <!-- SECÇÃO 4: Stock -->
       <div class="secao-form" id="secaoStock">
-        <div class="secao-form-titulo">📦 Stock</div>
+        <div class="secao-form-titulo">📦 Stock Geral</div>
         <div class="secao-form-corpo">
+          <div style="font-size:12px; color:var(--cinza); margin-bottom:14px;">
+            💡 Se o produto tiver variantes (tamanhos/cores), o stock de cada variante é gerido na secção "Variantes" abaixo. Este campo serve para produtos sem variantes.
+          </div>
           <div class="form-grid-2">
             <div class="form-grupo">
               <label>Quantidade em Stock *</label>
@@ -349,7 +342,7 @@
         </div>
       </div>
 
-      <!-- SECÇÃO 4: Por Encomenda -->
+      <!-- SECÇÃO 5: Por Encomenda -->
       <div class="secao-form" id="secaoEncomenda" style="display:none">
         <div class="secao-form-titulo">📦 Detalhes de Encomenda</div>
         <div class="secao-form-corpo">
@@ -360,49 +353,62 @@
             </div>
             <div class="form-grupo">
               <label>Adiantamento / 1ª Prestação (%)</label>
-              <input type="number" id="prodSinal" placeholder="Ex: 50" min="0" max="100"
-                oninput="calcularAdiantamento()">
+              <input type="number" id="prodSinal" placeholder="Ex: 50" min="0" max="100" oninput="calcularAdiantamento()">
             </div>
           </div>
           <div class="adiantamento-info" id="adiantamentoInfo"></div>
         </div>
       </div>
 
-      <!-- SECÇÃO 5: Imagem -->
+      <!-- SECÇÃO 6: Variantes -->
       <div class="secao-form">
-        <div class="secao-form-titulo">🖼️ Imagem do Produto</div>
+        <div class="secao-form-titulo">
+          <span>🎨 Variantes (Tamanhos, Cores, etc.)</span>
+        </div>
         <div class="secao-form-corpo">
-          <img id="imagemPreview" class="produto-imagem-preview" style="display:none"
-            onerror="this.style.display='none'; document.getElementById('uploadArea').style.display='block'">
-          <div class="upload-area" id="uploadArea"
-            onclick="document.getElementById('inputImagem').click()"
-            ondragover="event.preventDefault(); this.classList.add('drag')"
-            ondragleave="this.classList.remove('drag')"
-            ondrop="handleDrop(event)">
-            <span class="icone">📷</span>
-            <p><strong>Clica para seleccionar</strong> ou arrasta a imagem aqui</p>
-            <p>JPG, PNG ou WEBP — máx. 5 MB</p>
+          <div style="font-size:12px; color:var(--cinza); margin-bottom:14px;">
+            💡 Adiciona grupos de variantes. Ex: um grupo "Tamanho" com S/M/L, ou um grupo "Cor" com Azul/Preto. Cada opção pode ter o seu próprio stock.
           </div>
-          <input type="file" id="inputImagem" accept="image/*" style="display:none"
-            onchange="previewImagem(event)">
-          <div class="progress-bar" id="progressBar">
-            <div class="progress-bar-fill" id="progressFill"></div>
+
+          <div class="variante-tipos-rapidos">
+            <button class="tipo-rapido-btn" onclick="adicionarGrupoVariante('Tamanho')">+ Tamanho</button>
+            <button class="tipo-rapido-btn" onclick="adicionarGrupoVariante('Cor')">+ Cor</button>
+            <button class="tipo-rapido-btn" onclick="adicionarGrupoVariante('Capacidade')">+ Capacidade</button>
+            <button class="tipo-rapido-btn" onclick="adicionarGrupoVariante('Número')">+ Número</button>
+            <button class="tipo-rapido-btn" onclick="adicionarGrupoVariante('Outro')">+ Outro Tipo</button>
           </div>
-          <div style="margin-top:12px">
-            <div class="form-grupo">
-              <label>Ou cola o URL da imagem</label>
-              <input type="text" id="prodImagemUrl" placeholder="https://..." oninput="previewUrl()">
-            </div>
-          </div>
-          <div style="margin-top:8px">
-            <button class="btn-admin btn-admin-outline" onclick="limparImagem()" style="font-size:12px">
-              🗑️ Remover imagem
-            </button>
+
+          <div id="gruposVariantes"></div>
+
+          <div style="font-size:12px; color:var(--cinza); margin-top:10px;">
+            Deixa vazio se este produto não tiver variantes (ex: tamanho único).
           </div>
         </div>
       </div>
 
-      <!-- SECÇÃO 6: Estado -->
+      <!-- SECÇÃO 7: Imagens -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">🖼️ Imagens do Produto</div>
+        <div class="secao-form-corpo">
+          <div style="font-size:12px; color:var(--cinza); margin-bottom:14px;">
+            💡 A primeira imagem é a principal (aparece no catálogo). Podes adicionar quantas quiseres.
+          </div>
+          <div class="imagens-grid" id="imagensGrid"></div>
+          <div style="margin-top:10px;">
+            <div class="form-grupo" style="margin-bottom:0;">
+              <label>Ou cola um URL de imagem</label>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="novoImagemUrl" placeholder="https://...">
+                <button class="btn-admin btn-admin-outline" onclick="adicionarImagemUrl()" style="white-space:nowrap;">➕ Adicionar</button>
+              </div>
+            </div>
+          </div>
+          <input type="file" id="inputImagensMultiplas" accept="image/*" multiple style="display:none" onchange="handleUploadImagens(event)">
+          <div class="progress-bar" id="progressBar"><div class="progress-bar-fill" id="progressFill"></div></div>
+        </div>
+      </div>
+
+      <!-- SECÇÃO 8: Estado -->
       <div class="secao-form">
         <div class="secao-form-titulo">⚙️ Estado e Destaque</div>
         <div class="secao-form-corpo">
@@ -423,19 +429,12 @@
               </select>
             </div>
           </div>
-          <div style="font-size:13px; color:var(--cinza); margin-top:4px;">
-            💡 Coloca em destaque os produtos que queres mostrar na página inicial da loja.
-          </div>
         </div>
       </div>
 
       <div class="form-acoes">
-        <button class="btn-admin btn-admin-rosa" onclick="guardarProduto()" id="btnGuardar">
-          💾 Guardar Produto
-        </button>
-        <button class="btn-admin btn-admin-outline" onclick="mostrarLista()">
-          Cancelar
-        </button>
+        <button class="btn-admin btn-admin-rosa" onclick="guardarProduto()" id="btnGuardar">💾 Guardar Produto</button>
+        <button class="btn-admin btn-admin-outline" onclick="mostrarLista()">Cancelar</button>
       </div>
 
     </div>
@@ -448,26 +447,74 @@
 <script>
 
   let todosProdutos = [];
-  let imagemFicheiro = null;
-  let imagemUrlActual = '';
+  let imagensProduto = []; // [{url, isPrimary, file (opcional), isNova}]
+  let gruposVariantesData = []; // [{id (temp), tipo, linhas: [{id, valor, stock, preco_adicional}]}]
+  let variantesParaApagar = [];
+  let mediaParaApagar = [];
+  let contadorTempId = 0;
 
   async function iniciar() {
     const ok = await verificarAdmin();
     if (!ok) return;
     carregarAdminNav('produtos');
+    carregarTaxaCambio();
     await carregarCategorias();
     await carregarProdutos();
     const params = new URLSearchParams(window.location.search);
     if (params.get('acao') === 'novo') mostrarFormNovo();
   }
 
-  async function carregarCategorias() {
-    const { data } = await db
-      .from('categories')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order');
+  // ============================
+  // CONVERSOR USD → MZN
+  // ============================
+  function carregarTaxaCambio() {
+    const taxa = localStorage.getItem('ed_taxa_usd_mzn') || '64.00';
+    document.getElementById('taxaDisplay').textContent = parseFloat(taxa).toFixed(2);
+  }
 
+  function editarTaxa() {
+    const taxaActual = localStorage.getItem('ed_taxa_usd_mzn') || '64.00';
+    const novaTaxa = prompt('Introduz a nova taxa de câmbio (1 USD = ? MT):', taxaActual);
+    if (!novaTaxa || isNaN(parseFloat(novaTaxa))) return;
+    localStorage.setItem('ed_taxa_usd_mzn', parseFloat(novaTaxa).toFixed(2));
+    carregarTaxaCambio();
+    calcularConversao();
+  }
+
+  function calcularConversao() {
+    const usd = parseFloat(document.getElementById('valorUsd').value) || 0;
+    const margem = parseFloat(document.getElementById('margemConversao').value) || 0;
+    const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
+    const resultado = document.getElementById('conversorResultado');
+
+    if (usd <= 0) {
+      resultado.style.display = 'none';
+      return;
+    }
+
+    const valorBase = usd * taxa;
+    const valorFinal = valorBase * (1 + margem / 100);
+
+    resultado.innerHTML = `
+      💵 $${usd.toFixed(2)} USD × ${taxa.toFixed(2)} = ${formatMZN(valorBase)}
+      ${margem > 0 ? `<br>➕ Com margem de ${margem}%: <strong>${formatMZN(valorFinal)}</strong>` : ''}
+      <br><button class="btn-admin btn-admin-rosa" style="margin-top:8px; font-size:12px;" onclick="usarValorConvertido(${valorFinal.toFixed(2)})">
+        Usar este valor como Preço Normal
+      </button>`;
+    resultado.style.display = 'block';
+  }
+
+  function usarValorConvertido(valor) {
+    document.getElementById('prodPreco').value = valor;
+    calcularAdiantamento();
+    calcularMargem();
+  }
+
+  // ============================
+  // CATEGORIAS
+  // ============================
+  async function carregarCategorias() {
+    const { data } = await db.from('categories').select('*').eq('is_active', true).order('sort_order');
     const selects = ['filtroCategoria', 'prodCategoria'];
     selects.forEach(id => {
       const sel = document.getElementById(id);
@@ -484,10 +531,13 @@
     });
   }
 
+  // ============================
+  // LISTA DE PRODUTOS
+  // ============================
   async function carregarProdutos() {
     const { data, error } = await db
       .from('products')
-      .select(`*, categories(name), product_stock(quantity)`)
+      .select(`*, categories(name), product_stock(quantity), product_variants(id)`)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -503,56 +553,33 @@
     document.getElementById('totalProdutos').textContent = `${produtos.length} produto(s)`;
 
     if (produtos.length === 0) {
-      tbody.innerHTML = `
-        <tr><td colspan="8">
-          <div class="admin-vazio">
-            <span class="icone">👗</span>
-            <h3>Nenhum produto encontrado</h3>
-          </div>
-        </td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9"><div class="admin-vazio"><span class="icone">👗</span><h3>Nenhum produto encontrado</h3></div></td></tr>`;
       return;
     }
 
     tbody.innerHTML = produtos.map(p => {
       const stock = p.product_stock?.quantity ?? '—';
       const temPromo = p.sale_price && p.sale_price < p.price;
+      const numVariantes = p.product_variants?.length || 0;
+
       return `
         <tr>
-          <td>
-            ${p.image_url
-              ? `<img src="${p.image_url}" class="produto-thumb" alt="${p.name}"
-                   onerror="this.style.display='none'">`
-              : `<div class="sem-imagem">👗</div>`}
-          </td>
+          <td>${p.image_url ? `<img src="${p.image_url}" class="produto-thumb" alt="${p.name}" onerror="this.style.display='none'">` : `<div class="sem-imagem">👗</div>`}</td>
           <td>
             <strong style="font-size:13px">${p.name}</strong>
             ${temPromo ? `<br><small style="color:var(--rosa);">Promoção activa</small>` : ''}
             ${p.is_featured ? `<br><small style="color:var(--verde);">⭐ Destaque</small>` : ''}
           </td>
           <td>${p.categories?.name || '—'}</td>
-          <td>
-            ${temPromo
-              ? `<span style="text-decoration:line-through;color:var(--cinza);font-size:11px">${formatMZN(p.price)}</span>
-                 <br><strong style="color:var(--rosa)">${formatMZN(p.sale_price)}</strong>`
-              : `<strong>${formatMZN(p.price)}</strong>`}
-          </td>
-          <td>
-            ${p.availability_type === 'pre_order'
-              ? '<span style="color:var(--cinza);font-size:12px;">N/A</span>'
-              : `<strong style="color:${stock === 0 ? '#DC2626' : stock <= 5 ? '#D97706' : '#16A34A'}">${stock}</strong>`}
-          </td>
-          <td>
-            ${p.availability_type === 'pre_order'
-              ? '<span class="status-badge status-preparing">Por Encomenda</span>'
-              : '<span class="status-badge status-paid">Em Stock</span>'}
-          </td>
+          <td>${temPromo ? `<span style="text-decoration:line-through;color:var(--cinza);font-size:11px">${formatMZN(p.price)}</span><br><strong style="color:var(--rosa)">${formatMZN(p.sale_price)}</strong>` : `<strong>${formatMZN(p.price)}</strong>`}</td>
+          <td>${p.availability_type === 'pre_order' ? '<span style="color:var(--cinza);font-size:12px;">N/A</span>' : `<strong style="color:${stock === 0 ? '#DC2626' : stock <= 5 ? '#D97706' : '#16A34A'}">${stock}</strong>`}</td>
+          <td>${numVariantes > 0 ? `<span class="status-badge status-preparing">${numVariantes} opção(ões)</span>` : '<span style="color:var(--cinza);font-size:12px;">—</span>'}</td>
+          <td>${p.availability_type === 'pre_order' ? '<span class="status-badge status-preparing">Por Encomenda</span>' : '<span class="status-badge status-paid">Em Stock</span>'}</td>
           <td>${badgeStatus(p.status)}</td>
           <td>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button class="btn-admin btn-admin-outline" onclick="editarProduto('${p.id}')">✏️ Editar</button>
-              <button class="btn-admin btn-admin-vermelho"
-                onclick="arquivarProduto('${p.id}', '${p.status}')"
-                title="${p.status === 'archived' ? 'Reactivar' : 'Arquivar'}">
+              <button class="btn-admin btn-admin-vermelho" onclick="arquivarProduto('${p.id}', '${p.status}')" title="${p.status === 'archived' ? 'Reactivar' : 'Arquivar'}">
                 ${p.status === 'archived' ? '♻️' : '🗄️'}
               </button>
             </div>
@@ -574,10 +601,12 @@
       const matchTipo = !tipo || p.availability_type === tipo;
       return matchPesquisa && matchCategoria && matchStatus && matchTipo;
     });
-
     renderTabela(filtrados);
   }
 
+  // ============================
+  // FORMULÁRIO NOVO / EDITAR
+  // ============================
   function mostrarFormNovo() {
     limparForm();
     document.getElementById('formTitulo').textContent = '➕ Novo Produto';
@@ -611,22 +640,278 @@
     document.getElementById('prodSinal').value = p.deposit_percentage || '';
     document.getElementById('prodStatus').value = p.status || 'active';
     document.getElementById('prodDestaque').value = p.is_featured ? 'true' : 'false';
-    document.getElementById('prodImagemUrl').value = p.image_url || '';
-
-    if (p.image_url) {
-      const preview = document.getElementById('imagemPreview');
-      preview.src = p.image_url;
-      preview.style.display = 'block';
-      document.getElementById('uploadArea').style.display = 'none';
-      imagemUrlActual = p.image_url;
-    }
 
     toggleEncomenda();
     calcularAdiantamento();
     calcularMargem();
+
+    // Carregar imagens (principal + media)
+    await carregarImagensExistentes(p.id, p.image_url);
+
+    // Carregar variantes
+    await carregarVariantesExistentes(p.id);
+
     mostrarVista('vistaForm');
   }
 
+  // ============================
+  // IMAGENS MÚLTIPLAS
+  // ============================
+  async function carregarImagensExistentes(productId, imagemPrincipalUrl) {
+    imagensProduto = [];
+
+    const { data: media } = await db
+      .from('product_media')
+      .select('*')
+      .eq('product_id', productId)
+      .order('sort_order');
+
+    if (media && media.length > 0) {
+      imagensProduto = media.map(m => ({
+        id: m.id, url: m.url, isPrimary: m.is_primary, isNova: false
+      }));
+      if (!imagensProduto.some(i => i.isPrimary) && imagemPrincipalUrl) {
+        imagensProduto.unshift({ id: null, url: imagemPrincipalUrl, isPrimary: true, isNova: false });
+      }
+    } else if (imagemPrincipalUrl) {
+      imagensProduto = [{ id: null, url: imagemPrincipalUrl, isPrimary: true, isNova: false }];
+    }
+
+    renderImagens();
+  }
+
+  function renderImagens() {
+    const grid = document.getElementById('imagensGrid');
+    let html = imagensProduto.map((img, idx) => `
+      <div class="imagem-slot ${img.isPrimary ? 'principal' : ''}">
+        ${img.isPrimary ? '<span class="imagem-slot-badge">Principal</span>' : ''}
+        <img src="${img.url}" onerror="this.style.opacity='0.3'">
+        <div class="imagem-slot-acoes">
+          ${!img.isPrimary ? `<button onclick="definirPrincipal(${idx})">⭐</button>` : ''}
+          <button onclick="removerImagem(${idx})">🗑️</button>
+        </div>
+      </div>`).join('');
+
+    html += `
+      <div class="add-imagem-slot" onclick="document.getElementById('inputImagensMultiplas').click()">
+        <span>➕</span>
+        <small>Adicionar</small>
+      </div>`;
+
+    grid.innerHTML = html;
+  }
+
+  function definirPrincipal(idx) {
+    imagensProduto.forEach((img, i) => img.isPrimary = (i === idx));
+    // Move a principal para o início
+    const principal = imagensProduto.splice(idx, 1)[0];
+    imagensProduto.unshift(principal);
+    renderImagens();
+  }
+
+  function removerImagem(idx) {
+    const img = imagensProduto[idx];
+    if (img.id) mediaParaApagar.push(img.id);
+    const eraPrincipal = img.isPrimary;
+    imagensProduto.splice(idx, 1);
+    if (eraPrincipal && imagensProduto.length > 0) imagensProduto[0].isPrimary = true;
+    renderImagens();
+  }
+
+  function adicionarImagemUrl() {
+    const url = document.getElementById('novoImagemUrl').value.trim();
+    if (!url) return;
+    imagensProduto.push({ id: null, url, isPrimary: imagensProduto.length === 0, isNova: true });
+    document.getElementById('novoImagemUrl').value = '';
+    renderImagens();
+  }
+
+  function handleUploadImagens(event) {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    files.forEach(file => {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`A imagem "${file.name}" excede 5 MB e foi ignorada.`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = e => {
+        imagensProduto.push({
+          id: null, url: e.target.result, isPrimary: imagensProduto.length === 0,
+          isNova: true, file
+        });
+        renderImagens();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    event.target.value = '';
+  }
+
+  async function uploadImagensNovas() {
+    const idsFinais = [];
+    for (const img of imagensProduto) {
+      if (img.isNova && img.file) {
+        const ext = img.file.name.split('.').pop();
+        const nomeFile = `produto_${Date.now()}_${Math.random().toString(36).slice(2,7)}.${ext}`;
+        const { error } = await db.storage.from('produtos').upload(nomeFile, img.file, { upsert: true });
+        if (!error) {
+          const { data: urlData } = db.storage.from('produtos').getPublicUrl(nomeFile);
+          img.url = urlData.publicUrl;
+        }
+      }
+      idsFinais.push(img);
+    }
+    return idsFinais;
+  }
+
+  // ============================
+  // VARIANTES
+  // ============================
+  function adicionarGrupoVariante(tipo) {
+    gruposVariantesData.push({
+      tempId: 'g' + (contadorTempId++),
+      tipo,
+      linhas: [{ tempId: 'l' + (contadorTempId++), id: null, valor: '', stock: 0, preco_adicional: 0 }]
+    });
+    renderGruposVariantes();
+  }
+
+  function removerGrupoVariante(grupoTempId) {
+    const grupo = gruposVariantesData.find(g => g.tempId === grupoTempId);
+    if (grupo) {
+      grupo.linhas.forEach(l => { if (l.id) variantesParaApagar.push(l.id); });
+    }
+    gruposVariantesData = gruposVariantesData.filter(g => g.tempId !== grupoTempId);
+    renderGruposVariantes();
+  }
+
+  function adicionarLinhaVariante(grupoTempId) {
+    const grupo = gruposVariantesData.find(g => g.tempId === grupoTempId);
+    if (!grupo) return;
+    grupo.linhas.push({ tempId: 'l' + (contadorTempId++), id: null, valor: '', stock: 0, preco_adicional: 0 });
+    renderGruposVariantes();
+  }
+
+  function removerLinhaVariante(grupoTempId, linhaTempId) {
+    const grupo = gruposVariantesData.find(g => g.tempId === grupoTempId);
+    if (!grupo) return;
+    const linha = grupo.linhas.find(l => l.tempId === linhaTempId);
+    if (linha?.id) variantesParaApagar.push(linha.id);
+    grupo.linhas = grupo.linhas.filter(l => l.tempId !== linhaTempId);
+    if (grupo.linhas.length === 0) removerGrupoVariante(grupoTempId);
+    else renderGruposVariantes();
+  }
+
+  function actualizarValorVariante(grupoTempId, linhaTempId, campo, valor) {
+    const grupo = gruposVariantesData.find(g => g.tempId === grupoTempId);
+    if (!grupo) return;
+    const linha = grupo.linhas.find(l => l.tempId === linhaTempId);
+    if (!linha) return;
+    linha[campo] = valor;
+  }
+
+  function renderGruposVariantes() {
+    const container = document.getElementById('gruposVariantes');
+
+    if (gruposVariantesData.length === 0) {
+      container.innerHTML = `<p style="font-size:13px; color:var(--cinza); text-align:center; padding:14px;">Nenhuma variante adicionada.</p>`;
+      return;
+    }
+
+    container.innerHTML = gruposVariantesData.map(grupo => `
+      <div class="variante-grupo">
+        <div class="variante-grupo-header">
+          <span class="variante-tipo-tag">${grupo.tipo}</span>
+          <button class="btn-remover-grupo-variante" onclick="removerGrupoVariante('${grupo.tempId}')">Remover grupo</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 100px 110px 36px; gap:8px; margin-bottom:6px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase;">
+          <span>Valor</span><span>Stock</span><span>Preço +/-</span><span></span>
+        </div>
+
+        ${grupo.linhas.map(linha => `
+          <div class="variante-linha">
+            <input type="text" placeholder="Ex: M, Azul, 256GB..." value="${linha.valor}"
+              oninput="actualizarValorVariante('${grupo.tempId}', '${linha.tempId}', 'valor', this.value)">
+            <input type="number" placeholder="0" min="0" value="${linha.stock}"
+              oninput="actualizarValorVariante('${grupo.tempId}', '${linha.tempId}', 'stock', this.value)">
+            <input type="number" placeholder="0.00" step="0.01" value="${linha.preco_adicional}"
+              oninput="actualizarValorVariante('${grupo.tempId}', '${linha.tempId}', 'preco_adicional', this.value)">
+            <button class="btn-remover-variante" onclick="removerLinhaVariante('${grupo.tempId}', '${linha.tempId}')">×</button>
+          </div>`).join('')}
+
+        <button class="btn-add-variante-linha" onclick="adicionarLinhaVariante('${grupo.tempId}')">
+          ➕ Adicionar opção de ${grupo.tipo}
+        </button>
+      </div>`).join('');
+  }
+
+  async function carregarVariantesExistentes(productId) {
+    gruposVariantesData = [];
+    variantesParaApagar = [];
+
+    const { data: variantes } = await db
+      .from('product_variants')
+      .select('*')
+      .eq('product_id', productId)
+      .order('sort_order');
+
+    if (!variantes || variantes.length === 0) {
+      renderGruposVariantes();
+      return;
+    }
+
+    const tiposUnicos = [...new Set(variantes.map(v => v.tipo))];
+    tiposUnicos.forEach(tipo => {
+      const linhasDoTipo = variantes.filter(v => v.tipo === tipo);
+      gruposVariantesData.push({
+        tempId: 'g' + (contadorTempId++),
+        tipo,
+        linhas: linhasDoTipo.map(v => ({
+          tempId: 'l' + (contadorTempId++),
+          id: v.id, valor: v.valor, stock: v.stock, preco_adicional: v.preco_adicional
+        }))
+      });
+    });
+
+    renderGruposVariantes();
+  }
+
+  async function guardarVariantes(productId) {
+    // Apagar removidas
+    if (variantesParaApagar.length > 0) {
+      await db.from('product_variants').delete().in('id', variantesParaApagar);
+    }
+
+    // Inserir/actualizar
+    for (const grupo of gruposVariantesData) {
+      let ordem = 0;
+      for (const linha of grupo.linhas) {
+        if (!linha.valor || !linha.valor.trim()) continue;
+
+        const dadosVariante = {
+          product_id: productId,
+          tipo: grupo.tipo,
+          valor: linha.valor.trim(),
+          stock: parseInt(linha.stock) || 0,
+          preco_adicional: parseFloat(linha.preco_adicional) || 0,
+          sort_order: ordem++
+        };
+
+        if (linha.id) {
+          await db.from('product_variants').update(dadosVariante).eq('id', linha.id);
+        } else {
+          await db.from('product_variants').insert(dadosVariante);
+        }
+      }
+    }
+  }
+
+  // ============================
+  // GUARDAR PRODUTO (completo)
+  // ============================
   async function guardarProduto() {
     const btn = document.getElementById('btnGuardar');
     const id = document.getElementById('produtoId').value;
@@ -650,33 +935,14 @@
 
     btn.disabled = true;
     btn.textContent = 'A guardar...';
+    document.getElementById('progressBar').style.display = 'block';
+    document.getElementById('progressFill').style.width = '20%';
 
-    let imageUrl = document.getElementById('prodImagemUrl').value.trim() || imagemUrlActual;
+    // Upload de imagens novas
+    imagensProduto = await uploadImagensNovas();
+    document.getElementById('progressFill').style.width = '60%';
 
-    if (imagemFicheiro) {
-      const ext = imagemFicheiro.name.split('.').pop();
-      const nomeFile = `produto_${Date.now()}.${ext}`;
-
-      document.getElementById('progressBar').style.display = 'block';
-      document.getElementById('progressFill').style.width = '40%';
-
-      const { error: uploadErr } = await db.storage
-        .from('produtos')
-        .upload(nomeFile, imagemFicheiro, { upsert: true });
-
-      if (uploadErr) {
-        mostrarErro('msgErroForm', 'Erro ao fazer upload da imagem: ' + uploadErr.message);
-        btn.disabled = false;
-        btn.textContent = '💾 Guardar Produto';
-        document.getElementById('progressBar').style.display = 'none';
-        return;
-      }
-
-      document.getElementById('progressFill').style.width = '100%';
-      const { data: urlData } = db.storage.from('produtos').getPublicUrl(nomeFile);
-      imageUrl = urlData.publicUrl;
-    }
-
+    const imagemPrincipal = imagensProduto.find(i => i.isPrimary)?.url || imagensProduto[0]?.url || null;
     const slug = gerarSlug(nome) + '-' + Date.now();
 
     const dadosProduto = {
@@ -692,144 +958,97 @@
       deposit_percentage: parseFloat(document.getElementById('prodSinal').value) || 0,
       status: document.getElementById('prodStatus').value,
       is_featured: document.getElementById('prodDestaque').value === 'true',
-      image_url: imageUrl || null,
+      image_url: imagemPrincipal,
       updated_at: new Date().toISOString()
     };
 
     let produtoFinal;
 
     if (id) {
-      const { data, error } = await db
-        .from('products')
-        .update(dadosProduto)
-        .eq('id', id)
-        .select()
-        .single();
-
+      const { data, error } = await db.from('products').update(dadosProduto).eq('id', id).select().single();
       if (error) {
         mostrarErro('msgErroForm', 'Erro ao actualizar: ' + error.message);
-        btn.disabled = false;
-        btn.textContent = '💾 Guardar Produto';
-        return;
+        resetBtn(btn); return;
       }
       produtoFinal = data;
     } else {
       dadosProduto.slug = slug;
-      const { data, error } = await db
-        .from('products')
-        .insert(dadosProduto)
-        .select()
-        .single();
-
+      const { data, error } = await db.from('products').insert(dadosProduto).select().single();
       if (error) {
         mostrarErro('msgErroForm', 'Erro ao criar: ' + error.message);
-        btn.disabled = false;
-        btn.textContent = '💾 Guardar Produto';
-        return;
+        resetBtn(btn); return;
       }
       produtoFinal = data;
     }
 
+    document.getElementById('progressFill').style.width = '75%';
+
+    // Stock geral (só se não tiver variantes)
     if (tipo === 'stock') {
       const quantidade = parseInt(document.getElementById('prodQuantidade').value) || 0;
       const minimo = parseInt(document.getElementById('prodStockMinimo').value) || 5;
-
       await db.from('product_stock').upsert({
-        product_id: produtoFinal.id,
-        quantity: quantidade,
-        low_stock_threshold: minimo,
-        updated_at: new Date().toISOString()
+        product_id: produtoFinal.id, quantity: quantidade,
+        low_stock_threshold: minimo, updated_at: new Date().toISOString()
       }, { onConflict: 'product_id' });
     }
 
-    document.getElementById('progressBar').style.display = 'none';
+    document.getElementById('progressFill').style.width = '85%';
+
+    // Guardar variantes
+    await guardarVariantes(produtoFinal.id);
+
+    document.getElementById('progressFill').style.width = '92%';
+
+    // Guardar media (imagens extra, exceto a principal já guardada em image_url)
+    if (mediaParaApagar.length > 0) {
+      await db.from('product_media').delete().in('id', mediaParaApagar);
+    }
+    for (let i = 0; i < imagensProduto.length; i++) {
+      const img = imagensProduto[i];
+      const dadosMedia = {
+        product_id: produtoFinal.id, url: img.url, tipo: 'image',
+        is_primary: img.isPrimary, sort_order: i
+      };
+      if (img.id) {
+        await db.from('product_media').update(dadosMedia).eq('id', img.id);
+      } else {
+        await db.from('product_media').insert(dadosMedia);
+      }
+    }
+
+    document.getElementById('progressFill').style.width = '100%';
+
     mostrarSucesso('msgSucessoForm', `✅ Produto ${id ? 'actualizado' : 'criado'} com sucesso!`);
-    btn.disabled = false;
-    btn.textContent = '💾 Guardar Produto';
+    resetBtn(btn);
 
     await carregarProdutos();
     setTimeout(() => mostrarLista(), 1500);
   }
 
+  function resetBtn(btn) {
+    btn.disabled = false;
+    btn.textContent = '💾 Guardar Produto';
+    document.getElementById('progressBar').style.display = 'none';
+  }
+
   async function arquivarProduto(id, statusActual) {
     const novoStatus = statusActual === 'archived' ? 'active' : 'archived';
-    const msg = novoStatus === 'archived'
-      ? 'Arquivar este produto? Deixará de aparecer na loja.'
-      : 'Reactivar este produto?';
+    const msg = novoStatus === 'archived' ? 'Arquivar este produto? Deixará de aparecer na loja.' : 'Reactivar este produto?';
     if (!confirm(msg)) return;
     await db.from('products').update({ status: novoStatus }).eq('id', id);
     await carregarProdutos();
   }
 
-  // IMAGEM
-  function previewImagem(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      alert('A imagem não pode ter mais de 5 MB.');
-      return;
-    }
-    imagemFicheiro = file;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const preview = document.getElementById('imagemPreview');
-      preview.src = e.target.result;
-      preview.style.display = 'block';
-      document.getElementById('uploadArea').style.display = 'none';
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function previewUrl() {
-    const url = document.getElementById('prodImagemUrl').value.trim();
-    const preview = document.getElementById('imagemPreview');
-    if (url) {
-      preview.src = url;
-      preview.style.display = 'block';
-      document.getElementById('uploadArea').style.display = 'none';
-      imagemFicheiro = null;
-      imagemUrlActual = url;
-    } else {
-      preview.style.display = 'none';
-      document.getElementById('uploadArea').style.display = 'block';
-      imagemUrlActual = '';
-    }
-  }
-
-  function handleDrop(event) {
-    event.preventDefault();
-    document.getElementById('uploadArea').classList.remove('drag');
-    const file = event.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      imagemFicheiro = file;
-      const reader = new FileReader();
-      reader.onload = e => {
-        const preview = document.getElementById('imagemPreview');
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-        document.getElementById('uploadArea').style.display = 'none';
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  function limparImagem() {
-    imagemFicheiro = null;
-    imagemUrlActual = '';
-    document.getElementById('prodImagemUrl').value = '';
-    document.getElementById('imagemPreview').style.display = 'none';
-    document.getElementById('uploadArea').style.display = 'block';
-    document.getElementById('inputImagem').value = '';
-  }
-
-  // TOGGLE ENCOMENDA
+  // ============================
+  // AUXILIARES
+  // ============================
   function toggleEncomenda() {
     const tipo = document.getElementById('prodTipo').value;
     document.getElementById('secaoStock').style.display = tipo === 'stock' ? 'block' : 'none';
     document.getElementById('secaoEncomenda').style.display = tipo === 'pre_order' ? 'block' : 'none';
   }
 
-  // CALCULAR ADIANTAMENTO
   function calcularAdiantamento() {
     const preco = parseFloat(document.getElementById('prodPreco').value) || 0;
     const percentagem = parseFloat(document.getElementById('prodSinal').value) || 0;
@@ -844,7 +1063,6 @@
     }
   }
 
-  // CALCULAR MARGEM
   function calcularMargem() {
     const preco = parseFloat(document.getElementById('prodPreco').value) || 0;
     const custo = parseFloat(document.getElementById('prodCusto').value) || 0;
@@ -859,7 +1077,6 @@
     }
   }
 
-  // VISTAS
   function mostrarVista(vistaId) {
     document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
     document.getElementById(vistaId).classList.add('activa');
@@ -887,16 +1104,23 @@
     document.getElementById('prodSinal').value = '';
     document.getElementById('prodStatus').value = 'active';
     document.getElementById('prodDestaque').value = 'false';
-    document.getElementById('prodImagemUrl').value = '';
-    document.getElementById('imagemPreview').style.display = 'none';
-    document.getElementById('uploadArea').style.display = 'block';
+    document.getElementById('valorUsd').value = '';
+    document.getElementById('margemConversao').value = '0';
+    document.getElementById('novoImagemUrl').value = '';
+    document.getElementById('conversorResultado').style.display = 'none';
     document.getElementById('progressBar').style.display = 'none';
     document.getElementById('progressFill').style.width = '0%';
     document.getElementById('margemInfo').textContent = '';
     const adInfo = document.getElementById('adiantamentoInfo');
     if (adInfo) adInfo.style.display = 'none';
-    imagemFicheiro = null;
-    imagemUrlActual = '';
+
+    imagensProduto = [];
+    gruposVariantesData = [];
+    variantesParaApagar = [];
+    mediaParaApagar = [];
+
+    renderImagens();
+    renderGruposVariantes();
     toggleEncomenda();
     esconderMensagem('msgErroForm');
     esconderMensagem('msgSucessoForm');
