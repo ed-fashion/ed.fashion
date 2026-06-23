@@ -1018,6 +1018,7 @@
       localStorage.setItem('ed_carrinho', JSON.stringify(carrinhoRestante));
     }
     localStorage.removeItem('ed_cupao');
+    localStorage.removeItem('ed_checkout_itens');
     atualizarContadorCarrinho();
 
     mostrarSucesso(encomenda, metodoPagamento, total);
