@@ -789,7 +789,7 @@
                     ${produto.estimated_delivery_days
                       ? `<li>⏱️ Prazo estimado: <strong>${produto.estimated_delivery_days} dias</strong> após submissão da encomenda</li>`
                       : ''}
-                    ${produto.deposit_percentage ? `<li>💰 Adiantamento: <strong>${produto.deposit_percentage}% do valor total</strong></li>` : ''}
+                    ${produto.deposit_percentage ? `<li>💰 Adiantamento: <strong>${produto.deposit_percentage}% do valor total</strong> (${formatMZN(precoFinal * produto.deposit_percentage / 100)})</li>` : ''}
                     <li>✅ Acompanhamento de todo o processo</li>
                     <li>🔒 Compra segura e garantida</li>
                   </ul>
