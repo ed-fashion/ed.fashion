@@ -272,6 +272,52 @@
       .filtro-estado-btn { font-size: 11px; padding: 6px 12px; }
     }
 
+    /* SELEÇÃO EM MASSA */
+    .barra-selecao {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: #FFF3F8;
+      border: 1.5px solid var(--rosa);
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .barra-selecao.visivel { display: flex; }
+    .barra-selecao .sel-count {
+      font-size: 13px; font-weight: 700; color: var(--rosa); flex-shrink: 0;
+    }
+    .barra-selecao .sep { color: #ddd; }
+
+    .checkbox-linha {
+      width: 18px; height: 18px; border-radius: 4px; border: 2px solid #ddd;
+      background: white; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; transition: all 0.15s;
+    }
+    .checkbox-linha.marcado { background: var(--rosa); border-color: var(--rosa); }
+    .checkbox-linha.marcado::after { content: '✓'; color: white; font-size: 11px; font-weight: 800; }
+
+    /* MODAL ENVIO */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 1000;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.visivel { display: flex; }
+    .modal-box {
+      background: white; border-radius: 16px; padding: 28px;
+      max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal-box h3 { font-size: 17px; font-weight: 800; margin-bottom: 16px; }
+    .modal-box textarea {
+      width: 100%; min-height: 100px; padding: 10px 14px;
+      border: 1.5px solid #ddd; border-radius: 8px; font-size: 13px;
+      resize: vertical; outline: none; font-family: var(--fonte); box-sizing: border-box;
+    }
+    .modal-box textarea:focus { border-color: var(--rosa); }
+    .modal-acoes { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
   </style>
 </head>
 <body>
@@ -336,10 +382,32 @@
           <h3>Lista de Encomendas</h3>
           <span id="totalEncomendas" style="font-size:13px; color:var(--cinza);"></span>
         </div>
+
+        <!-- BARRA DE SELEÇÃO EM MASSA -->
+        <div class="barra-selecao" id="barraSelecao">
+          <span class="sel-count" id="selCount">0 selecionadas</span>
+          <span class="sep">|</span>
+          <button class="btn-admin btn-admin-outline" style="font-size:12px;" onclick="abrirModalEstado()">
+            🔄 Mudar Estado
+          </button>
+          <button class="btn-admin btn-admin-outline" style="font-size:12px;" onclick="abrirModalNotificacao()">
+            💬 Notificar (WhatsApp)
+          </button>
+          <button class="btn-admin" style="font-size:12px; background:#DC2626; color:white;" onclick="apagarSelecionadas()">
+            🗑️ Apagar
+          </button>
+          <button class="btn-admin btn-admin-outline" style="font-size:12px; margin-left:auto;" onclick="limparSelecao()">
+            ✕ Limpar
+          </button>
+        </div>
+
         <div class="admin-table-wrap">
           <table class="admin-table">
             <thead>
               <tr>
+                <th style="width:36px;">
+                  <div class="checkbox-linha" id="checkboxTodas" onclick="toggleSelecionarTodas()" title="Selecionar tudo"></div>
+                </th>
                 <th>Nº Encomenda</th>
                 <th>Cliente</th>
                 <th>Produtos</th>
@@ -351,9 +419,45 @@
               </tr>
             </thead>
             <tbody id="tabelaEncomendas">
-              <tr><td colspan="8" style="text-align:center;padding:40px;color:#888;">A carregar...</td></tr>
+              <tr><td colspan="9" style="text-align:center;padding:40px;color:#888;">A carregar...</td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- MODAL: MUDAR ESTADO EM MASSA -->
+      <div class="modal-overlay" id="modalEstado">
+        <div class="modal-box">
+          <h3>🔄 Mudar Estado das Encomendas Selecionadas</h3>
+          <p style="font-size:13px; color:var(--cinza); margin-bottom:14px;">Selecciona o novo estado para todas as encomendas selecionadas.</p>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;" id="modalEstadoBtns"></div>
+          <div class="form-grupo" style="margin-bottom:0;">
+            <label style="font-size:12px; font-weight:700; color:var(--cinza); display:block; margin-bottom:6px;">Nota (opcional)</label>
+            <textarea id="modalEstadoNota" placeholder="Ex: Pagamentos confirmados, lote enviado hoje..."></textarea>
+          </div>
+          <div class="modal-acoes">
+            <button class="btn-admin btn-admin-rosa" onclick="aplicarEstadoEmMassa()">✅ Aplicar</button>
+            <button class="btn-admin btn-admin-outline" onclick="fecharModal('modalEstado')">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL: NOTIFICAÇÃO EM MASSA -->
+      <div class="modal-overlay" id="modalNotificacao">
+        <div class="modal-box">
+          <h3>💬 Notificar Clientes via WhatsApp</h3>
+          <p style="font-size:13px; color:var(--cinza); margin-bottom:14px;" id="modalNotifSubtitulo"></p>
+          <div class="form-grupo">
+            <label style="font-size:12px; font-weight:700; color:var(--cinza); display:block; margin-bottom:6px;">Mensagem</label>
+            <textarea id="modalNotifMsg" rows="4" placeholder="Ex: A vossa encomenda foi enviada hoje! 🚚"></textarea>
+          </div>
+          <div style="font-size:12px; color:var(--cinza); margin-bottom:14px;">
+            💡 Será aberto um link de WhatsApp por cliente. Variáveis disponíveis: <strong>{nome}</strong>, <strong>{numero}</strong>, <strong>{estado}</strong>
+          </div>
+          <div class="modal-acoes">
+            <button class="btn-admin btn-admin-rosa" onclick="enviarNotificacoes()">💬 Abrir WhatsApp</button>
+            <button class="btn-admin btn-admin-outline" onclick="fecharModal('modalNotificacao')">Cancelar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -468,6 +572,8 @@
   let filtroActivo = 'todas';
   let encomendaActual = null;
   let estadoSeleccionado = '';
+  let selecionadas = new Set(); // IDs das encomendas selecionadas
+  let estadoMassaEscolhido = '';
 
   const ORDEM_ESTADOS = [
     'pending', 'awaiting_payment', 'paid', 'preparing', 'shipped', 'delivered'
@@ -571,9 +677,14 @@
       const info = INFO_ESTADOS[e.status] || {};
       const pagamento = e.payments?.[0];
       const numItens = e.order_items?.length || 0;
+      const marcada = selecionadas.has(e.id);
 
       return `
-        <tr style="cursor:pointer" onclick="abrirDetalhe('${e.id}')">
+        <tr style="cursor:pointer; ${marcada ? 'background:#FFF8FC;' : ''}" onclick="abrirDetalhe('${e.id}')">
+          <td onclick="event.stopPropagation()">
+            <div class="checkbox-linha ${marcada ? 'marcado' : ''}"
+              onclick="toggleSelecionarLinha('${e.id}')"></div>
+          </td>
           <td><strong>${e.order_number}</strong></td>
           <td>
             <strong>${e.profiles?.full_name || 'Cliente'}</strong>
@@ -591,6 +702,13 @@
           </td>
         </tr>`;
     }).join('');
+
+    // Atualizar estado do checkbox "selecionar tudo"
+    const todoCk = document.getElementById('checkboxTodas');
+    if (todoCk) {
+      const todasMarcadas = lista.length > 0 && lista.every(e => selecionadas.has(e.id));
+      todoCk.classList.toggle('marcado', todasMarcadas);
+    }
   }
 
   async function abrirDetalhe(id) {
@@ -919,6 +1037,11 @@
           onclick="cancelarEncomenda('${encomenda.id}')">
           ❌ Cancelar Encomenda
         </button>` : ''}
+        <button class="btn-admin"
+          style="width:100%; justify-content:center; background:#DC2626; color:white;"
+          onclick="apagarEncomenda('${encomenda.id}', '${encomenda.order_number}')">
+          🗑️ Apagar Encomenda
+        </button>
       </div>`;
   }
 
@@ -940,6 +1063,170 @@
     mostrarSucesso('msgSucessoDetalhe', '✅ Encomenda cancelada.');
     await carregarEncomendas();
     await abrirDetalhe(id);
+  }
+
+  // ============================
+  // SELEÇÃO E AÇÕES EM MASSA
+  // ============================
+
+  function toggleSelecionarLinha(id) {
+    if (selecionadas.has(id)) selecionadas.delete(id);
+    else selecionadas.add(id);
+    actualizarBarraSelecao();
+    renderTabela();
+  }
+
+  function toggleSelecionarTodas() {
+    const listaVisivel = getListaFiltrada();
+    const todasMarcadas = listaVisivel.every(e => selecionadas.has(e.id));
+    if (todasMarcadas) listaVisivel.forEach(e => selecionadas.delete(e.id));
+    else listaVisivel.forEach(e => selecionadas.add(e.id));
+    actualizarBarraSelecao();
+    renderTabela();
+  }
+
+  function limparSelecao() {
+    selecionadas.clear();
+    actualizarBarraSelecao();
+    renderTabela();
+  }
+
+  function actualizarBarraSelecao() {
+    const barra = document.getElementById('barraSelecao');
+    const count = document.getElementById('selCount');
+    barra.classList.toggle('visivel', selecionadas.size > 0);
+    if (count) count.textContent = `${selecionadas.size} selecionada(s)`;
+  }
+
+  function getListaFiltrada() {
+    const pesquisa = document.getElementById('pesquisaEncomenda').value.toLowerCase();
+    let lista = filtroActivo === 'todas'
+      ? todasEncomendas
+      : todasEncomendas.filter(e => e.status === filtroActivo);
+    if (pesquisa) {
+      lista = lista.filter(e =>
+        e.order_number.toLowerCase().includes(pesquisa) ||
+        e.profiles?.full_name?.toLowerCase().includes(pesquisa)
+      );
+    }
+    return lista;
+  }
+
+  async function apagarSelecionadas() {
+    if (selecionadas.size === 0) return;
+    if (!confirm(`⚠️ Apagar ${selecionadas.size} encomenda(s) permanentemente?\nEsta acção não pode ser desfeita.`)) return;
+
+    const ids = [...selecionadas];
+    await db.from('order_status_history').delete().in('order_id', ids);
+    await db.from('order_items').delete().in('order_id', ids);
+    await db.from('payments').delete().in('order_id', ids);
+    const { error } = await db.from('orders').delete().in('id', ids);
+
+    if (error) { alert('Erro ao apagar: ' + error.message); return; }
+    selecionadas.clear();
+    actualizarBarraSelecao();
+    await carregarEncomendas();
+    mostrarSucesso('msgSucessoLista', `✅ ${ids.length} encomenda(s) apagada(s).`);
+  }
+
+  async function apagarEncomenda(id, numero) {
+    if (!confirm(`⚠️ Apagar a encomenda ${numero} permanentemente?\nEsta acção não pode ser desfeita.`)) return;
+    await db.from('order_status_history').delete().eq('order_id', id);
+    await db.from('order_items').delete().eq('order_id', id);
+    await db.from('payments').delete().eq('order_id', id);
+    const { error } = await db.from('orders').delete().eq('id', id);
+    if (error) { alert('Erro: ' + error.message); return; }
+    mostrarSucesso('msgSucessoLista', `✅ Encomenda ${numero} apagada.`);
+    await carregarEncomendas();
+    mostrarVista('vistaLista');
+  }
+
+  // MODAL ESTADO EM MASSA
+  function abrirModalEstado() {
+    if (selecionadas.size === 0) return;
+    estadoMassaEscolhido = '';
+    const btns = document.getElementById('modalEstadoBtns');
+    btns.innerHTML = [...ORDEM_ESTADOS, 'cancelled'].map(estado => {
+      const info = INFO_ESTADOS[estado] || {};
+      return `<button class="estado-btn" onclick="escolherEstadoMassa('${estado}', this)">
+        ${info.icone} ${info.label}
+      </button>`;
+    }).join('');
+    document.getElementById('modalEstadoNota').value = '';
+    document.getElementById('modalEstado').classList.add('visivel');
+  }
+
+  function escolherEstadoMassa(estado, el) {
+    estadoMassaEscolhido = estado;
+    document.querySelectorAll('#modalEstadoBtns .estado-btn').forEach(b => {
+      b.style.background = '';
+      b.style.borderColor = '';
+      b.style.color = '';
+    });
+    el.style.background = 'var(--rosa)';
+    el.style.borderColor = 'var(--rosa)';
+    el.style.color = 'white';
+  }
+
+  async function aplicarEstadoEmMassa() {
+    if (!estadoMassaEscolhido) { alert('Selecciona um estado.'); return; }
+    const ids = [...selecionadas];
+    const nota = document.getElementById('modalEstadoNota').value.trim() || null;
+    const { data: { session } } = await db.auth.getSession();
+
+    await db.from('orders').update({ status: estadoMassaEscolhido, updated_at: new Date().toISOString() }).in('id', ids);
+
+    const historico = ids.map(id => {
+      const enc = todasEncomendas.find(e => e.id === id);
+      return {
+        order_id: id,
+        old_status: enc?.status || null,
+        new_status: estadoMassaEscolhido,
+        changed_by: session.user.id,
+        notes: nota
+      };
+    });
+    await db.from('order_status_history').insert(historico);
+
+    fecharModal('modalEstado');
+    selecionadas.clear();
+    actualizarBarraSelecao();
+    await carregarEncomendas();
+    mostrarSucesso('msgSucessoLista', `✅ Estado alterado para "${INFO_ESTADOS[estadoMassaEscolhido]?.label}" em ${ids.length} encomenda(s).`);
+  }
+
+  // MODAL NOTIFICAÇÃO EM MASSA
+  function abrirModalNotificacao() {
+    if (selecionadas.size === 0) return;
+    document.getElementById('modalNotifSubtitulo').textContent =
+      `Será gerado um link WhatsApp para cada um dos ${selecionadas.size} clientes selecionados.`;
+    document.getElementById('modalNotifMsg').value =
+      `Olá {nome}! 👋\n\nA vossa encomenda *{numero}* está com o estado: *{estado}*.\n\nQualquer dúvida, estamos aqui! 😊 — E'D Fashion`;
+    document.getElementById('modalNotificacao').classList.add('visivel');
+  }
+
+  function enviarNotificacoes() {
+    const modelo = document.getElementById('modalNotifMsg').value.trim();
+    if (!modelo) { alert('Escreve uma mensagem.'); return; }
+
+    const enc = todasEncomendas.filter(e => selecionadas.has(e.id));
+    enc.forEach((e, i) => {
+      const telefone = e.shipping_address?.telefone || e.profiles?.phone;
+      if (!telefone) return;
+      const msg = modelo
+        .replace('{nome}', e.shipping_address?.nome || e.profiles?.full_name || 'Cliente')
+        .replace('{numero}', e.order_number)
+        .replace('{estado}', INFO_ESTADOS[e.status]?.label || e.status);
+      const url = `https://wa.me/258${telefone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`;
+      // Abrir com delay para não bloquear pop-ups do browser
+      setTimeout(() => window.open(url, '_blank'), i * 600);
+    });
+
+    fecharModal('modalNotificacao');
+  }
+
+  function fecharModal(id) {
+    document.getElementById(id).classList.remove('visivel');
   }
 
   function traduzirMetodo(metodo) {

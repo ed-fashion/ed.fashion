@@ -780,6 +780,15 @@
           <div class="item-tipo ${item.tipo === 'pre_order' ? 'encomenda' : ''}">
             ${item.tipo === 'pre_order' ? '📦 Por Encomenda' : '✅ Em Stock'}
           </div>
+          ${item.variantes && Object.keys(item.variantes).length > 0
+            ? `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                ${Object.entries(item.variantes).map(([tipo, v]) =>
+                  `<span style="background:#f3f4f6; border:1px solid #ddd; border-radius:6px; padding:2px 8px; font-size:12px; color:var(--cinza-escuro);">
+                    <strong>${tipo}:</strong> ${v.valor}
+                  </span>`
+                ).join('')}
+              </div>`
+            : ''}
           <div class="item-preco">${formatMZN(item.preco)}</div>
 
           <div class="item-controlo">

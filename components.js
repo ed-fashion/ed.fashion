@@ -11,7 +11,6 @@ function carregarNavbar() {
         <button onclick="pesquisar()">🔍</button>
       </div>
       <div class="navbar-icons">
-        <a href="favoritos.html" title="Favoritos">♡</a>
         <a href="carrinho.html" title="Carrinho">
           🛒 <span id="carrinhoCount" class="badge">0</span>
         </a>
@@ -64,7 +63,6 @@ function carregarFooter() {
         <h4>Loja</h4>
         <a href="catalogo.html">Produtos</a>
         <a href="encomenda.html">Por Encomenda</a>
-        <a href="favoritos.html">Favoritos</a>
       </div>
       <div class="footer-col">
         <h4>Conta</h4>

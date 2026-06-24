@@ -348,6 +348,8 @@
       <input type="hidden" id="bannerId">
       <input type="hidden" id="produtoId1">
       <input type="hidden" id="produtoId2">
+      <input type="hidden" id="produtoId3">
+      <input type="hidden" id="produtoId4">
 
       <div class="secao-form">
         <div class="secao-form-titulo">📝 Conteúdo do Banner</div>
@@ -360,6 +362,23 @@
             <label>Subtítulo / Descrição</label>
             <textarea id="bannerSubtitulo" rows="2" placeholder="Texto de apoio que aparece abaixo do título"></textarea>
           </div>
+
+          <!-- LIGAR A UMA COLECÇÃO -->
+          <div style="background:#EFF6FF; border:1.5px solid #2563EB; border-radius:10px; padding:16px; margin-bottom:16px;">
+            <div style="font-size:13px; font-weight:700; color:#2563EB; margin-bottom:10px;">
+              🎯 Ligar a uma Colecção (recomendado)
+            </div>
+            <div class="form-grupo" style="margin-bottom:8px;">
+              <label>Escolher Colecção</label>
+              <select id="bannerColecao" onchange="selecionarColecao(this.value)">
+                <option value="">— Nenhuma (preenche o link manualmente) —</option>
+              </select>
+            </div>
+            <div style="font-size:11px; color:#2563EB; margin-top:4px;">
+              💡 Ao escolher uma colecção, o link e os produtos são preenchidos automaticamente.
+            </div>
+          </div>
+
           <div class="form-grid-2">
             <div class="form-grupo">
               <label>Texto do Botão</label>
@@ -367,7 +386,7 @@
             </div>
             <div class="form-grupo">
               <label>Link do Botão</label>
-              <input type="text" id="bannerLink" placeholder="Ex: catalogo.html" value="catalogo.html">
+              <input type="text" id="bannerLink" placeholder="Ex: catalogo.html ou colecao.html?slug=..." value="catalogo.html">
             </div>
           </div>
         </div>
@@ -378,7 +397,7 @@
         <div class="secao-form-titulo">🏷️ Produtos em Destaque no Banner (opcional)</div>
         <div class="secao-form-corpo">
           <div style="font-size:12px; color:var(--cinza); margin-bottom:14px;">
-            💡 Mostra até 2 produtos com preço sobrepostos na imagem do banner — como na Shein.
+            💡 Mostra até 4 produtos com preço sobrepostos na imagem do banner. Escolhe os que quiseres destacar.
           </div>
 
           <!-- SLOT 1 -->
@@ -409,6 +428,36 @@
             </div>
             <input type="text" id="buscaProduto2" placeholder="🔍 Pesquisar produto..." oninput="buscarProdutos(2)">
             <div class="produtos-busca-lista" id="listaBusca2"></div>
+          </div>
+
+          <!-- SLOT 3 -->
+          <div class="produto-slot">
+            <div class="produto-slot-header">Produto 3</div>
+            <div class="produto-selecionado-preview" id="preview3">
+              <img class="produto-selecionado-img" id="previewImg3">
+              <div class="produto-selecionado-info">
+                <div class="produto-selecionado-nome" id="previewNome3"></div>
+                <div class="produto-selecionado-preco" id="previewPreco3"></div>
+              </div>
+              <button class="btn-remover-produto" onclick="removerProdutoSlot(3)">×</button>
+            </div>
+            <input type="text" id="buscaProduto3" placeholder="🔍 Pesquisar produto..." oninput="buscarProdutos(3)">
+            <div class="produtos-busca-lista" id="listaBusca3"></div>
+          </div>
+
+          <!-- SLOT 4 -->
+          <div class="produto-slot">
+            <div class="produto-slot-header">Produto 4</div>
+            <div class="produto-selecionado-preview" id="preview4">
+              <img class="produto-selecionado-img" id="previewImg4">
+              <div class="produto-selecionado-info">
+                <div class="produto-selecionado-nome" id="previewNome4"></div>
+                <div class="produto-selecionado-preco" id="previewPreco4"></div>
+              </div>
+              <button class="btn-remover-produto" onclick="removerProdutoSlot(4)">×</button>
+            </div>
+            <input type="text" id="buscaProduto4" placeholder="🔍 Pesquisar produto..." oninput="buscarProdutos(4)">
+            <div class="produtos-busca-lista" id="listaBusca4"></div>
           </div>
         </div>
       </div>
@@ -478,13 +527,67 @@
   let imagemFicheiroBanner = null;
   let imagemUrlBannerActual = '';
   let todosProdutosCache = [];
+  let todasColecoes = [];
 
   async function iniciar() {
     const ok = await verificarAdmin();
     if (!ok) return;
     carregarAdminNav('produtos');
-    await carregarBanners();
-    await carregarProdutosCache();
+    await Promise.all([carregarBanners(), carregarProdutosCache(), carregarColecoesDropdown()]);
+  }
+
+  async function carregarColecoesDropdown() {
+    const { data } = await db
+      .from('collections')
+      .select('id, nome, slug, descricao, collection_products(product_id, sort_order)')
+      .eq('is_active', true)
+      .order('nome');
+
+    todasColecoes = data || [];
+
+    const sel = document.getElementById('bannerColecao');
+    if (!sel) return;
+    // Manter opção vazia
+    sel.innerHTML = `<option value="">— Nenhuma (preenche o link manualmente) —</option>` +
+      todasColecoes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+  }
+
+  async function selecionarColecao(colecaoId) {
+    if (!colecaoId) return;
+
+    const col = todasColecoes.find(c => c.id === colecaoId);
+    if (!col) return;
+
+    // Preencher título, subtítulo e link automaticamente (só se estiverem vazios ou forem o padrão)
+    const tituloEl = document.getElementById('bannerTitulo');
+    const subEl = document.getElementById('bannerSubtitulo');
+    const linkEl = document.getElementById('bannerLink');
+
+    if (!tituloEl.value || tituloEl.value === tituloEl.dataset.auto) {
+      tituloEl.value = col.nome;
+      tituloEl.dataset.auto = col.nome;
+    }
+    if (!subEl.value || subEl.value === subEl.dataset.auto) {
+      subEl.value = col.descricao || '';
+      subEl.dataset.auto = col.descricao || '';
+    }
+    linkEl.value = `colecao.html?slug=${col.slug}`;
+
+    // Preencher slots com produtos da colecção (até 4)
+    const produtosCol = (col.collection_products || [])
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .slice(0, 4)
+      .map(cp => cp.product_id);
+
+    // Limpar slots primeiro
+    [1,2,3,4].forEach(i => removerProdutoSlot(i));
+
+    // Preencher com os produtos da colecção
+    produtosCol.forEach((pid, i) => {
+      const slot = i + 1;
+      const p = todosProdutosCache.find(x => x.id === pid);
+      if (p) preencherProdutoSlot(slot, p.id);
+    });
   }
 
   async function carregarProdutosCache() {
@@ -536,7 +639,9 @@
               ${b.is_active ? '✅ Activo' : '⏸️ Inactivo'}
             </span>
             <span>🔗 ${b.link_url}</span>
-            ${b.produto_id_1 || b.produto_id_2 ? `<span>🏷️ ${(b.produto_id_1 ? 1 : 0) + (b.produto_id_2 ? 1 : 0)} produto(s) destacado(s)</span>` : ''}
+            ${b.produto_id_1 || b.produto_id_2 || b.produto_id_3 || b.produto_id_4
+              ? `<span>🏷️ ${[b.produto_id_1, b.produto_id_2, b.produto_id_3, b.produto_id_4].filter(Boolean).length} produto(s) destacado(s)</span>`
+              : ''}
           </div>
         </div>
         <div class="banner-ordem-btns">
@@ -583,6 +688,10 @@
     document.getElementById('bannerLink').value = b.link_url || 'catalogo.html';
     document.getElementById('bannerAtivo').value = b.is_active ? 'true' : 'false';
 
+    // Restaurar colecção se o link corresponder a alguma
+    const matchCol = todasColecoes.find(c => (b.link_url || '').includes('slug=' + c.slug));
+    document.getElementById('bannerColecao').value = matchCol ? matchCol.id : '';
+
     seleccionarCor(b.cor_overlay || 'rosa');
 
     if (b.imagem_url) {
@@ -594,6 +703,8 @@
 
     if (b.produto_id_1) preencherProdutoSlot(1, b.produto_id_1);
     if (b.produto_id_2) preencherProdutoSlot(2, b.produto_id_2);
+    if (b.produto_id_3) preencherProdutoSlot(3, b.produto_id_3);
+    if (b.produto_id_4) preencherProdutoSlot(4, b.produto_id_4);
 
     mostrarVista('vistaForm');
   }
@@ -733,6 +844,8 @@
       imagem_url: imageUrl || null,
       produto_id_1: document.getElementById('produtoId1').value || null,
       produto_id_2: document.getElementById('produtoId2').value || null,
+      produto_id_3: document.getElementById('produtoId3').value || null,
+      produto_id_4: document.getElementById('produtoId4').value || null,
       is_active: document.getElementById('bannerAtivo').value === 'true'
     };
 
@@ -787,8 +900,14 @@
     document.getElementById('uploadAreaBanner').style.display = 'block';
     removerProdutoSlot(1);
     removerProdutoSlot(2);
+    removerProdutoSlot(3);
+    removerProdutoSlot(4);
     document.getElementById('buscaProduto1').value = '';
     document.getElementById('buscaProduto2').value = '';
+    document.getElementById('buscaProduto3').value = '';
+    document.getElementById('buscaProduto4').value = '';
+    const colSel = document.getElementById('bannerColecao');
+    if (colSel) colSel.value = '';
     imagemFicheiroBanner = null;
     imagemUrlBannerActual = '';
     seleccionarCor('rosa');

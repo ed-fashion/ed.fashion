@@ -383,6 +383,226 @@
       transform: translateX(-50%) translateY(0);
     }
 
+    /* GALERIA */
+    .galeria-thumbnails {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .galeria-thumb {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s, opacity 0.2s;
+      opacity: 0.7;
+    }
+
+    .galeria-thumb:hover,
+    .galeria-thumb.activa {
+      border-color: var(--rosa);
+      opacity: 1;
+    }
+
+    /* VARIANTES */
+    .variantes-wrap {
+      margin-bottom: 20px;
+    }
+
+    .variante-grupo {
+      margin-bottom: 14px;
+    }
+
+    .variante-grupo-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .variante-opcoes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .variante-opcao {
+      padding: 7px 16px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      color: var(--preto);
+      user-select: none;
+    }
+
+    .variante-opcao:hover {
+      border-color: var(--rosa);
+      color: var(--rosa);
+    }
+
+    .variante-opcao.seleccionada {
+      background: var(--rosa);
+      border-color: var(--rosa);
+      color: white;
+    }
+
+    .variante-opcao.sem-stock {
+      opacity: 0.4;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+
+    /* COMENTÁRIOS */
+    .comentarios-secao {
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 2px solid #eee;
+    }
+
+    .comentarios-secao h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--preto);
+      margin-bottom: 6px;
+    }
+
+    .comentarios-secao h2 span { color: var(--rosa); }
+
+    .rating-resumo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .rating-numero {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--preto);
+      line-height: 1;
+    }
+
+    .rating-estrelas {
+      font-size: 22px;
+      letter-spacing: 2px;
+    }
+
+    .rating-total {
+      font-size: 13px;
+      color: var(--cinza);
+    }
+
+    .comentario-item {
+      padding: 16px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .comentario-cabecalho {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .comentario-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--rosa);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .comentario-autor {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--preto);
+    }
+
+    .comentario-data {
+      font-size: 12px;
+      color: var(--cinza);
+      margin-left: auto;
+    }
+
+    .comentario-estrelas { font-size: 14px; }
+
+    .comentario-texto {
+      font-size: 14px;
+      color: var(--cinza-escuro);
+      line-height: 1.6;
+      margin-top: 4px;
+    }
+
+    .form-review {
+      background: var(--cinza-claro);
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+
+    .form-review h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--preto);
+    }
+
+    .estrelas-picker {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .estrela-pick {
+      font-size: 28px;
+      cursor: pointer;
+      transition: transform 0.1s;
+      filter: grayscale(1);
+      opacity: 0.4;
+      line-height: 1;
+    }
+
+    .estrela-pick.activa {
+      filter: none;
+      opacity: 1;
+    }
+
+    .estrela-pick:hover { transform: scale(1.2); }
+
+    .form-review textarea {
+      width: 100%;
+      min-height: 90px;
+      padding: 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      font-size: 14px;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    .form-review textarea:focus { border-color: var(--rosa); }
+
     .produto-loading {
       max-width: 1100px;
       margin: 30px auto;
@@ -398,6 +618,7 @@
       .produto-imagem-wrap { position: static; }
       .produto-nome { font-size: 20px; }
       .produto-preco-actual { font-size: 26px; }
+      .galeria-thumb { width: 58px; height: 58px; }
     }
 
   </style>
@@ -447,7 +668,9 @@
       .select(`
         *,
         categories(id, name, slug),
-        product_stock(quantity, low_stock_threshold)
+        product_stock(quantity, low_stock_threshold),
+        product_media(id, url, is_primary, sort_order),
+        product_variants(id, tipo, valor, stock, preco_adicional, sort_order)
       `)
       .eq('id', id)
       .eq('status', 'active')
@@ -470,6 +693,9 @@
     carregarRelacionados();
   }
 
+  // Variantes seleccionadas globalmente
+  let variantesSelecionadas = {};
+
   function renderProduto() {
     const temPromo = produto.sale_price && produto.sale_price < produto.price;
     const precoFinal = temPromo ? produto.sale_price : produto.price;
@@ -478,6 +704,22 @@
     const esgotado = produto.availability_type === 'stock' && stock === 0;
     const stockBaixo = produto.availability_type === 'stock' && stock > 0 && stock <= 5;
     const eEncomenda = produto.availability_type === 'pre_order';
+
+    // Galeria de imagens
+    const media = (produto.product_media || []).sort((a, b) => a.sort_order - b.sort_order);
+    const imagemPrincipal = media.find(m => m.is_primary)?.url || media[0]?.url || produto.image_url;
+    const todasImagens = media.length > 0
+      ? media.map(m => m.url)
+      : (produto.image_url ? [produto.image_url] : []);
+
+    // Variantes agrupadas por tipo
+    const variantes = produto.product_variants || [];
+    const gruposVariantes = variantes.reduce((acc, v) => {
+      if (!acc[v.tipo]) acc[v.tipo] = [];
+      acc[v.tipo].push(v);
+      return acc;
+    }, {});
+    variantesSelecionadas = {};
 
     const whatsappMsg = encodeURIComponent(
       `Olá E'D Fashion! 👋\n\nTenho interesse no seguinte produto:\n\n` +
@@ -499,17 +741,30 @@
 
         <div class="produto-grid">
 
+          <!-- COLUNA ESQUERDA: Imagens -->
           <div class="produto-imagem-wrap">
-            ${produto.image_url
-              ? `<img src="${produto.image_url}" alt="${produto.name}"
+            ${imagemPrincipal
+              ? `<img src="${imagemPrincipal}" alt="${produto.name}"
+                   id="imagemPrincipal"
                    class="produto-imagem-principal"
                    onerror="this.style.display='none'; document.getElementById('semImagem').style.display='flex'">`
               : ''}
-            <div id="semImagem" class="produto-sem-imagem" ${produto.image_url ? 'style="display:none"' : ''}>
+            <div id="semImagem" class="produto-sem-imagem" ${imagemPrincipal ? 'style="display:none"' : ''}>
               👗
             </div>
+            ${todasImagens.length > 1
+              ? `<div class="galeria-thumbnails" id="galeriaThumbs">
+                  ${todasImagens.map((url, i) =>
+                    `<img src="${url}" alt="Imagem ${i+1}"
+                       class="galeria-thumb ${i === 0 ? 'activa' : ''}"
+                       onclick="mudarImagem('${url}', this)"
+                       onerror="this.style.display='none'">`
+                  ).join('')}
+                </div>`
+              : ''}
           </div>
 
+          <!-- COLUNA DIREITA: Info -->
           <div class="produto-info">
 
             <div class="produto-badges">
@@ -531,7 +786,9 @@
               ? `<div class="encomenda-info">
                   <h4>📦 Produto por Encomenda</h4>
                   <ul>
-                    ${produto.estimated_delivery_days ? `<li>⏱️ Prazo estimado: <strong>${produto.estimated_delivery_days} dias</strong></li>` : ''}
+                    ${produto.estimated_delivery_days
+                      ? `<li>⏱️ Prazo estimado: <strong>${produto.estimated_delivery_days} dias</strong> após submissão da encomenda</li>`
+                      : ''}
                     ${produto.deposit_percentage ? `<li>💰 Adiantamento: <strong>${produto.deposit_percentage}% do valor total</strong></li>` : ''}
                     <li>✅ Acompanhamento de todo o processo</li>
                     <li>🔒 Compra segura e garantida</li>
@@ -554,6 +811,29 @@
                 </p>`
               : ''}
 
+            ${Object.keys(gruposVariantes).length > 0
+              ? `<div class="variantes-wrap" id="variantesWrap">
+                  ${Object.entries(gruposVariantes).map(([tipo, opcoes]) => `
+                    <div class="variante-grupo">
+                      <span class="variante-grupo-label">${tipo}</span>
+                      <div class="variante-opcoes">
+                        ${opcoes.sort((a,b) => a.sort_order - b.sort_order).map(op => {
+                          const semStock = op.stock !== null && op.stock !== undefined && op.stock === 0;
+                          return `<button
+                            class="variante-opcao${semStock ? ' sem-stock' : ''}"
+                            data-tipo="${tipo}"
+                            data-valor="${op.valor}"
+                            data-preco="${op.preco_adicional || 0}"
+                            ${semStock ? 'disabled title="Sem stock"' : `onclick="selecionarVariante('${tipo}', '${op.valor}', ${op.preco_adicional || 0}, this)"`}>
+                            ${op.valor}
+                          </button>`;
+                        }).join('')}
+                      </div>
+                    </div>`
+                  ).join('')}
+                </div>`
+              : ''}
+
             ${!esgotado ? `
             <div class="quantidade-wrap">
               <label>Quantidade</label>
@@ -570,10 +850,12 @@
 
             <div class="produto-btns">
               ${!esgotado
-                ? `<button class="btn-comprar-agora" onclick="comprarAgora()" id="btnComprarAgora">
+                ? `<button class="btn-comprar-agora" onclick="comprarAgora()" id="btnComprarAgora"
+                    ${Object.keys(gruposVariantes).length > 0 ? 'disabled' : ''}>
                     ⚡ Comprar Agora
                   </button>
-                  <button class="btn-carrinho" onclick="adicionarCarrinho()" id="btnCarrinho">
+                  <button class="btn-carrinho" onclick="adicionarCarrinho()" id="btnCarrinho"
+                    ${Object.keys(gruposVariantes).length > 0 ? 'disabled' : ''}>
                     🛒 Adicionar ao Carrinho
                   </button>`
                 : `<button class="btn-carrinho" disabled>😔 Produto Esgotado</button>`}
@@ -594,12 +876,16 @@
           </div>
         </div>
 
+        <!-- TABS: Descrição / Especificações / Avaliações -->
         <div>
           <div class="produto-tabs">
             <div class="produto-tab activa" onclick="mudarTab('descricao', this)">Descrição</div>
             ${produto.specifications && Object.keys(produto.specifications).length > 0
               ? `<div class="produto-tab" onclick="mudarTab('especificacoes', this)">Especificações</div>`
               : ''}
+            <div class="produto-tab" onclick="mudarTab('avaliacoes', this)">
+              Avaliações <span id="contadorReviews" style="font-size:11px; background:#eee; padding:2px 6px; border-radius:10px; margin-left:4px;">0</span>
+            </div>
           </div>
 
           <div class="produto-tab-conteudo activa" id="tab-descricao">
@@ -622,11 +908,60 @@
                 </div>
               </div>`
             : ''}
+
+          <div class="produto-tab-conteudo" id="tab-avaliacoes">
+            <div id="reviewsConteudo">
+              <div style="text-align:center; padding:30px; color:var(--cinza);">⏳ A carregar avaliações...</div>
+            </div>
+          </div>
         </div>
 
         <div class="relacionados" id="relacionados"></div>
 
       </div>`;
+
+    // Carregar reviews após render
+    carregarReviews();
+  }
+
+  function mudarImagem(url, el) {
+    const principal = document.getElementById('imagemPrincipal');
+    if (principal) {
+      principal.src = url;
+      principal.style.display = 'block';
+      document.getElementById('semImagem').style.display = 'none';
+    }
+    document.querySelectorAll('.galeria-thumb').forEach(t => t.classList.remove('activa'));
+    el.classList.add('activa');
+  }
+
+  function selecionarVariante(tipo, valor, precoAdicional, el) {
+    // Desselecionar outros do mesmo grupo
+    document.querySelectorAll(`.variante-opcao[data-tipo="${tipo}"]`).forEach(b => b.classList.remove('seleccionada'));
+    el.classList.add('seleccionada');
+    variantesSelecionadas[tipo] = { valor, precoAdicional };
+
+    // Atualizar preço visível
+    const precoBase = produto.sale_price && produto.sale_price < produto.price
+      ? produto.sale_price
+      : produto.price;
+    const precoExtra = Object.values(variantesSelecionadas)
+      .reduce((s, v) => s + (v.precoAdicional || 0), 0);
+    const precoTotal = precoBase + precoExtra;
+
+    const elPreco = document.querySelector('.produto-preco-actual');
+    if (elPreco) elPreco.textContent = formatMZN(precoTotal);
+
+    // Desbloquear botões quando todos os grupos tiverem seleção
+    const todosGrupos = [...document.querySelectorAll('.variante-grupo')]
+      .map(g => g.querySelector('.variante-grupo-label')?.textContent?.trim())
+      .filter(Boolean);
+    const todosSeleccionados = todosGrupos.every(t => variantesSelecionadas[t]);
+
+    const btnComprar = document.getElementById('btnComprarAgora');
+    const btnCarrinho = document.getElementById('btnCarrinho');
+    if (btnComprar) btnComprar.disabled = !todosSeleccionados;
+    if (btnCarrinho) btnCarrinho.disabled = !todosSeleccionados;
   }
 
   function alterarQtd(delta) {
@@ -640,14 +975,17 @@
   // COMPRAR AGORA — vai directo ao checkout
   function comprarAgora() {
     const quantidade = parseInt(document.getElementById('quantidade')?.value || 1);
+    const precoFinal = produto.sale_price && produto.sale_price < produto.price ? produto.sale_price : produto.price;
+    const precoExtra = Object.values(variantesSelecionadas).reduce((s, v) => s + (v.precoAdicional || 0), 0);
 
     const itemCompra = [{
       id: produto.id,
       nome: produto.name,
-      preco: produto.sale_price && produto.sale_price < produto.price ? produto.sale_price : produto.price,
+      preco: precoFinal + precoExtra,
       imagem: produto.image_url || '',
       quantidade,
-      tipo: produto.availability_type
+      tipo: produto.availability_type,
+      variantes: { ...variantesSelecionadas }
     }];
 
     localStorage.setItem('ed_compra_directa', JSON.stringify(itemCompra));
@@ -656,19 +994,25 @@
 
   function adicionarCarrinho() {
     const quantidade = parseInt(document.getElementById('quantidade')?.value || 1);
+    const precoFinal = produto.sale_price && produto.sale_price < produto.price ? produto.sale_price : produto.price;
+    const precoExtra = Object.values(variantesSelecionadas).reduce((s, v) => s + (v.precoAdicional || 0), 0);
     const carrinho = JSON.parse(localStorage.getItem('ed_carrinho') || '[]');
 
-    const idx = carrinho.findIndex(i => i.id === produto.id);
+    // Chave única inclui variantes escolhidas
+    const chaveVariantes = JSON.stringify(variantesSelecionadas);
+    const idx = carrinho.findIndex(i => i.id === produto.id && JSON.stringify(i.variantes || {}) === chaveVariantes);
+
     if (idx >= 0) {
       carrinho[idx].quantidade += quantidade;
     } else {
       carrinho.push({
         id: produto.id,
         nome: produto.name,
-        preco: produto.sale_price && produto.sale_price < produto.price ? produto.sale_price : produto.price,
+        preco: precoFinal + precoExtra,
         imagem: produto.image_url || '',
         quantidade,
-        tipo: produto.availability_type
+        tipo: produto.availability_type,
+        variantes: { ...variantesSelecionadas }
       });
     }
 
@@ -731,6 +1075,177 @@
             </div>`;
         }).join('')}
       </div>`;
+  }
+
+  // ============================
+  // REVIEWS / AVALIAÇÕES
+  // ============================
+
+  let ratingEscolhido = 0;
+
+  async function carregarReviews() {
+    const { data: reviews, error } = await db
+      .from('product_reviews')
+      .select('id, rating, comment, created_at, profiles(full_name)')
+      .eq('product_id', produto.id)
+      .eq('is_approved', true)
+      .order('created_at', { ascending: false });
+
+    const container = document.getElementById('reviewsConteudo');
+    if (!container) return;
+
+    if (error) {
+      // Se a tabela ainda não existir, mostra o formulário na mesma
+      const container = document.getElementById('reviewsConteudo');
+      if (!container) return;
+      const sessaoActiva = await verificarSessao();
+      container.innerHTML = `
+        <p style="color:var(--cinza); font-size:14px; margin-bottom:16px;">Ainda sem avaliações. Sê o primeiro!</p>
+        <div class="form-review">
+          <h3>✍️ Deixar uma Avaliação</h3>
+          ${sessaoActiva
+            ? `<div class="estrelas-picker" id="estrelasPicker">
+                 ${[1,2,3,4,5].map(n =>
+                   `<span class="estrela-pick" data-n="${n}" onclick="escolherEstrela(${n})">⭐</span>`
+                 ).join('')}
+               </div>
+               <p id="labelRating" style="font-size:12px; color:var(--cinza); margin-bottom:10px;">Selecciona uma classificação</p>
+               <textarea id="comentarioTexto" placeholder="Partilha a tua experiência com este produto (opcional)..."></textarea>
+               <div class="msg-erro" id="msgErroReview" style="margin-top:8px;"></div>
+               <div class="msg-sucesso" id="msgSucessoReview" style="margin-top:8px;"></div>
+               <button class="btn-carrinho" style="margin-top:12px; width:auto; padding:12px 28px;"
+                 onclick="submeterReview()">Publicar Avaliação</button>`
+            : `<p style="font-size:14px; color:var(--cinza);">
+                 <a href="login.html" style="color:var(--rosa); font-weight:700;">Inicia sessão</a> para deixar uma avaliação.
+               </p>`}
+        </div>`;
+      return;
+    }
+
+    const lista = reviews || [];
+    const contador = document.getElementById('contadorReviews');
+    if (contador) contador.textContent = lista.length;
+
+    const mediaRating = lista.length > 0
+      ? (lista.reduce((s, r) => s + r.rating, 0) / lista.length).toFixed(1)
+      : 0;
+
+    const estrelas = (n) => '⭐'.repeat(Math.round(n)) + '☆'.repeat(5 - Math.round(n));
+
+    const sessaoActiva = await verificarSessao();
+
+    container.innerHTML = `
+      ${lista.length > 0 ? `
+        <div class="rating-resumo">
+          <div class="rating-numero">${mediaRating}</div>
+          <div>
+            <div class="rating-estrelas">${estrelas(mediaRating)}</div>
+            <div class="rating-total">${lista.length} avaliação${lista.length !== 1 ? 'ões' : ''}</div>
+          </div>
+        </div>` : ''}
+
+      ${lista.length === 0
+        ? `<p style="color:var(--cinza); font-size:14px; margin-bottom:20px;">Ainda sem avaliações. Sê o primeiro!</p>`
+        : lista.map(r => {
+            const nome = r.profiles?.full_name || 'Cliente';
+            const inicial = nome.charAt(0).toUpperCase();
+            const data = new Date(r.created_at).toLocaleDateString('pt-PT', { day:'2-digit', month:'short', year:'numeric' });
+            return `
+              <div class="comentario-item">
+                <div class="comentario-cabecalho">
+                  <div class="comentario-avatar">${inicial}</div>
+                  <div>
+                    <div class="comentario-autor">${nome}</div>
+                    <div class="comentario-estrelas">${'⭐'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+                  </div>
+                  <div class="comentario-data">${data}</div>
+                </div>
+                ${r.comment ? `<div class="comentario-texto">${r.comment}</div>` : ''}
+              </div>`;
+          }).join('')}
+
+      <div class="form-review">
+        <h3>✍️ Deixar uma Avaliação</h3>
+        ${sessaoActiva
+          ? `<div class="estrelas-picker" id="estrelasPicker">
+               ${[1,2,3,4,5].map(n =>
+                 `<span class="estrela-pick" data-n="${n}" onclick="escolherEstrela(${n})">⭐</span>`
+               ).join('')}
+             </div>
+             <p id="labelRating" style="font-size:12px; color:var(--cinza); margin-bottom:10px;">Selecciona uma classificação</p>
+             <textarea id="comentarioTexto" placeholder="Partilha a tua experiência com este produto (opcional)..."></textarea>
+             <div class="msg-erro" id="msgErroReview" style="margin-top:8px;"></div>
+             <div class="msg-sucesso" id="msgSucessoReview" style="margin-top:8px;"></div>
+             <button class="btn-carrinho" style="margin-top:12px; width:auto; padding:12px 28px;"
+               onclick="submeterReview()">Publicar Avaliação</button>`
+          : `<p style="font-size:14px; color:var(--cinza);">
+               <a href="login.html" style="color:var(--rosa); font-weight:700;">Inicia sessão</a> para deixar uma avaliação.
+             </p>`}
+      </div>`;
+
+    // Re-init estrelas picker
+    ratingEscolhido = 0;
+  }
+
+  async function verificarSessao() {
+    try {
+      const { data: { user } } = await db.auth.getUser();
+      return !!user;
+    } catch { return false; }
+  }
+
+  function escolherEstrela(n) {
+    ratingEscolhido = n;
+    const labels = ['Muito mau', 'Mau', 'Razoável', 'Bom', 'Excelente'];
+    const label = document.getElementById('labelRating');
+    if (label) label.textContent = labels[n - 1];
+    document.querySelectorAll('.estrela-pick').forEach(el => {
+      el.classList.toggle('activa', parseInt(el.dataset.n) <= n);
+    });
+  }
+
+  async function submeterReview() {
+    if (ratingEscolhido === 0) {
+      mostrarErro('msgErroReview', 'Selecciona uma classificação de 1 a 5 estrelas.');
+      return;
+    }
+
+    const { data: { user } } = await db.auth.getUser();
+    if (!user) {
+      mostrarErro('msgErroReview', 'Precisas de iniciar sessão.');
+      return;
+    }
+
+    const comentario = document.getElementById('comentarioTexto')?.value.trim() || null;
+
+    // Verificar se já avaliou
+    const { data: jaExiste } = await db
+      .from('product_reviews')
+      .select('id')
+      .eq('product_id', produto.id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (jaExiste) {
+      mostrarErro('msgErroReview', 'Já avaliaste este produto.');
+      return;
+    }
+
+    const { error } = await db.from('product_reviews').insert({
+      product_id: produto.id,
+      user_id: user.id,
+      rating: ratingEscolhido,
+      comment: comentario,
+      is_approved: true
+    });
+
+    if (error) {
+      mostrarErro('msgErroReview', 'Erro ao publicar: ' + error.message);
+      return;
+    }
+
+    mostrarSucesso('msgSucessoReview', '✅ Avaliação publicada com sucesso!');
+    setTimeout(() => carregarReviews(), 1500);
   }
 
   iniciar();

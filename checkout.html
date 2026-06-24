@@ -807,6 +807,7 @@
               ${seleccionados.length === 0 ? 'disabled' : ''}>
               🎉 Confirmar Encomenda
             </button>
+            <div class="msg-erro" id="msgErroResumo" style="margin-top:10px; font-size:13px;"></div>
 
             <div class="seguranca-info">
               🔒 Compra segura e protegida
@@ -827,6 +828,15 @@
           : `<div class="grupo-item-sem-img">👗</div>`}
         <div class="grupo-item-info">
           <div class="grupo-item-nome">${item.nome}</div>
+          ${item.variantes && Object.keys(item.variantes).length > 0
+            ? `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:4px;">
+                ${Object.entries(item.variantes).map(([tipo, v]) =>
+                  `<span style="background:#f3f4f6; border:1px solid #ddd; border-radius:5px; padding:1px 7px; font-size:11px; color:var(--cinza-escuro);">
+                    <strong>${tipo}:</strong> ${v.valor}
+                  </span>`
+                ).join('')}
+              </div>`
+            : ''}
           <div class="grupo-item-qtd">Quantidade: ${item.quantidade}</div>
         </div>
         <div class="grupo-item-preco">${formatMZN(item.preco * item.quantidade)}</div>
@@ -848,8 +858,9 @@
         passos: [
           'Abre o menu M-Pesa no teu telemóvel Vodacom',
           'Selecciona <strong>Enviar Dinheiro</strong>',
-          `Introduz o número: <strong>86 646 4666</strong>`,
+          `Introduz o número: <strong>850 700 257</strong>`,
           `Introduz o valor: <strong>${total}</strong>`,
+          `Nome: <strong>Edma A******o</strong>`,
           'Confirma com o teu PIN M-Pesa',
           'Guarda o comprovativo (screenshot) e envia-nos via WhatsApp'
         ]
@@ -861,6 +872,7 @@
           'Selecciona <strong>Transferência</strong>',
           `Introduz o número: <strong>86 646 4666</strong>`,
           `Introduz o valor: <strong>${total}</strong>`,
+          `Nome: <strong>Edma A******o</strong>`,
           'Confirma com o teu PIN e-Mola',
           'Guarda o comprovativo (screenshot) e envia-nos via WhatsApp'
         ]
@@ -870,8 +882,8 @@
         passos: [
           'Acede ao teu banco ou internet banking',
           'Selecciona <strong>Transferência / TPA</strong>',
-          'Banco: <strong>BCI</strong> — NIB: <strong>0008 0000 00000000 00</strong>',
-          'Nome: <strong>E\'D Fashion</strong>',
+          'Banco: <strong>BCI</strong> — NIB: <strong>000800008369966810195</strong>',
+          'Nome: <strong>Edma Agostinho</strong>',
           `Valor: <strong>${total}</strong>`,
           'Guarda o comprovativo e envia-nos via WhatsApp ou email'
         ]
@@ -905,10 +917,11 @@
   async function confirmarEncomenda() {
     esconderMensagem('msgErro');
     esconderMensagem('msgSucesso');
+    esconderMensagem('msgErroResumo');
 
     const seleccionados = getItensSeleccionados();
     if (seleccionados.length === 0) {
-      mostrarErro('msgErro', 'Selecciona pelo menos um produto para continuar.');
+      mostrarErroResumo('Selecciona pelo menos um produto para continuar.');
       return;
     }
 
@@ -917,11 +930,11 @@
     const bairro = document.getElementById('entBairro').value.trim();
     const cidade = document.getElementById('entCidade').value.trim();
 
-    if (!nome) { mostrarErro('msgErro', 'Introduz o nome de quem recebe.'); return; }
-    if (!telefone) { mostrarErro('msgErro', 'Introduz o telefone de contacto.'); return; }
-    if (!bairro) { mostrarErro('msgErro', 'Introduz o bairro ou zona de entrega.'); return; }
-    if (!cidade) { mostrarErro('msgErro', 'Introduz a cidade.'); return; }
-    if (!metodoPagamento) { mostrarErro('msgErro', 'Selecciona um método de pagamento.'); return; }
+    if (!nome) { scrollParaCampo('entNome', 'Preenche o nome de quem recebe.'); return; }
+    if (!telefone) { scrollParaCampo('entTelefone', 'Preenche o telefone de contacto.'); return; }
+    if (!bairro) { scrollParaCampo('entBairro', 'Preenche o bairro ou zona de entrega.'); return; }
+    if (!cidade) { scrollParaCampo('entCidade', 'Preenche a cidade.'); return; }
+    if (!metodoPagamento) { mostrarErroResumo('Selecciona um método de pagamento.'); return; }
 
     const btn = document.getElementById('btnConfirmar');
     btn.disabled = true;
@@ -1089,6 +1102,32 @@
       cash: 'Dinheiro'
     };
     return map[metodo] || metodo;
+  }
+
+  function mostrarErroResumo(msg) {
+    const el = document.getElementById('msgErroResumo');
+    if (el) {
+      el.textContent = '⚠️ ' + msg;
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  function scrollParaCampo(campoId, msg) {
+    // Mostra erro no resumo lateral
+    mostrarErroResumo(msg);
+    // Faz scroll para o campo e destaca-o
+    const campo = document.getElementById(campoId);
+    if (campo) {
+      campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      campo.focus();
+      campo.style.borderColor = '#DC2626';
+      campo.style.boxShadow = '0 0 0 3px rgba(220,38,38,0.15)';
+      campo.addEventListener('input', () => {
+        campo.style.borderColor = '';
+        campo.style.boxShadow = '';
+      }, { once: true });
+    }
   }
 
   iniciar();

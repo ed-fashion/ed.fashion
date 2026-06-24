@@ -106,6 +106,53 @@
     .role-employee { background: #DBEAFE; color: #2563EB; }
     .role-customer { background: var(--rosa-claro); color: var(--rosa); }
 
+    /* SELEÇÃO EM MASSA */
+    .barra-selecao {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: #FFF3F8;
+      border: 1.5px solid var(--rosa);
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .barra-selecao.visivel { display: flex; }
+    .barra-selecao .sel-count { font-size: 13px; font-weight: 700; color: var(--rosa); flex-shrink: 0; }
+
+    .checkbox-linha {
+      width: 18px; height: 18px; border-radius: 4px; border: 2px solid #ddd;
+      background: white; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; transition: all 0.15s;
+    }
+    .checkbox-linha.marcado { background: var(--rosa); border-color: var(--rosa); }
+    .checkbox-linha.marcado::after { content: '✓'; color: white; font-size: 11px; font-weight: 800; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 1000;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.visivel { display: flex; }
+    .modal-box {
+      background: white; border-radius: 16px; padding: 28px;
+      max-width: 520px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal-box h3 { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+    .modal-box p { font-size: 13px; color: var(--cinza); margin-bottom: 14px; }
+    .modal-box textarea, .modal-box input[type=text] {
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid #ddd; border-radius: 8px; font-size: 13px;
+      outline: none; font-family: var(--fonte); box-sizing: border-box;
+    }
+    .modal-box textarea { min-height: 100px; resize: vertical; }
+    .modal-box textarea:focus, .modal-box input:focus { border-color: var(--rosa); }
+    .modal-acoes { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    .form-grupo-modal { margin-bottom: 14px; }
+    .form-grupo-modal label { font-size: 12px; font-weight: 700; color: var(--cinza); display: block; margin-bottom: 6px; }
+
     @media (max-width: 768px) {
       .detalhe-grid { grid-template-columns: 1fr; }
     }
@@ -185,10 +232,29 @@
           <h3>Lista de Utilizadores</h3>
           <span id="totalClientes" style="font-size:13px; color:var(--cinza);"></span>
         </div>
+
+        <!-- BARRA DE SELEÇÃO -->
+        <div class="barra-selecao" id="barraSelecao">
+          <span class="sel-count" id="selCount">0 selecionados</span>
+          <span style="color:#ddd;">|</span>
+          <button class="btn-admin btn-admin-outline" style="font-size:12px;" onclick="abrirModalPromo()">
+            🎁 Enviar Promoção / Cupão
+          </button>
+          <button class="btn-admin" style="font-size:12px; background:#DC2626; color:white;" onclick="removerSelecionados()">
+            🗑️ Remover
+          </button>
+          <button class="btn-admin btn-admin-outline" style="font-size:12px; margin-left:auto;" onclick="limparSelecao()">
+            ✕ Limpar
+          </button>
+        </div>
+
         <div class="admin-table-wrap">
           <table class="admin-table">
             <thead>
               <tr>
+                <th style="width:36px;">
+                  <div class="checkbox-linha" id="checkboxTodos" onclick="toggleSelecionarTodos()" title="Selecionar tudo"></div>
+                </th>
                 <th>Cliente</th>
                 <th>Telefone</th>
                 <th>Perfil</th>
@@ -199,9 +265,39 @@
               </tr>
             </thead>
             <tbody id="tabelaClientes">
-              <tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">A carregar...</td></tr>
+              <tr><td colspan="8" style="text-align:center;padding:40px;color:#888;">A carregar...</td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- MODAL: ENVIAR PROMOÇÃO -->
+      <div class="modal-overlay" id="modalPromo">
+        <div class="modal-box">
+          <h3>🎁 Enviar Promoção / Cupão</h3>
+          <p id="modalPromoSubtitulo"></p>
+
+          <div class="form-grupo-modal">
+            <label>Mensagem / Oferta</label>
+            <textarea id="modalPromoMsg" rows="4"
+              placeholder="Ex: Olá {nome}! Temos uma promoção especial para si: usa o cupão PROMO10 e ganha 10% de desconto na próxima compra! 🛍️"></textarea>
+          </div>
+
+          <div style="font-size:12px; color:var(--cinza); margin-bottom:14px;">
+            💡 Variáveis: <strong>{nome}</strong>. Será enviado um link WhatsApp por cada cliente.
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+              <input type="checkbox" id="enviarWhatsapp" checked style="width:auto;">
+              💬 WhatsApp
+            </label>
+          </div>
+
+          <div class="modal-acoes">
+            <button class="btn-admin btn-admin-rosa" onclick="enviarPromo()">🚀 Enviar</button>
+            <button class="btn-admin btn-admin-outline" onclick="fecharModal('modalPromo')">Cancelar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -321,6 +417,7 @@
   let todosClientes = [];
   let filtroActivo = 'todos';
   let clienteActual = null;
+  let selecionados = new Set();
 
   async function iniciar() {
     const ok = await verificarAdmin();
@@ -417,7 +514,11 @@
     }
 
     tbody.innerHTML = lista.map(c => `
-      <tr style="cursor:pointer" onclick="abrirDetalhe('${c.id}')">
+      <tr style="cursor:pointer; ${selecionados.has(c.id) ? 'background:#FFF8FC;' : ''}" onclick="abrirDetalhe('${c.id}')">
+        <td onclick="event.stopPropagation()">
+          <div class="checkbox-linha ${selecionados.has(c.id) ? 'marcado' : ''}"
+            onclick="toggleSelecionarLinha('${c.id}')"></div>
+        </td>
         <td>
           <div style="display:flex; align-items:center; gap:12px;">
             <div class="cliente-avatar">${(c.full_name || '?').charAt(0).toUpperCase()}</div>
@@ -442,6 +543,12 @@
           </button>
         </td>
       </tr>`).join('');
+
+    // Checkbox "selecionar tudo"
+    const todoCk = document.getElementById('checkboxTodos');
+    if (todoCk) {
+      todoCk.classList.toggle('marcado', lista.length > 0 && lista.every(c => selecionados.has(c.id)));
+    }
   }
 
   async function abrirDetalhe(id) {
@@ -585,6 +692,109 @@
   function traduzirRole(role) {
     const map = { admin: 'Administrador', employee: 'Funcionário', customer: 'Cliente' };
     return map[role] || role;
+  }
+
+  // ============================
+  // SELEÇÃO E AÇÕES EM MASSA
+  // ============================
+
+  function toggleSelecionarLinha(id) {
+    if (selecionados.has(id)) selecionados.delete(id);
+    else selecionados.add(id);
+    actualizarBarraSelecao();
+    renderTabela();
+  }
+
+  function toggleSelecionarTodos() {
+    const lista = getListaFiltrada();
+    const todasMarcadas = lista.every(c => selecionados.has(c.id));
+    if (todasMarcadas) lista.forEach(c => selecionados.delete(c.id));
+    else lista.forEach(c => selecionados.add(c.id));
+    actualizarBarraSelecao();
+    renderTabela();
+  }
+
+  function limparSelecao() {
+    selecionados.clear();
+    actualizarBarraSelecao();
+    renderTabela();
+  }
+
+  function actualizarBarraSelecao() {
+    const barra = document.getElementById('barraSelecao');
+    const count = document.getElementById('selCount');
+    barra.classList.toggle('visivel', selecionados.size > 0);
+    if (count) count.textContent = `${selecionados.size} selecionado(s)`;
+  }
+
+  function getListaFiltrada() {
+    const pesquisa = document.getElementById('pesquisaCliente').value.toLowerCase();
+    let lista = filtroActivo === 'todos'
+      ? todosClientes
+      : todosClientes.filter(c => c.role === filtroActivo);
+    if (pesquisa) {
+      lista = lista.filter(c =>
+        c.full_name?.toLowerCase().includes(pesquisa) ||
+        c.phone?.toLowerCase().includes(pesquisa)
+      );
+    }
+    return lista;
+  }
+
+  async function removerSelecionados() {
+    if (selecionados.size === 0) return;
+    if (!confirm(`⚠️ Remover ${selecionados.size} cliente(s) permanentemente?\n\nIsso apaga o perfil mas não a conta de autenticação. As encomendas associadas são mantidas.`)) return;
+
+    const ids = [...selecionados];
+    const { error } = await db.from('profiles').delete().in('id', ids);
+
+    if (error) { alert('Erro ao remover: ' + error.message); return; }
+    selecionados.clear();
+    actualizarBarraSelecao();
+    await carregarClientes();
+    mostrarErro('msgErroLista', ''); // limpar
+    // Mostrar sucesso
+    const msgEl = document.getElementById('msgErroLista');
+    if (msgEl) {
+      msgEl.className = 'msg-sucesso';
+      msgEl.textContent = `✅ ${ids.length} cliente(s) removido(s).`;
+      msgEl.style.display = 'block';
+      setTimeout(() => { msgEl.style.display = 'none'; msgEl.className = 'msg-erro'; }, 4000);
+    }
+  }
+
+  // MODAL PROMOÇÃO
+  function abrirModalPromo() {
+    if (selecionados.size === 0) return;
+    const clientes = todosClientes.filter(c => selecionados.has(c.id));
+    const comTelefone = clientes.filter(c => c.phone).length;
+    document.getElementById('modalPromoSubtitulo').textContent =
+      `${selecionados.size} cliente(s) selecionado(s) — ${comTelefone} com número de WhatsApp.`;
+    document.getElementById('modalPromo').classList.add('visivel');
+  }
+
+  function enviarPromo() {
+    const modelo = document.getElementById('modalPromoMsg').value.trim();
+    if (!modelo) { alert('Escreve uma mensagem.'); return; }
+
+    const viaWhatsapp = document.getElementById('enviarWhatsapp').checked;
+    const clientes = todosClientes.filter(c => selecionados.has(c.id));
+
+    if (viaWhatsapp) {
+      const comTelefone = clientes.filter(c => c.phone);
+      if (comTelefone.length === 0) { alert('Nenhum cliente selecionado tem número de telefone.'); return; }
+      comTelefone.forEach((c, i) => {
+        const msg = modelo.replace('{nome}', c.full_name?.split(' ')[0] || 'Cliente');
+        const url = `https://wa.me/258${c.phone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`;
+        setTimeout(() => window.open(url, '_blank'), i * 600);
+      });
+    }
+
+    fecharModal('modalPromo');
+  }
+
+  function fecharModal(id) {
+    document.getElementById(id).classList.remove('visivel');
   }
 
   function mostrarVista(vistaId) {

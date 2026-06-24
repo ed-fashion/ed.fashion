@@ -285,17 +285,37 @@
                 <button class="btn-editar-taxa" onclick="editarTaxa()">editar</button>
               </span>
             </div>
-            <div class="form-grid-2" style="margin-bottom:0;">
+
+            <div class="form-grid-2" style="margin-bottom:12px;">
               <div class="form-grupo" style="margin-bottom:0;">
                 <label>Valor em Dólares (USD)</label>
                 <input type="number" id="valorUsd" placeholder="Ex: 15.80" min="0" step="0.01" oninput="calcularConversao()">
               </div>
               <div class="form-grupo" style="margin-bottom:0;">
-                <label>Margem Adicional (%)</label>
-                <input type="number" id="margemConversao" placeholder="Ex: 20" min="0" value="0" oninput="calcularConversao()">
+                <label>Valor Adicional (MT) — para Preço Normal</label>
+                <input type="number" id="margemConversao" placeholder="Ex: 200" min="0" value="200" oninput="calcularConversao()">
               </div>
             </div>
-            <div class="conversor-resultado" id="conversorResultado"></div>
+
+            <!-- Resultado passo 1 -->
+            <div id="conversorResultado" class="conversor-resultado"></div>
+
+            <!-- Passo 2: Preço Normal automático -->
+            <div id="conversorPasso2" style="display:none; margin-top:12px; background:#F0F7E6; border:1px solid var(--verde); border-radius:8px; padding:12px; font-size:13px; color:#16A34A;">
+              <strong>📐 Preço Normal sugerido:</strong>
+              <span id="precoSugeridoTexto"></span>
+              <br><small style="color:var(--cinza-escuro);">Fórmula: 2 × Custo + Valor Adicional</small>
+              <div style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <button class="btn-admin btn-admin-rosa" style="font-size:12px;" onclick="aplicarPrecoSugerido()">
+                  ✅ Usar este Preço Normal
+                </button>
+                <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--cinza-escuro); cursor:pointer;">
+                  <input type="checkbox" id="calcManual" onchange="toggleCalcManual()" style="width:auto;">
+                  Calcular preço manualmente para este produto
+                </label>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -483,31 +503,83 @@
 
   function calcularConversao() {
     const usd = parseFloat(document.getElementById('valorUsd').value) || 0;
-    const margem = parseFloat(document.getElementById('margemConversao').value) || 0;
+    const valorAdicional = parseFloat(document.getElementById('margemConversao').value) || 0;
     const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
     const resultado = document.getElementById('conversorResultado');
+    const passo2 = document.getElementById('conversorPasso2');
 
     if (usd <= 0) {
       resultado.style.display = 'none';
+      passo2.style.display = 'none';
       return;
     }
 
-    const valorBase = usd * taxa;
-    const valorFinal = valorBase * (1 + margem / 100);
+    // Passo 1: USD × câmbio = Custo
+    const custo = usd * taxa;
 
     resultado.innerHTML = `
-      💵 $${usd.toFixed(2)} USD × ${taxa.toFixed(2)} = ${formatMZN(valorBase)}
-      ${margem > 0 ? `<br>➕ Com margem de ${margem}%: <strong>${formatMZN(valorFinal)}</strong>` : ''}
-      <br><button class="btn-admin btn-admin-rosa" style="margin-top:8px; font-size:12px;" onclick="usarValorConvertido(${valorFinal.toFixed(2)})">
-        Usar este valor como Preço Normal
+      💵 $${usd.toFixed(2)} USD × ${taxa.toFixed(2)} MT = <strong>${formatMZN(custo)}</strong>
+      <br><button class="btn-admin btn-admin-rosa" style="margin-top:8px; font-size:12px;" onclick="usarValorConvertido(${custo.toFixed(2)})">
+        ➕ Usar como Custo do Produto
       </button>`;
     resultado.style.display = 'block';
+
+    // Passo 2: Preço Normal = 2 × Custo + Valor Adicional
+    const precoSugerido = (custo * 2) + valorAdicional;
+    const textoSugerido = document.getElementById('precoSugeridoTexto');
+    if (textoSugerido) {
+      textoSugerido.innerHTML = ` <strong style="font-size:15px;">${formatMZN(precoSugerido)}</strong>
+        <span style="color:var(--cinza); margin-left:6px;">(2 × ${formatMZN(custo)} + ${formatMZN(valorAdicional)})</span>`;
+    }
+
+    const calcManual = document.getElementById('calcManual');
+    passo2.style.display = 'block';
+
+    // Se não estiver em modo manual, preenche automaticamente
+    if (calcManual && !calcManual.checked) {
+      document.getElementById('prodPreco').value = precoSugerido.toFixed(2);
+      calcularAdiantamento();
+      calcularMargem();
+    }
   }
 
   function usarValorConvertido(valor) {
-    document.getElementById('prodPreco').value = valor;
+    document.getElementById('prodCusto').value = valor;
+    calcularMargem();
+    // Recalcular o preço normal se não for manual
+    const calcManual = document.getElementById('calcManual');
+    if (calcManual && !calcManual.checked) {
+      const valorAdicional = parseFloat(document.getElementById('margemConversao').value) || 0;
+      const precoSugerido = (valor * 2) + valorAdicional;
+      document.getElementById('prodPreco').value = precoSugerido.toFixed(2);
+      calcularAdiantamento();
+      calcularMargem();
+    }
+  }
+
+  function aplicarPrecoSugerido() {
+    const usd = parseFloat(document.getElementById('valorUsd').value) || 0;
+    const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
+    const valorAdicional = parseFloat(document.getElementById('margemConversao').value) || 0;
+    const custo = usd * taxa;
+    const precoSugerido = (custo * 2) + valorAdicional;
+    document.getElementById('prodPreco').value = precoSugerido.toFixed(2);
     calcularAdiantamento();
     calcularMargem();
+  }
+
+  function toggleCalcManual() {
+    const manual = document.getElementById('calcManual').checked;
+    const prodPreco = document.getElementById('prodPreco');
+    if (manual) {
+      prodPreco.style.borderColor = '#D97706';
+      prodPreco.title = 'Cálculo manual activado — preenche o preço manualmente';
+    } else {
+      prodPreco.style.borderColor = '';
+      prodPreco.title = '';
+      // Recalcular automaticamente
+      calcularConversao();
+    }
   }
 
   // ============================
@@ -582,6 +654,7 @@
               <button class="btn-admin btn-admin-vermelho" onclick="arquivarProduto('${p.id}', '${p.status}')" title="${p.status === 'archived' ? 'Reactivar' : 'Arquivar'}">
                 ${p.status === 'archived' ? '♻️' : '🗄️'}
               </button>
+              <button class="btn-admin" style="background:#DC2626;color:white;" onclick="eliminarProduto('${p.id}', '${p.name.replace(/'/g, "\\'")}')" title="Eliminar permanentemente">🗑️</button>
             </div>
           </td>
         </tr>`;
@@ -1040,6 +1113,19 @@
     await carregarProdutos();
   }
 
+  async function eliminarProduto(id, nome) {
+    if (!confirm(`⚠️ Eliminar permanentemente "${nome}"?\n\nEsta acção não pode ser revertida. O produto e todas as suas imagens, variantes e stock serão apagados.`)) return;
+    await db.from('product_media').delete().eq('product_id', id);
+    await db.from('product_variants').delete().eq('product_id', id);
+    await db.from('product_stock').delete().eq('product_id', id);
+    const { error } = await db.from('products').delete().eq('id', id);
+    if (error) {
+      alert('Erro ao eliminar: ' + error.message);
+      return;
+    }
+    await carregarProdutos();
+  }
+
   // ============================
   // AUXILIARES
   // ============================
@@ -1105,9 +1191,14 @@
     document.getElementById('prodStatus').value = 'active';
     document.getElementById('prodDestaque').value = 'false';
     document.getElementById('valorUsd').value = '';
-    document.getElementById('margemConversao').value = '0';
+    document.getElementById('margemConversao').value = '200';
     document.getElementById('novoImagemUrl').value = '';
     document.getElementById('conversorResultado').style.display = 'none';
+    const passo2El = document.getElementById('conversorPasso2');
+    if (passo2El) passo2El.style.display = 'none';
+    const calcManualEl = document.getElementById('calcManual');
+    if (calcManualEl) { calcManualEl.checked = false; }
+    document.getElementById('prodPreco').style.borderColor = '';
     document.getElementById('progressBar').style.display = 'none';
     document.getElementById('progressFill').style.width = '0%';
     document.getElementById('margemInfo').textContent = '';
