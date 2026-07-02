@@ -945,26 +945,39 @@
     el.classList.add('activa');
   }
 
+  // Normaliza o preco_adicional da DB para MT real.
+  // Valores < 500 foram guardados como USD bruto (antes da feature de conversão).
+  // Converte: USD × taxa + valorAdicional.
+  // Valores >= 500 já estão em MT correcto.
+  function normalizarPrecoVariante(precoAdicional) {
+    if (!precoAdicional || precoAdicional === 0) return 0;
+    const taxa = 71; // taxa de referência; valores < 500 são claramente USD
+    if (precoAdicional < 500) {
+      // É um valor USD bruto — converter para MT com valor adicional
+      const adicional = 200; // valor adicional padrão
+      return parseFloat(((precoAdicional * taxa) + adicional).toFixed(2));
+    }
+    return precoAdicional; // já está em MT
+  }
+
   function selecionarVariante(tipo, valor, precoAdicional, el) {
     // Desselecionar outros do mesmo grupo
     document.querySelectorAll(`.variante-opcao[data-tipo="${tipo}"]`).forEach(b => b.classList.remove('seleccionada'));
     el.classList.add('seleccionada');
-    variantesSelecionadas[tipo] = { valor, precoAdicional };
 
-    // Calcular preço a mostrar:
-    // Se ALGUMA variante tem preço próprio (preco_adicional > 0) → usa esse como preço final
-    // Se todas têm 0 → usa o preço base do produto
+    // Normalizar o preco_adicional para MT real
+    const precoMT = normalizarPrecoVariante(precoAdicional);
+    variantesSelecionadas[tipo] = { valor, precoAdicional: precoMT };
+
+    // Se variante tem preço próprio → usa esse. Se = 0 → usa preço base.
     const precoBase = produto.sale_price && produto.sale_price < produto.price
       ? produto.sale_price
       : produto.price;
 
-    // Preço próprio da variante mais recente seleccionada (com preço definido)
     const precosPropriosSeleccionados = Object.values(variantesSelecionadas)
       .filter(v => v.precoAdicional > 0)
       .map(v => v.precoAdicional);
 
-    // Se houver variante com preço próprio, usa o mais alto (ex: tamanho + cor)
-    // Se não houver nenhuma, usa o preço base
     const precoTotal = precosPropriosSeleccionados.length > 0
       ? Math.max(...precosPropriosSeleccionados)
       : precoBase;
