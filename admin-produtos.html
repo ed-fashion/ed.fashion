@@ -147,7 +147,7 @@
       padding: 3px 10px; border-radius: 20px; text-transform: uppercase;
     }
     .variante-linha {
-      display: grid; grid-template-columns: 1fr 100px 110px 36px; gap: 8px; margin-bottom: 8px; align-items: center;
+      display: grid; grid-template-columns: 1fr 80px 100px 80px 36px; gap: 8px; margin-bottom: 8px; align-items: center;
     }
     .variante-linha input { padding: 8px 10px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
     .variante-linha input:focus { border-color: var(--rosa); }
@@ -177,7 +177,9 @@
       .form-grid-2 { grid-template-columns: 1fr; }
       .form-grid-3 { grid-template-columns: 1fr 1fr; }
       .filtros-bar input { min-width: 100%; }
-      .variante-linha { grid-template-columns: 1fr; }
+      .variante-linha { grid-template-columns: 1fr 70px; }
+      .variante-linha input:nth-child(3),
+      .variante-linha input:nth-child(4) { grid-column: span 1; }
     }
     @media (max-width: 480px) {
       .form-grid-3 { grid-template-columns: 1fr; }
@@ -805,7 +807,7 @@
     gruposVariantesData.push({
       tempId: 'g' + (contadorTempId++),
       tipo,
-      linhas: [{ tempId: 'l' + (contadorTempId++), id: null, valor: '', stock: 0, preco_adicional: 0 }]
+      linhas: [{ tempId: 'l' + (contadorTempId++), id: null, valor: '', stock: 0, preco_adicional: 0, usd_adicional: 0 }]
     });
     renderGruposVariantes();
   }
@@ -822,7 +824,7 @@
   function adicionarLinhaVariante(grupoTempId) {
     const grupo = gruposVariantesData.find(g => g.tempId === grupoTempId);
     if (!grupo) return;
-    grupo.linhas.push({ tempId: 'l' + (contadorTempId++), id: null, valor: '', stock: 0, preco_adicional: 0 });
+    grupo.linhas.push({ tempId: 'l' + (contadorTempId++), id: null, valor: '', stock: 0, preco_adicional: 0, usd_adicional: 0 });
     renderGruposVariantes();
   }
 
@@ -844,6 +846,26 @@
     linha[campo] = valor;
   }
 
+  function actualizarUsdVariante(grupoTempId, linhaTempId, usdValor) {
+    const grupo = gruposVariantesData.find(g => g.tempId === grupoTempId);
+    if (!grupo) return;
+    const linha = grupo.linhas.find(l => l.tempId === linhaTempId);
+    if (!linha) return;
+
+    const usd = parseFloat(usdValor) || 0;
+    const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
+    const adicional = parseFloat(document.getElementById('valorAdicional')?.value) || 0;
+
+    linha.usd_adicional = usd;
+    // Preço próprio da variante: USD × Taxa + Valor Adicional
+    // Se USD = 0, preco_adicional = 0 (usa preço base do produto)
+    linha.preco_adicional = usd > 0 ? parseFloat(((usd * taxa) + adicional).toFixed(2)) : 0;
+
+    // Atualizar campo MT readonly
+    const mtEl = document.getElementById('mt_' + linhaTempId);
+    if (mtEl) mtEl.value = usd > 0 ? formatMZN(linha.preco_adicional) : '';
+  }
+
   function renderGruposVariantes() {
     const container = document.getElementById('gruposVariantes');
 
@@ -859,8 +881,8 @@
           <button class="btn-remover-grupo-variante" onclick="removerGrupoVariante('${grupo.tempId}')">Remover grupo</button>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 100px 110px 36px; gap:8px; margin-bottom:6px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase;">
-          <span>Valor</span><span>Stock</span><span>Preço +/-</span><span></span>
+        <div style="display:grid; grid-template-columns: 1fr 80px 100px 80px 36px; gap:8px; margin-bottom:6px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase;">
+          <span>Valor</span><span>Stock</span><span>Extra (USD)</span><span>= MT</span><span></span>
         </div>
 
         ${grupo.linhas.map(linha => `
@@ -869,8 +891,15 @@
               oninput="actualizarValorVariante('${grupo.tempId}', '${linha.tempId}', 'valor', this.value)">
             <input type="number" placeholder="0" min="0" value="${linha.stock}"
               oninput="actualizarValorVariante('${grupo.tempId}', '${linha.tempId}', 'stock', this.value)">
-            <input type="number" placeholder="0.00" step="0.01" value="${linha.preco_adicional}"
-              oninput="actualizarValorVariante('${grupo.tempId}', '${linha.tempId}', 'preco_adicional', this.value)">
+            <input type="number" placeholder="0.00" step="0.01" min="0"
+              value="${linha.usd_adicional || ''}"
+              title="Valor extra em USD — será convertido para MT automaticamente"
+              oninput="actualizarUsdVariante('${grupo.tempId}', '${linha.tempId}', this.value)">
+            <input type="text" readonly
+              value="${linha.preco_adicional > 0 ? formatMZN(linha.preco_adicional) : ''}"
+              id="mt_${linha.tempId}"
+              style="background:var(--cinza-claro); color:var(--rosa); font-weight:700; font-size:12px; text-align:center;"
+              title="Valor extra em MT (calculado)">
             <button class="btn-remover-variante" onclick="removerLinhaVariante('${grupo.tempId}', '${linha.tempId}')">×</button>
           </div>`).join('')}
 
@@ -901,10 +930,16 @@
       gruposVariantesData.push({
         tempId: 'g' + (contadorTempId++),
         tipo,
-        linhas: linhasDoTipo.map(v => ({
-          tempId: 'l' + (contadorTempId++),
-          id: v.id, valor: v.valor, stock: v.stock, preco_adicional: v.preco_adicional
-        }))
+        linhas: linhasDoTipo.map(v => {
+          const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
+          const usdAdicional = v.preco_adicional > 0 ? parseFloat((v.preco_adicional / taxa).toFixed(2)) : 0;
+          return {
+            tempId: 'l' + (contadorTempId++),
+            id: v.id, valor: v.valor, stock: v.stock,
+            preco_adicional: v.preco_adicional,
+            usd_adicional: usdAdicional
+          };
+        })
       });
     });
 

@@ -951,13 +951,23 @@
     el.classList.add('seleccionada');
     variantesSelecionadas[tipo] = { valor, precoAdicional };
 
-    // Atualizar preço visível
+    // Calcular preço a mostrar:
+    // Se ALGUMA variante tem preço próprio (preco_adicional > 0) → usa esse como preço final
+    // Se todas têm 0 → usa o preço base do produto
     const precoBase = produto.sale_price && produto.sale_price < produto.price
       ? produto.sale_price
       : produto.price;
-    const precoExtra = Object.values(variantesSelecionadas)
-      .reduce((s, v) => s + (v.precoAdicional || 0), 0);
-    const precoTotal = precoBase + precoExtra;
+
+    // Preço próprio da variante mais recente seleccionada (com preço definido)
+    const precosPropriosSeleccionados = Object.values(variantesSelecionadas)
+      .filter(v => v.precoAdicional > 0)
+      .map(v => v.precoAdicional);
+
+    // Se houver variante com preço próprio, usa o mais alto (ex: tamanho + cor)
+    // Se não houver nenhuma, usa o preço base
+    const precoTotal = precosPropriosSeleccionados.length > 0
+      ? Math.max(...precosPropriosSeleccionados)
+      : precoBase;
 
     const elPreco = document.querySelector('.produto-preco-actual');
     if (elPreco) elPreco.textContent = formatMZN(precoTotal);
@@ -974,6 +984,21 @@
     if (btnCarrinho) btnCarrinho.disabled = !todosSeleccionados;
   }
 
+  // Função auxiliar para obter o preço real com as variantes seleccionadas
+  function calcularPrecoComVariantes() {
+    const precoBase = produto.sale_price && produto.sale_price < produto.price
+      ? produto.sale_price
+      : produto.price;
+
+    const precosPropriosSeleccionados = Object.values(variantesSelecionadas)
+      .filter(v => v.precoAdicional > 0)
+      .map(v => v.precoAdicional);
+
+    return precosPropriosSeleccionados.length > 0
+      ? Math.max(...precosPropriosSeleccionados)
+      : precoBase;
+  }
+
   function alterarQtd(delta) {
     const input = document.getElementById('quantidade');
     if (!input) return;
@@ -985,13 +1010,12 @@
   // COMPRAR AGORA — vai directo ao checkout
   function comprarAgora() {
     const quantidade = parseInt(document.getElementById('quantidade')?.value || 1);
-    const precoFinal = produto.sale_price && produto.sale_price < produto.price ? produto.sale_price : produto.price;
-    const precoExtra = Object.values(variantesSelecionadas).reduce((s, v) => s + (v.precoAdicional || 0), 0);
+    const preco = calcularPrecoComVariantes();
 
     const itemCompra = [{
       id: produto.id,
       nome: produto.name,
-      preco: precoFinal + precoExtra,
+      preco,
       imagem: produto.image_url || '',
       quantidade,
       tipo: produto.availability_type,
@@ -1004,11 +1028,9 @@
 
   function adicionarCarrinho() {
     const quantidade = parseInt(document.getElementById('quantidade')?.value || 1);
-    const precoFinal = produto.sale_price && produto.sale_price < produto.price ? produto.sale_price : produto.price;
-    const precoExtra = Object.values(variantesSelecionadas).reduce((s, v) => s + (v.precoAdicional || 0), 0);
+    const preco = calcularPrecoComVariantes();
     const carrinho = JSON.parse(localStorage.getItem('ed_carrinho') || '[]');
 
-    // Chave única inclui variantes escolhidas
     const chaveVariantes = JSON.stringify(variantesSelecionadas);
     const idx = carrinho.findIndex(i => i.id === produto.id && JSON.stringify(i.variantes || {}) === chaveVariantes);
 
@@ -1018,7 +1040,7 @@
       carrinho.push({
         id: produto.id,
         nome: produto.name,
-        preco: precoFinal + precoExtra,
+        preco,
         imagem: produto.image_url || '',
         quantidade,
         tipo: produto.availability_type,
