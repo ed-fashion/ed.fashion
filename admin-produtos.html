@@ -68,10 +68,12 @@
       padding: 10px 14px; font-size: 13px; color: var(--rosa); font-weight: 700; margin-top: 8px; display: none;
     }
 
-    /* CONVERSOR USD */
+    /* CONVERSOR USD — POR ENCOMENDA */
     .conversor-box {
-      background: #EFF6FF; border: 1.5px solid #2563EB; border-radius: 10px; padding: 16px; margin-bottom: 16px;
+      background: #EFF6FF; border: 1.5px solid #2563EB; border-radius: 10px; padding: 16px; margin-bottom: 0;
+      display: none;
     }
+    .conversor-box.visivel { display: block; }
     .conversor-box-header {
       display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
     }
@@ -79,12 +81,16 @@
     .taxa-actual {
       font-size: 12px; color: #2563EB; background: white; padding: 4px 10px; border-radius: 6px; font-weight: 700;
     }
-    .conversor-resultado {
-      background: white; border-radius: 8px; padding: 10px 14px; font-size: 14px; font-weight: 700;
-      color: #2563EB; margin-top: 10px; display: none;
+    .conversor-formula {
+      background: white; border-radius: 8px; padding: 12px 14px; font-size: 13px;
+      color: #2563EB; margin-top: 12px; line-height: 1.6;
     }
+    .conversor-formula strong { color: #1e3a8a; }
     .btn-editar-taxa {
       background: none; border: none; color: #2563EB; font-size: 11px; text-decoration: underline; cursor: pointer; padding: 0;
+    }
+    .conversor-aviso-stock {
+      font-size: 12px; color: var(--cinza); padding: 14px; text-align: center;
     }
 
     /* IMAGENS MÚLTIPLAS */
@@ -273,27 +279,27 @@
         </div>
       </div>
 
-      <!-- SECÇÃO 2: Conversor USD -->
-      <div class="secao-form">
-        <div class="secao-form-titulo">💱 Conversor Dólar → Metical</div>
-        <div class="secao-form-corpo">
-          <div class="conversor-box">
+      <!-- SECÇÃO 2: Conversor USD (só Por Encomenda) -->
+      <div class="secao-form" id="secaoConversor">
+        <div class="secao-form-titulo">💱 Cálculo do Preço — Por Encomenda</div>
+        <div class="secao-form-corpo" style="padding-bottom:0;">
+
+          <div class="conversor-box visivel" id="conversorBox">
             <div class="conversor-box-header">
-              <strong>🌍 Calcular preço a partir do valor em USD</strong>
+              <strong>🌍 Custo a partir do valor em USD (Shein)</strong>
               <span class="taxa-actual">
                 Taxa actual: 1 USD = <span id="taxaDisplay">64.00</span> MT
                 <button class="btn-editar-taxa" onclick="editarTaxa()">editar</button>
               </span>
             </div>
-
-            <div class="form-grid-2" style="margin-bottom:12px;">
+            <div class="form-grid-3" style="margin-bottom:0;">
               <div class="form-grupo" style="margin-bottom:0;">
                 <label>Valor em Dólares (USD)</label>
-                <input type="number" id="valorUsd" placeholder="Ex: 15.80" min="0" step="0.01" oninput="calcularConversao()">
+                <input type="number" id="valorUsd" placeholder="Ex: 15.80" min="0" step="0.01" oninput="calcularFormulaEncomenda()">
               </div>
               <div class="form-grupo" style="margin-bottom:0;">
-                <label>Valor Adicional (MT) — para Preço Normal</label>
-                <input type="number" id="margemConversao" placeholder="Ex: 200" min="0" value="200" oninput="calcularConversao()">
+                <label>Custo (USD × Taxa)</label>
+                <input type="text" id="custoCalculado" readonly placeholder="0,00 MT">
               </div>
             </div>
 
@@ -304,7 +310,7 @@
             <div id="conversorPasso2" style="display:none; margin-top:12px; background:#F0F7E6; border:1px solid var(--verde); border-radius:8px; padding:12px; font-size:13px; color:#16A34A;">
               <strong>📐 Preço Normal sugerido:</strong>
               <span id="precoSugeridoTexto"></span>
-              <br><small style="color:var(--cinza-escuro);">Fórmula: Custo (USD × câmbio) + Valor Adicional</small>
+              <br><small style="color:var(--cinza-escuro);">Fórmula: 2 × Custo + Valor Adicional</small>
               <div style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                 <button class="btn-admin btn-admin-rosa" style="font-size:12px;" onclick="aplicarPrecoSugerido()">
                   ✅ Usar este Preço Normal
@@ -316,7 +322,10 @@
               </div>
             </div>
 
+          <div class="conversor-aviso-stock" id="avisoStockTipo" style="display:none;">
+            💡 Este cálculo aplica-se a produtos <strong>Por Encomenda</strong>. Para produtos em stock, define o preço directamente abaixo.
           </div>
+
         </div>
       </div>
 
@@ -485,7 +494,8 @@
   }
 
   // ============================
-  // CONVERSOR USD → MZN
+  // CONVERSOR USD → MZN (Por Encomenda)
+  // Fórmula: Custo = USD × Taxa | Preço Normal = Custo + Valor Adicional
   // ============================
   function carregarTaxaCambio() {
     const taxa = localStorage.getItem('ed_taxa_usd_mzn') || '64.00';
@@ -498,38 +508,42 @@
     if (!novaTaxa || isNaN(parseFloat(novaTaxa))) return;
     localStorage.setItem('ed_taxa_usd_mzn', parseFloat(novaTaxa).toFixed(2));
     carregarTaxaCambio();
-    calcularConversao();
+    calcularFormulaEncomenda();
   }
 
-  function calcularConversao() {
+  function calcularFormulaEncomenda() {
     const usd = parseFloat(document.getElementById('valorUsd').value) || 0;
-    const valorAdicional = parseFloat(document.getElementById('margemConversao').value) || 0;
+    const adicional = parseFloat(document.getElementById('valorAdicional').value) || 0;
     const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
-    const resultado = document.getElementById('conversorResultado');
-    const passo2 = document.getElementById('conversorPasso2');
+    const formulaBox = document.getElementById('conversorFormula');
+    const campoCusto = document.getElementById('custoCalculado');
 
     if (usd <= 0) {
-      resultado.style.display = 'none';
-      passo2.style.display = 'none';
+      campoCusto.value = '';
+      formulaBox.style.display = 'none';
       return;
     }
 
-    // Passo 1: USD × câmbio = Custo
     const custo = usd * taxa;
+    const precoNormal = custo + adicional;
 
-    resultado.innerHTML = `
-      💵 $${usd.toFixed(2)} USD × ${taxa.toFixed(2)} MT = <strong>${formatMZN(custo)}</strong>
-      <br><button class="btn-admin btn-admin-rosa" style="margin-top:8px; font-size:12px;" onclick="usarValorConvertido(${custo.toFixed(2)})">
-        ➕ Usar como Custo do Produto
+    campoCusto.value = formatMZN(custo);
+
+    formulaBox.innerHTML = `
+      💵 $${usd.toFixed(2)} USD × ${taxa.toFixed(2)} = <strong>${formatMZN(custo)}</strong> (custo do produto)<br>
+      ➕ Custo + Valor Adicional (${formatMZN(adicional)}) = <strong>${formatMZN(precoNormal)}</strong> (preço normal)
+      <br><button class="btn-admin btn-admin-rosa" style="margin-top:8px; font-size:12px;"
+        onclick="aplicarFormulaEncomenda(${custo.toFixed(2)}, ${precoNormal.toFixed(2)})">
+        ✅ Aplicar: Custo e Preço Normal
       </button>`;
     resultado.style.display = 'block';
 
-    // Passo 2: Preço Normal = Custo + Valor Adicional (para produtos por encomenda)
-    const precoSugerido = custo + valorAdicional;
+    // Passo 2: Preço Normal = 2 × Custo + Valor Adicional
+    const precoSugerido = (custo * 2) + valorAdicional;
     const textoSugerido = document.getElementById('precoSugeridoTexto');
     if (textoSugerido) {
       textoSugerido.innerHTML = ` <strong style="font-size:15px;">${formatMZN(precoSugerido)}</strong>
-        <span style="color:var(--cinza); margin-left:6px;">(${formatMZN(custo)} + ${formatMZN(valorAdicional)})</span>`;
+        <span style="color:var(--cinza); margin-left:6px;">(2 × ${formatMZN(custo)} + ${formatMZN(valorAdicional)})</span>`;
     }
 
     const calcManual = document.getElementById('calcManual');
@@ -550,7 +564,7 @@
     const calcManual = document.getElementById('calcManual');
     if (calcManual && !calcManual.checked) {
       const valorAdicional = parseFloat(document.getElementById('margemConversao').value) || 0;
-      const precoSugerido = valor + valorAdicional;
+      const precoSugerido = (valor * 2) + valorAdicional;
       document.getElementById('prodPreco').value = precoSugerido.toFixed(2);
       calcularAdiantamento();
       calcularMargem();
@@ -562,7 +576,7 @@
     const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
     const valorAdicional = parseFloat(document.getElementById('margemConversao').value) || 0;
     const custo = usd * taxa;
-    const precoSugerido = custo + valorAdicional;
+    const precoSugerido = (custo * 2) + valorAdicional;
     document.getElementById('prodPreco').value = precoSugerido.toFixed(2);
     calcularAdiantamento();
     calcularMargem();
@@ -654,7 +668,6 @@
               <button class="btn-admin btn-admin-vermelho" onclick="arquivarProduto('${p.id}', '${p.status}')" title="${p.status === 'archived' ? 'Reactivar' : 'Arquivar'}">
                 ${p.status === 'archived' ? '♻️' : '🗄️'}
               </button>
-              <button class="btn-admin" style="background:#DC2626;color:white;" onclick="eliminarProduto('${p.id}', '${p.name.replace(/'/g, "\\'")}')" title="Eliminar permanentemente">🗑️</button>
             </div>
           </td>
         </tr>`;
@@ -776,7 +789,6 @@
 
   function definirPrincipal(idx) {
     imagensProduto.forEach((img, i) => img.isPrimary = (i === idx));
-    // Move a principal para o início
     const principal = imagensProduto.splice(idx, 1)[0];
     imagensProduto.unshift(principal);
     renderImagens();
@@ -953,12 +965,10 @@
   }
 
   async function guardarVariantes(productId) {
-    // Apagar removidas
     if (variantesParaApagar.length > 0) {
       await db.from('product_variants').delete().in('id', variantesParaApagar);
     }
 
-    // Inserir/actualizar
     for (const grupo of gruposVariantesData) {
       let ordem = 0;
       for (const linha of grupo.linhas) {
@@ -1011,7 +1021,6 @@
     document.getElementById('progressBar').style.display = 'block';
     document.getElementById('progressFill').style.width = '20%';
 
-    // Upload de imagens novas
     imagensProduto = await uploadImagensNovas();
     document.getElementById('progressFill').style.width = '60%';
 
@@ -1056,7 +1065,6 @@
 
     document.getElementById('progressFill').style.width = '75%';
 
-    // Stock geral (só se não tiver variantes)
     if (tipo === 'stock') {
       const quantidade = parseInt(document.getElementById('prodQuantidade').value) || 0;
       const minimo = parseInt(document.getElementById('prodStockMinimo').value) || 5;
@@ -1068,12 +1076,10 @@
 
     document.getElementById('progressFill').style.width = '85%';
 
-    // Guardar variantes
     await guardarVariantes(produtoFinal.id);
 
     document.getElementById('progressFill').style.width = '92%';
 
-    // Guardar media (imagens extra, exceto a principal já guardada em image_url)
     if (mediaParaApagar.length > 0) {
       await db.from('product_media').delete().in('id', mediaParaApagar);
     }
@@ -1113,26 +1119,17 @@
     await carregarProdutos();
   }
 
-  async function eliminarProduto(id, nome) {
-    if (!confirm(`⚠️ Eliminar permanentemente "${nome}"?\n\nEsta acção não pode ser revertida. O produto e todas as suas imagens, variantes e stock serão apagados.`)) return;
-    await db.from('product_media').delete().eq('product_id', id);
-    await db.from('product_variants').delete().eq('product_id', id);
-    await db.from('product_stock').delete().eq('product_id', id);
-    const { error } = await db.from('products').delete().eq('id', id);
-    if (error) {
-      alert('Erro ao eliminar: ' + error.message);
-      return;
-    }
-    await carregarProdutos();
-  }
-
   // ============================
   // AUXILIARES
   // ============================
   function toggleEncomenda() {
     const tipo = document.getElementById('prodTipo').value;
-    document.getElementById('secaoStock').style.display = tipo === 'stock' ? 'block' : 'none';
-    document.getElementById('secaoEncomenda').style.display = tipo === 'pre_order' ? 'block' : 'none';
+    const eEncomenda = tipo === 'pre_order';
+
+    document.getElementById('secaoStock').style.display = eEncomenda ? 'none' : 'block';
+    document.getElementById('secaoEncomenda').style.display = eEncomenda ? 'block' : 'none';
+    document.getElementById('conversorBox').classList.toggle('visivel', eEncomenda);
+    document.getElementById('avisoStockTipo').style.display = eEncomenda ? 'none' : 'block';
   }
 
   function calcularAdiantamento() {
@@ -1191,14 +1188,10 @@
     document.getElementById('prodStatus').value = 'active';
     document.getElementById('prodDestaque').value = 'false';
     document.getElementById('valorUsd').value = '';
-    document.getElementById('margemConversao').value = '200';
+    document.getElementById('valorAdicional').value = '';
+    document.getElementById('custoCalculado').value = '';
     document.getElementById('novoImagemUrl').value = '';
-    document.getElementById('conversorResultado').style.display = 'none';
-    const passo2El = document.getElementById('conversorPasso2');
-    if (passo2El) passo2El.style.display = 'none';
-    const calcManualEl = document.getElementById('calcManual');
-    if (calcManualEl) { calcManualEl.checked = false; }
-    document.getElementById('prodPreco').style.borderColor = '';
+    document.getElementById('conversorFormula').style.display = 'none';
     document.getElementById('progressBar').style.display = 'none';
     document.getElementById('progressFill').style.width = '0%';
     document.getElementById('margemInfo').textContent = '';
