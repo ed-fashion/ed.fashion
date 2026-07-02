@@ -304,7 +304,7 @@
             <div id="conversorPasso2" style="display:none; margin-top:12px; background:#F0F7E6; border:1px solid var(--verde); border-radius:8px; padding:12px; font-size:13px; color:#16A34A;">
               <strong>📐 Preço Normal sugerido:</strong>
               <span id="precoSugeridoTexto"></span>
-              <br><small style="color:var(--cinza-escuro);">Fórmula: 2 × Custo + Valor Adicional</small>
+              <br><small style="color:var(--cinza-escuro);">Fórmula: Custo (USD × câmbio) + Valor Adicional</small>
               <div style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                 <button class="btn-admin btn-admin-rosa" style="font-size:12px;" onclick="aplicarPrecoSugerido()">
                   ✅ Usar este Preço Normal
@@ -524,12 +524,12 @@
       </button>`;
     resultado.style.display = 'block';
 
-    // Passo 2: Preço Normal = 2 × Custo + Valor Adicional
-    const precoSugerido = (custo * 2) + valorAdicional;
+    // Passo 2: Preço Normal = Custo + Valor Adicional (para produtos por encomenda)
+    const precoSugerido = custo + valorAdicional;
     const textoSugerido = document.getElementById('precoSugeridoTexto');
     if (textoSugerido) {
       textoSugerido.innerHTML = ` <strong style="font-size:15px;">${formatMZN(precoSugerido)}</strong>
-        <span style="color:var(--cinza); margin-left:6px;">(2 × ${formatMZN(custo)} + ${formatMZN(valorAdicional)})</span>`;
+        <span style="color:var(--cinza); margin-left:6px;">(${formatMZN(custo)} + ${formatMZN(valorAdicional)})</span>`;
     }
 
     const calcManual = document.getElementById('calcManual');
@@ -550,7 +550,7 @@
     const calcManual = document.getElementById('calcManual');
     if (calcManual && !calcManual.checked) {
       const valorAdicional = parseFloat(document.getElementById('margemConversao').value) || 0;
-      const precoSugerido = (valor * 2) + valorAdicional;
+      const precoSugerido = valor + valorAdicional;
       document.getElementById('prodPreco').value = precoSugerido.toFixed(2);
       calcularAdiantamento();
       calcularMargem();
@@ -562,7 +562,7 @@
     const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
     const valorAdicional = parseFloat(document.getElementById('margemConversao').value) || 0;
     const custo = usd * taxa;
-    const precoSugerido = (custo * 2) + valorAdicional;
+    const precoSugerido = custo + valorAdicional;
     document.getElementById('prodPreco').value = precoSugerido.toFixed(2);
     calcularAdiantamento();
     calcularMargem();
