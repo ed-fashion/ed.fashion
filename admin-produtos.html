@@ -301,26 +301,13 @@
                 <label>Custo (USD × Taxa)</label>
                 <input type="text" id="custoCalculado" readonly placeholder="0,00 MT">
               </div>
-            </div>
-
-            <!-- Resultado passo 1 -->
-            <div id="conversorResultado" class="conversor-resultado"></div>
-
-            <!-- Passo 2: Preço Normal automático -->
-            <div id="conversorPasso2" style="display:none; margin-top:12px; background:#F0F7E6; border:1px solid var(--verde); border-radius:8px; padding:12px; font-size:13px; color:#16A34A;">
-              <strong>📐 Preço Normal sugerido:</strong>
-              <span id="precoSugeridoTexto"></span>
-              <br><small style="color:var(--cinza-escuro);">Fórmula: 2 × Custo + Valor Adicional</small>
-              <div style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <button class="btn-admin btn-admin-rosa" style="font-size:12px;" onclick="aplicarPrecoSugerido()">
-                  ✅ Usar este Preço Normal
-                </button>
-                <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--cinza-escuro); cursor:pointer;">
-                  <input type="checkbox" id="calcManual" onchange="toggleCalcManual()" style="width:auto;">
-                  Calcular preço manualmente para este produto
-                </label>
+              <div class="form-grupo" style="margin-bottom:0;">
+                <label>Valor Adicional (MT)</label>
+                <input type="number" id="valorAdicional" placeholder="Ex: 200" min="0" step="0.01" value="200" oninput="calcularFormulaEncomenda()">
               </div>
             </div>
+            <div class="conversor-formula" id="conversorFormula" style="display:none;"></div>
+          </div>
 
           <div class="conversor-aviso-stock" id="avisoStockTipo" style="display:none;">
             💡 Este cálculo aplica-se a produtos <strong>Por Encomenda</strong>. Para produtos em stock, define o preço directamente abaixo.
@@ -536,64 +523,14 @@
         onclick="aplicarFormulaEncomenda(${custo.toFixed(2)}, ${precoNormal.toFixed(2)})">
         ✅ Aplicar: Custo e Preço Normal
       </button>`;
-    resultado.style.display = 'block';
-
-    // Passo 2: Preço Normal = 2 × Custo + Valor Adicional
-    const precoSugerido = (custo * 2) + valorAdicional;
-    const textoSugerido = document.getElementById('precoSugeridoTexto');
-    if (textoSugerido) {
-      textoSugerido.innerHTML = ` <strong style="font-size:15px;">${formatMZN(precoSugerido)}</strong>
-        <span style="color:var(--cinza); margin-left:6px;">(2 × ${formatMZN(custo)} + ${formatMZN(valorAdicional)})</span>`;
-    }
-
-    const calcManual = document.getElementById('calcManual');
-    passo2.style.display = 'block';
-
-    // Se não estiver em modo manual, preenche automaticamente
-    if (calcManual && !calcManual.checked) {
-      document.getElementById('prodPreco').value = precoSugerido.toFixed(2);
-      calcularAdiantamento();
-      calcularMargem();
-    }
+    formulaBox.style.display = 'block';
   }
 
-  function usarValorConvertido(valor) {
-    document.getElementById('prodCusto').value = valor;
-    calcularMargem();
-    // Recalcular o preço normal se não for manual
-    const calcManual = document.getElementById('calcManual');
-    if (calcManual && !calcManual.checked) {
-      const valorAdicional = parseFloat(document.getElementById('margemConversao').value) || 0;
-      const precoSugerido = (valor * 2) + valorAdicional;
-      document.getElementById('prodPreco').value = precoSugerido.toFixed(2);
-      calcularAdiantamento();
-      calcularMargem();
-    }
-  }
-
-  function aplicarPrecoSugerido() {
-    const usd = parseFloat(document.getElementById('valorUsd').value) || 0;
-    const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
-    const valorAdicional = parseFloat(document.getElementById('margemConversao').value) || 0;
-    const custo = usd * taxa;
-    const precoSugerido = (custo * 2) + valorAdicional;
-    document.getElementById('prodPreco').value = precoSugerido.toFixed(2);
+  function aplicarFormulaEncomenda(custo, precoNormal) {
+    document.getElementById('prodCusto').value = custo;
+    document.getElementById('prodPreco').value = precoNormal;
     calcularAdiantamento();
     calcularMargem();
-  }
-
-  function toggleCalcManual() {
-    const manual = document.getElementById('calcManual').checked;
-    const prodPreco = document.getElementById('prodPreco');
-    if (manual) {
-      prodPreco.style.borderColor = '#D97706';
-      prodPreco.title = 'Cálculo manual activado — preenche o preço manualmente';
-    } else {
-      prodPreco.style.borderColor = '';
-      prodPreco.title = '';
-      // Recalcular automaticamente
-      calcularConversao();
-    }
   }
 
   // ============================
@@ -1188,7 +1125,7 @@
     document.getElementById('prodStatus').value = 'active';
     document.getElementById('prodDestaque').value = 'false';
     document.getElementById('valorUsd').value = '';
-    document.getElementById('valorAdicional').value = '';
+    document.getElementById('valorAdicional').value = '200';
     document.getElementById('custoCalculado').value = '';
     document.getElementById('novoImagemUrl').value = '';
     document.getElementById('conversorFormula').style.display = 'none';
