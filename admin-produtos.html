@@ -868,11 +868,20 @@
 
   function renderGruposVariantes() {
     const container = document.getElementById('gruposVariantes');
+    const eEncomenda = document.getElementById('prodTipo')?.value === 'pre_order';
 
     if (gruposVariantesData.length === 0) {
       container.innerHTML = `<p style="font-size:13px; color:var(--cinza); text-align:center; padding:14px;">Nenhuma variante adicionada.</p>`;
       return;
     }
+
+    // Para encomendas: sem coluna de stock (irrelevante)
+    const colunas = eEncomenda
+      ? '1fr 100px 80px 36px'
+      : '1fr 80px 100px 80px 36px';
+    const cabecalhos = eEncomenda
+      ? '<span>Valor</span><span>Extra (USD)</span><span>= MT</span><span></span>'
+      : '<span>Valor</span><span>Stock</span><span>Extra (USD)</span><span>= MT</span><span></span>';
 
     container.innerHTML = gruposVariantesData.map(grupo => `
       <div class="variante-grupo">
@@ -881,16 +890,17 @@
           <button class="btn-remover-grupo-variante" onclick="removerGrupoVariante('${grupo.tempId}')">Remover grupo</button>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 80px 100px 80px 36px; gap:8px; margin-bottom:6px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase;">
-          <span>Valor</span><span>Stock</span><span>Extra (USD)</span><span>= MT</span><span></span>
+        <div style="display:grid; grid-template-columns: ${colunas}; gap:8px; margin-bottom:6px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase;">
+          ${cabecalhos}
         </div>
 
         ${grupo.linhas.map(linha => `
-          <div class="variante-linha">
+          <div class="variante-linha" style="grid-template-columns:${colunas};">
             <input type="text" placeholder="Ex: M, Azul, 256GB..." value="${linha.valor}"
               oninput="actualizarValorVariante('${grupo.tempId}', '${linha.tempId}', 'valor', this.value)">
+            ${eEncomenda ? '' : `
             <input type="number" placeholder="0" min="0" value="${linha.stock}"
-              oninput="actualizarValorVariante('${grupo.tempId}', '${linha.tempId}', 'stock', this.value)">
+              oninput="actualizarValorVariante('${grupo.tempId}', '${linha.tempId}', 'stock', this.value)">`}
             <input type="number" placeholder="0.00" step="0.01" min="0"
               value="${linha.usd_adicional || ''}"
               title="Valor extra em USD — será convertido para MT automaticamente"
@@ -899,7 +909,7 @@
               value="${linha.preco_adicional > 0 ? formatMZN(linha.preco_adicional) : ''}"
               id="mt_${linha.tempId}"
               style="background:var(--cinza-claro); color:var(--rosa); font-weight:700; font-size:12px; text-align:center;"
-              title="Valor extra em MT (calculado)">
+              title="Valor em MT (calculado)">
             <button class="btn-remover-variante" onclick="removerLinhaVariante('${grupo.tempId}', '${linha.tempId}')">×</button>
           </div>`).join('')}
 

@@ -828,7 +828,8 @@
                       <span class="variante-grupo-label">${tipo}</span>
                       <div class="variante-opcoes">
                         ${opcoes.sort((a,b) => a.sort_order - b.sort_order).map(op => {
-                          const semStock = op.stock !== null && op.stock !== undefined && op.stock === 0;
+                          // Só bloqueia por stock se o produto for de stock físico
+                          const semStock = !eEncomenda && op.stock !== null && op.stock !== undefined && op.stock === 0;
                           return `<button
                             class="variante-opcao${semStock ? ' sem-stock' : ''}"
                             data-tipo="${tipo}"
