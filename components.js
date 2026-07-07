@@ -7,8 +7,14 @@ function carregarNavbar() {
         <img src="logo.png" alt="E'D Fashion" height="50">
       </a>
       <div class="navbar-search">
-        <input type="text" id="searchInput" placeholder="Pesquisar produtos...">
-        <button onclick="pesquisar()">🔍</button>
+        <input type="text" id="searchInput" placeholder="Pesquisar produtos..."
+          onkeydown="if(event.key==='Enter') pesquisar()">
+        <button onclick="pesquisar()" title="Pesquisar">🔍</button>
+        <button onclick="abrirPesquisaFoto()" title="Pesquisar por foto" style="
+          background:none; border:none; cursor:pointer; font-size:18px;
+          padding:0 8px; display:flex; align-items:center; color:var(--cinza);
+          transition:color 0.2s;
+        " onmouseover="this.style.color='var(--rosa)'" onmouseout="this.style.color='var(--cinza)'">📷</button>
       </div>
       <div class="navbar-icons">
         <a href="carrinho.html" title="Carrinho">
@@ -29,10 +35,117 @@ function carregarNavbar() {
       <a href="catalogo.html?cat=casa">🏠 Casa</a>
       <a href="encomenda.html">📦 Por Encomenda</a>
     </div>
-  </nav>`;
+  </nav>
+
+  <!-- MODAL PESQUISA POR FOTO -->
+  <div id="modalFoto" onclick="if(event.target===this)fecharModalFoto()" style="
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55);
+    z-index:9999; align-items:center; justify-content:center; padding:20px;
+  ">
+    <div style="
+      background:white; border-radius:20px; padding:28px; max-width:420px;
+      width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.25); text-align:center;
+    ">
+      <div style="font-size:40px; margin-bottom:8px;">📷</div>
+      <h3 style="font-size:17px; font-weight:800; color:var(--preto); margin-bottom:6px;">
+        Pesquisar por Foto
+      </h3>
+      <p style="font-size:13px; color:var(--cinza); margin-bottom:20px;">
+        Tira uma foto ou carrega uma imagem para encontrar produtos semelhantes.
+      </p>
+
+      <!-- Upload de imagem -->
+      <div id="fotoPreviewWrap" style="display:none; margin-bottom:16px;">
+        <img id="fotoPreview" style="max-width:100%; max-height:200px; border-radius:12px; object-fit:contain;">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+        <label style="
+          display:flex; align-items:center; justify-content:center; gap:10px;
+          padding:13px; background:var(--rosa); color:white; border-radius:25px;
+          font-size:14px; font-weight:700; cursor:pointer; transition:background 0.2s;
+        " onmouseover="this.style.background='#c4186f'" onmouseout="this.style.background='var(--rosa)'">
+          📁 Escolher da galeria
+          <input type="file" id="inputFotoSearch" accept="image/*" style="display:none"
+            onchange="processarFotoSearch(event)">
+        </label>
+
+        <label style="
+          display:flex; align-items:center; justify-content:center; gap:10px;
+          padding:13px; background:var(--preto); color:white; border-radius:25px;
+          font-size:14px; font-weight:700; cursor:pointer; transition:background 0.2s;
+        " onmouseover="this.style.background='#333'" onmouseout="this.style.background='var(--preto)'">
+          📸 Tirar foto (câmara)
+          <input type="file" id="inputCameraSearch" accept="image/*" capture="environment" style="display:none"
+            onchange="processarFotoSearch(event)">
+        </label>
+      </div>
+
+      <div id="fotoSearchAcoes" style="display:none; flex-direction:column; gap:8px;">
+        <button onclick="pesquisarNoGoogle()" style="
+          width:100%; padding:12px; background:#4285F4; color:white; border:none;
+          border-radius:25px; font-size:14px; font-weight:700; cursor:pointer;
+        ">
+          🔍 Pesquisar com Google Lens
+        </button>
+        <p style="font-size:11px; color:var(--cinza);">
+          Abre o Google Lens para encontrar este produto em lojas online.
+        </p>
+      </div>
+
+      <button onclick="fecharModalFoto()" style="
+        width:100%; padding:10px; background:transparent; color:var(--cinza);
+        border:1.5px solid #ddd; border-radius:25px; font-size:13px;
+        font-weight:600; cursor:pointer; margin-top:8px;
+      ">Cancelar</button>
+    </div>
+  </div>`;
+
   document.getElementById('navbar').innerHTML = navbar;
   atualizarContadorCarrinho();
   atualizarNavbarSessao();
+}
+
+let _fotoSearchFile = null;
+
+function abrirPesquisaFoto() {
+  const modal = document.getElementById('modalFoto');
+  if (modal) {
+    modal.style.display = 'flex';
+    // Reset
+    document.getElementById('fotoPreviewWrap').style.display = 'none';
+    document.getElementById('fotoSearchAcoes').style.display = 'none';
+    _fotoSearchFile = null;
+  }
+}
+
+function fecharModalFoto() {
+  const modal = document.getElementById('modalFoto');
+  if (modal) modal.style.display = 'none';
+}
+
+function processarFotoSearch(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  _fotoSearchFile = file;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const preview = document.getElementById('fotoPreview');
+    const wrap = document.getElementById('fotoPreviewWrap');
+    const acoes = document.getElementById('fotoSearchAcoes');
+    if (preview) preview.src = e.target.result;
+    if (wrap) wrap.style.display = 'block';
+    if (acoes) acoes.style.display = 'flex';
+  };
+  reader.readAsDataURL(file);
+}
+
+function pesquisarNoGoogle() {
+  // Abre o Google Lens — o utilizador pode carregar a imagem lá
+  // Em mobile, o Google Lens funciona directamente com a câmara
+  window.open('https://lens.google.com', '_blank');
+  fecharModalFoto();
 }
 
 // Actualizar navbar conforme sessão
