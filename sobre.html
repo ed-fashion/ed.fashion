@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sobre Nós — E'D Fashion</title>
+  <meta name="description" content="Conheça a E'D Fashion — a loja de moda online da Beira, Moçambique. A nossa história, missão, valores e como trabalhamos para ti.">
+  <link rel="stylesheet" href="main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    /* HERO */
+    .sobre-hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #E91E8C 100%);
+      color: white;
+      padding: 80px 20px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sobre-hero::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -20%;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: rgba(233,30,140,0.08);
+    }
+
+    .sobre-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -10%;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: rgba(141,198,63,0.06);
+    }
+
+    .sobre-hero-conteudo { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
+
+    .sobre-hero-badge {
+      display: inline-block;
+      background: rgba(233,30,140,0.2);
+      border: 1px solid rgba(233,30,140,0.4);
+      color: #f9a8d4;
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .sobre-hero h1 {
+      font-size: 42px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .sobre-hero h1 span { color: var(--rosa); }
+
+    .sobre-hero p {
+      font-size: 16px;
+      opacity: 0.85;
+      line-height: 1.7;
+      margin-bottom: 30px;
+    }
+
+    .sobre-hero-stats {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .stat-item { text-align: center; }
+
+    .stat-numero {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--rosa);
+      display: block;
+    }
+
+    .stat-desc {
+      font-size: 12px;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* NAVEGAÇÃO INTERNA */
+    .sobre-nav {
+      background: white;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .sobre-nav-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .sobre-nav-inner::-webkit-scrollbar { display: none; }
+
+    .sobre-nav-link {
+      padding: 16px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--cinza);
+      text-decoration: none;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .sobre-nav-link:hover,
+    .sobre-nav-link.activo { color: var(--rosa); border-bottom-color: var(--rosa); }
+
+    /* SECÇÕES */
+    .sobre-secao {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 60px 20px;
+      scroll-margin-top: 56px;
+    }
+
+    .secao-tag {
+      display: inline-block;
+      background: var(--rosa-claro);
+      color: var(--rosa);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .secao-titulo {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--preto);
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+
+    .secao-titulo span { color: var(--rosa); }
+
+    .secao-texto {
+      font-size: 15px;
+      color: var(--cinza-escuro);
+      line-height: 1.8;
+    }
+
+    .secao-divisor {
+      border: none;
+      border-top: 1px solid #F0F2F5;
+      margin: 0;
+    }
+
+    /* HISTÓRIA */
+    .historia-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      align-items: center;
+    }
+
+    .historia-imagem-wrap {
+      position: relative;
+    }
+
+    .historia-imagem-bg {
+      width: 100%;
+      aspect-ratio: 4/3;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--rosa-claro) 0%, var(--verde-claro) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .historia-imagem-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+    }
+
+    .historia-badge-ano {
+      position: absolute;
+      bottom: -16px;
+      right: -16px;
+      background: var(--rosa);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 14px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(233,30,140,0.3);
+    }
+
+    .historia-badge-ano strong { font-size: 28px; font-weight: 800; display: block; }
+    .historia-badge-ano span { font-size: 11px; opacity: 0.85; }
+
+    /* MVV */
+    .mvv-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .mvv-card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px 24px;
+      box-shadow: var(--sombra);
+      border-top: 4px solid transparent;
+      transition: transform 0.2s;
+    }
+
+    .mvv-card:hover { transform: translateY(-4px); }
+    .mvv-card.missao { border-top-color: var(--rosa); }
+    .mvv-card.visao { border-top-color: var(--verde); }
+    .mvv-card.valores { border-top-color: #2563EB; }
+
+    .mvv-icone { font-size: 36px; margin-bottom: 14px; display: block; }
+    .mvv-titulo { font-size: 16px; font-weight: 800; color: var(--preto); margin-bottom: 10px; }
+    .mvv-texto { font-size: 13px; color: var(--cinza-escuro); line-height: 1.7; }
+
+    .valores-lista {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .valores-lista li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--cinza-escuro);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .valores-lista li::before {
+      content: '✓';
+      color: #2563EB;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    /* COMO FUNCIONA */
+    .como-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .como-card {
+      background: white;
+      border-radius: 14px;
+      padding: 24px 20px;
+      box-shadow: var(--sombra);
+      text-align: center;
+      position: relative;
+    }
+
+    .como-numero {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--rosa);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0 auto 14px;
+    }
+
+    .como-icone { font-size: 28px; margin-bottom: 10px; display: block; }
+    .como-titulo { font-size: 14px; font-weight: 700; color: var(--preto); margin-bottom: 6px; }
+    .como-texto { font-size: 12px; color: var(--cinza); line-height: 1.6; }
+
+    /* PAGAMENTOS */
+    .pagamentos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .pagamento-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--sombra);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .pagamento-icone {
+      font-size: 28px;
+      flex-shrink: 0;
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: var(--cinza-claro);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pagamento-info strong { font-size: 14px; color: var(--preto); display: block; margin-bottom: 2px; }
+    .pagamento-info span { font-size: 12px; color: var(--cinza); }
+
+    /* FAQ */
+    .faq-lista { display: flex; flex-direction: column; gap: 12px; }
+
+    .faq-item {
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--sombra);
+      overflow: hidden;
+    }
+
+    .faq-pergunta {
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--preto);
+      transition: background 0.2s;
+      gap: 12px;
+    }
+
+    .faq-pergunta:hover { background: #FAFAFA; }
+
+    .faq-toggle {
+      font-size: 20px;
+      color: var(--rosa);
+      transition: transform 0.3s;
+      flex-shrink: 0;
+      font-weight: 400;
+    }
+
+    .faq-toggle.aberto { transform: rotate(45deg); }
+
+    .faq-resposta {
+      display: none;
+      padding: 0 22px 18px;
+      font-size: 13px;
+      color: var(--cinza-escuro);
+      line-height: 1.7;
+      border-top: 1px solid #F0F2F5;
+      padding-top: 14px;
+    }
+
+    .faq-resposta.aberto { display: block; }
+
+    /* POLÍTICAS */
+    .politica-bloco {
+      background: white;
+      border-radius: 14px;
+      box-shadow: var(--sombra);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .politica-header {
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .politica-header:hover { background: #FAFAFA; }
+
+    .politica-icone {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--rosa-claro);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .politica-titulo {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--preto);
+    }
+
+    .politica-toggle { font-size: 18px; color: var(--cinza); transition: transform 0.3s; }
+    .politica-toggle.aberto { transform: rotate(180deg); }
+
+    .politica-corpo {
+      display: none;
+      padding: 0 24px 24px;
+      font-size: 13px;
+      color: var(--cinza-escuro);
+      line-height: 1.8;
+      border-top: 1px solid #F0F2F5;
+      padding-top: 16px;
+    }
+
+    .politica-corpo.aberta { display: block; }
+
+    .politica-corpo h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--preto);
+      margin: 14px 0 6px;
+    }
+
+    .politica-corpo ul {
+      margin: 0 0 10px 16px;
+      padding: 0;
+    }
+
+    .politica-corpo ul li { margin-bottom: 4px; }
+
+    /* CONTACTO */
+    .contacto-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .contacto-card {
+      background: white;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: var(--sombra);
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .contacto-card:hover { transform: translateY(-3px); }
+    .contacto-card a { text-decoration: none; color: inherit; }
+
+    .contacto-icone { font-size: 32px; margin-bottom: 12px; display: block; }
+    .contacto-titulo { font-size: 14px; font-weight: 700; color: var(--preto); margin-bottom: 6px; }
+    .contacto-detalhe { font-size: 13px; color: var(--rosa); font-weight: 600; }
+    .contacto-sub { font-size: 11px; color: var(--cinza); margin-top: 4px; }
+
+    /* CTA FINAL */
+    .sobre-cta {
+      background: linear-gradient(135deg, var(--rosa) 0%, #c4186f 50%, var(--verde) 100%);
+      border-radius: 20px;
+      padding: 50px 30px;
+      text-align: center;
+      color: white;
+      margin: 0 20px;
+    }
+
+    .sobre-cta h2 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+    .sobre-cta p { font-size: 15px; opacity: 0.9; margin-bottom: 28px; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+    .sobre-cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    .btn-cta-branco {
+      background: white;
+      color: var(--rosa);
+      padding: 13px 28px;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      transition: transform 0.2s;
+    }
+
+    .btn-cta-branco:hover { transform: scale(1.05); }
+
+    .btn-cta-outline {
+      background: transparent;
+      color: white;
+      border: 2px solid rgba(255,255,255,0.7);
+      padding: 13px 28px;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-cta-outline:hover { background: white; color: var(--rosa); }
+
+    /* RESPONSIVIDADE */
+    @media (max-width: 768px) {
+      .sobre-hero h1 { font-size: 28px; }
+      .historia-grid { grid-template-columns: 1fr; }
+      .historia-imagem-bg { aspect-ratio: 16/9; }
+      .historia-badge-ano { right: 0; bottom: -14px; }
+      .mvv-grid { grid-template-columns: 1fr; }
+      .sobre-cta { margin: 0 12px; padding: 36px 20px; }
+      .sobre-cta h2 { font-size: 22px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<!-- HERO -->
+<div class="sobre-hero">
+  <div class="sobre-hero-conteudo">
+    <div class="sobre-hero-badge">📍 Beira, Moçambique — Desde 2020</div>
+    <h1>Somos a <span>E'D Fashion</span><br>Moda para Todos</h1>
+    <p>Uma marca moçambicana nascida na Beira com o sonho de aproximar moda, qualidade e acessibilidade para cada canto de Moçambique.</p>
+    <div class="sobre-hero-stats">
+      <div class="stat-item">
+        <span class="stat-numero">4+</span>
+        <span class="stat-desc">Anos de história</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-numero">🇲🇿</span>
+        <span class="stat-desc">100% Moçambicana</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-numero">∞</span>
+        <span class="stat-desc">Produtos disponíveis</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-numero">10</span>
+        <span class="stat-desc">Províncias servidas</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAVEGAÇÃO INTERNA -->
+<div class="sobre-nav">
+  <div class="sobre-nav-inner">
+    <a href="#historia" class="sobre-nav-link" onclick="activarNav(this)">A Nossa História</a>
+    <a href="#mvv" class="sobre-nav-link" onclick="activarNav(this)">Missão & Valores</a>
+    <a href="#como-funciona" class="sobre-nav-link" onclick="activarNav(this)">Como Funciona</a>
+    <a href="#pagamentos" class="sobre-nav-link" onclick="activarNav(this)">Pagamentos</a>
+    <a href="#faq" class="sobre-nav-link" onclick="activarNav(this)">FAQ</a>
+    <a href="#politicas" class="sobre-nav-link" onclick="activarNav(this)">Políticas</a>
+    <a href="#contacto" class="sobre-nav-link" onclick="activarNav(this)">Contacto</a>
+  </div>
+</div>
+
+<!-- A NOSSA HISTÓRIA -->
+<div class="sobre-secao" id="historia">
+  <div class="historia-grid">
+    <div class="historia-imagem-wrap">
+      <div class="historia-imagem-bg">
+        🛍️
+        <div class="historia-badge-ano">
+          <strong>2020</strong>
+          <span>Fundação</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="secao-tag">A Nossa História</div>
+      <h2 class="secao-titulo">De Beira para <span>todo Moçambique</span></h2>
+      <div class="secao-texto">
+        <p style="margin-bottom:14px;">A E'D Fashion nasceu de um sonho simples: trazer moda acessível, moderna e de qualidade para Moçambique. Começámos na Beira como um pequeno projecto familiar, com uma visão clara de que todas as pessoas merecem vestir bem, independentemente de onde vivem.</p>
+        <p style="margin-bottom:14px;">Com os anos, crescemos. A nossa loja física no 6º Bairro Esturro tornou-se referência local, e a nossa presença online expandiu o alcance para todo o país. Hoje combinamos stock disponível imediatamente com um serviço inovador de importação por encomenda — porque acreditamos que as fronteiras não devem limitar o estilo.</p>
+        <p>A família por detrás da E'D Fashion continua a crescer — e contigo, crescemos juntos.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="secao-divisor">
+
+<!-- MISSÃO, VISÃO E VALORES -->
+<div class="sobre-secao" id="mvv">
+  <div style="text-align:center; margin-bottom:36px;">
+    <div class="secao-tag">O Que Nos Move</div>
+    <h2 class="secao-titulo">Missão, Visão <span>e Valores</span></h2>
+  </div>
+
+  <div class="mvv-grid">
+    <div class="mvv-card missao">
+      <span class="mvv-icone">🎯</span>
+      <div class="mvv-titulo">Missão</div>
+      <p class="mvv-texto">Democratizar o acesso à moda em Moçambique, oferecendo produtos de qualidade com um serviço próximo, honesto e acessível — do stock local à encomenda internacional, sempre com o cliente no centro.</p>
+    </div>
+    <div class="mvv-card visao">
+      <span class="mvv-icone">🔭</span>
+      <div class="mvv-titulo">Visão</div>
+      <p class="mvv-texto">Ser a plataforma de moda online de referência em Moçambique — reconhecida pela confiança, variedade e pela capacidade de trazer qualquer produto do mundo para a porta de cada moçambicano.</p>
+    </div>
+    <div class="mvv-card valores">
+      <span class="mvv-icone">💎</span>
+      <div class="mvv-titulo">Valores</div>
+      <ul class="valores-lista">
+        <li>Honestidade em cada transacção</li>
+        <li>Proximidade e respeito pelo cliente</li>
+        <li>Qualidade acima da quantidade</li>
+        <li>Compromisso com o prazo combinado</li>
+        <li>Orgulho em ser uma marca moçambicana</li>
+        <li>Inovação constante ao serviço do cliente</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<hr class="secao-divisor">
+
+<!-- COMO FUNCIONA -->
+<div class="sobre-secao" id="como-funciona" style="background:#F8F9FA; border-radius:20px;">
+  <div style="text-align:center; margin-bottom:36px;">
+    <div class="secao-tag">Simples e Transparente</div>
+    <h2 class="secao-titulo">Como <span>Funciona</span></h2>
+    <p class="secao-texto" style="max-width:560px; margin:0 auto;">Comprar na E'D Fashion é simples. Escolhes, pagas com o método que preferires, e recebemos. Para encomendas internacionais, acompanhas tudo em tempo real.</p>
+  </div>
+
+  <div class="como-grid">
+    <div class="como-card">
+      <div class="como-numero">1</div>
+      <span class="como-icone">🛍️</span>
+      <div class="como-titulo">Escolhe o Produto</div>
+      <p class="como-texto">Navega no nosso catálogo e encontra o que queres — roupa, calçado, acessórios, electrónica e muito mais.</p>
+    </div>
+    <div class="como-card">
+      <div class="como-numero">2</div>
+      <span class="como-icone">🛒</span>
+      <div class="como-titulo">Adiciona ao Carrinho</div>
+      <p class="como-texto">Selecciona tamanho, cor e quantidade. Podes guardar produtos no carrinho para comprar tudo de uma vez.</p>
+    </div>
+    <div class="como-card">
+      <div class="como-numero">3</div>
+      <span class="como-icone">💳</span>
+      <div class="como-titulo">Paga com Facilidade</div>
+      <p class="como-texto">M-Pesa, e-Mola, transferência bancária ou dinheiro presencial. Envias o comprovativo e confirmamos.</p>
+    </div>
+    <div class="como-card">
+      <div class="como-numero">4</div>
+      <span class="como-icone">📦</span>
+      <div class="como-titulo">Acompanhas o Estado</div>
+      <p class="como-texto">Vês em tempo real onde está a tua encomenda — da confirmação de pagamento até à entrega.</p>
+    </div>
+    <div class="como-card">
+      <div class="como-numero">5</div>
+      <span class="como-icone">🏠</span>
+      <div class="como-titulo">Recebes em Casa</div>
+      <p class="como-texto">Entregamos na Beira e enviamos para qualquer província de Moçambique. Sempre com aviso prévio.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="secao-divisor" style="margin-top:0;">
+
+<!-- PAGAMENTOS -->
+<div class="sobre-secao" id="pagamentos">
+  <div style="text-align:center; margin-bottom:36px;">
+    <div class="secao-tag">Pagamentos Seguros</div>
+    <h2 class="secao-titulo">Como <span>Pagar</span></h2>
+    <p class="secao-texto" style="max-width:500px; margin:0 auto;">Aceitamos os métodos de pagamento mais usados em Moçambique. Simples, rápido e seguro.</p>
+  </div>
+
+  <div class="pagamentos-grid">
+    <div class="pagamento-card">
+      <div class="pagamento-icone">📱</div>
+      <div class="pagamento-info">
+        <strong>M-Pesa (Vodacom)</strong>
+        <span>Nº: 86 646 4666</span>
+        <div style="font-size:11px; color:var(--cinza); margin-top:2px;">Envio imediato + comprovativo</div>
+      </div>
+    </div>
+    <div class="pagamento-card">
+      <div class="pagamento-icone">💳</div>
+      <div class="pagamento-info">
+        <strong>e-Mola (Movitel)</strong>
+        <span>Nº: 86 646 4666</span>
+        <div style="font-size:11px; color:var(--cinza); margin-top:2px;">Envio imediato + comprovativo</div>
+      </div>
+    </div>
+    <div class="pagamento-card">
+      <div class="pagamento-icone">🏦</div>
+      <div class="pagamento-info">
+        <strong>Transferência Bancária</strong>
+        <span>BCI — NIB a pedido</span>
+        <div style="font-size:11px; color:var(--cinza); margin-top:2px;">Confirmar via WhatsApp</div>
+      </div>
+    </div>
+    <div class="pagamento-card">
+      <div class="pagamento-icone">💵</div>
+      <div class="pagamento-info">
+        <strong>Dinheiro Presencial</strong>
+        <span>6º Bairro Esturro, Beira</span>
+        <div style="font-size:11px; color:var(--cinza); margin-top:2px;">Pagamento na entrega ou levantamento</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:#DCFCE7; border:1px solid #16A34A; border-radius:12px; padding:16px 20px; margin-top:20px; font-size:13px; color:#166534; display:flex; gap:10px; align-items:flex-start;">
+    <span style="font-size:18px; flex-shrink:0;">🔒</span>
+    <div>
+      <strong>Compra 100% Segura.</strong> Após o pagamento, envia o comprovativo via WhatsApp para <strong>+258 86 646 4666</strong>. Só processamos a encomenda após confirmação do pagamento. Nunca partilhamos os teus dados com terceiros.
+    </div>
+  </div>
+</div>
+
+<hr class="secao-divisor">
+
+<!-- FAQ -->
+<div class="sobre-secao" id="faq">
+  <div style="text-align:center; margin-bottom:36px;">
+    <div class="secao-tag">Perguntas Frequentes</div>
+    <h2 class="secao-titulo">Tens <span>Dúvidas?</span></h2>
+    <p class="secao-texto" style="max-width:500px; margin:0 auto;">Encontra aqui as respostas às perguntas mais comuns. Se não encontrares o que procuras, fala connosco.</p>
+  </div>
+
+  <div class="faq-lista">
+
+    <div class="faq-item">
+      <div class="faq-pergunta" onclick="toggleFaq(this)">
+        <span>Como faço a minha primeira encomenda?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-resposta">
+        Navega no catálogo, escolhe o produto, adiciona ao carrinho e clica em "Finalizar Compra". Preenche os teus dados, escolhe o método de pagamento e confirma. Depois é só enviar o comprovativo via WhatsApp e aguardar a confirmação da nossa parte.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-pergunta" onclick="toggleFaq(this)">
+        <span>Entregam fora da Beira?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-resposta">
+        Sim! Entregamos em todo Moçambique. Para a Beira e arredores, fazemos entrega directa. Para outras províncias, enviamos via transportadora e combinamos os detalhes via WhatsApp. O custo e prazo de entrega varia consoante a localização.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-pergunta" onclick="toggleFaq(this)">
+        <span>O que é um produto "Por Encomenda"?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-resposta">
+        São produtos que não temos em stock local mas que importamos especificamente para si. Encontra o produto online (ex: na Shein), envia-nos o link via WhatsApp, nós damos o preço final em Meticais e tratamos de tudo — da compra à entrega. O prazo habitual é de 15 a 30 dias.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-pergunta" onclick="toggleFaq(this)">
+        <span>Posso cancelar uma encomenda?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-resposta">
+        Para produtos em stock, pode cancelar antes de confirmarmos o pagamento, sem custos. Para produtos por encomenda, o cancelamento é possível antes de fazermos a compra ao fornecedor. Após esse momento, o adiantamento pago não é reembolsável pois já iniciámos o processo de importação. Em caso de dúvida, contacte-nos imediatamente.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-pergunta" onclick="toggleFaq(this)">
+        <span>O que acontece se o produto chegar com defeito?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-resposta">
+        Verificamos todos os produtos antes da entrega. Se ainda assim receber um produto com defeito, contacte-nos nas primeiras 24 horas após a entrega com fotos do problema. Analisamos cada caso individualmente e encontramos a melhor solução.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-pergunta" onclick="toggleFaq(this)">
+        <span>Como funciona o adiantamento nas encomendas?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-resposta">
+        Para produtos por encomenda, pedimos um adiantamento (normalmente 30% a 50% do valor total) para confirmar a encomenda. Este valor garante que fazemos a compra ao fornecedor. O restante é pago quando o produto chegar a Moçambique, antes da entrega.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-pergunta" onclick="toggleFaq(this)">
+        <span>Têm loja física?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-resposta">
+        Sim! Estamos localizados no 6º Bairro Esturro, Beira, Moçambique. Pode visitar-nos pessoalmente para ver produtos em stock, levantamento de encomendas ou pagamento em dinheiro. Contacte-nos via WhatsApp antes de vir para confirmar a disponibilidade.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-pergunta" onclick="toggleFaq(this)">
+        <span>Os dados da minha conta estão seguros?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-resposta">
+        Sim. Os seus dados são armazenados de forma segura e nunca são partilhados com terceiros. A autenticação é gerida pela plataforma Supabase com encriptação de ponta. Utilizamos apenas os dados necessários para processar as suas encomendas.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<hr class="secao-divisor">
+
+<!-- POLÍTICAS -->
+<div class="sobre-secao" id="politicas">
+  <div style="text-align:center; margin-bottom:36px;">
+    <div class="secao-tag">Transparência Total</div>
+    <h2 class="secao-titulo">As Nossas <span>Políticas</span></h2>
+    <p class="secao-texto" style="max-width:500px; margin:0 auto;">Acreditamos na transparência. Aqui encontras tudo o que precisas de saber sobre como trabalhamos.</p>
+  </div>
+
+  <div class="politica-bloco">
+    <div class="politica-header" onclick="togglePolitica(this)">
+      <div class="politica-icone">📦</div>
+      <div class="politica-titulo">Política de Entregas</div>
+      <span class="politica-toggle">▾</span>
+    </div>
+    <div class="politica-corpo">
+      <h4>Prazos de Entrega</h4>
+      <ul>
+        <li><strong>Beira e arredores:</strong> 1 a 3 dias úteis após confirmação de pagamento</li>
+        <li><strong>Outras províncias:</strong> 3 a 7 dias úteis, dependendo da localização</li>
+        <li><strong>Produtos por encomenda:</strong> 15 a 30 dias após confirmação do adiantamento</li>
+      </ul>
+      <h4>Custos de Entrega</h4>
+      <ul>
+        <li>Beira cidade: custo de entrega a combinar com o cliente</li>
+        <li>Outras cidades: custo calculado caso a caso via WhatsApp</li>
+        <li>Levantamento em loja: sem custo adicional</li>
+      </ul>
+      <h4>Processo</h4>
+      <p>Após confirmação do pagamento, a encomenda é preparada e o cliente é notificado via WhatsApp antes da entrega. O cliente deve estar disponível no endereço indicado ou indicar um alternativo com antecedência.</p>
+    </div>
+  </div>
+
+  <div class="politica-bloco">
+    <div class="politica-header" onclick="togglePolitica(this)">
+      <div class="politica-icone">↩️</div>
+      <div class="politica-titulo">Política de Trocas e Devoluções</div>
+      <span class="politica-toggle">▾</span>
+    </div>
+    <div class="politica-corpo">
+      <h4>Quando pode pedir troca ou devolução?</h4>
+      <ul>
+        <li>Produto com defeito de fabrico comprovado</li>
+        <li>Produto diferente do encomendado (modelo, cor, tamanho errado da nossa parte)</li>
+        <li>Produto danificado durante o transporte</li>
+      </ul>
+      <h4>Como proceder</h4>
+      <ul>
+        <li>Contactar-nos via WhatsApp nas primeiras 24 horas após receber o produto</li>
+        <li>Enviar fotos claras do produto e do problema</li>
+        <li>Aguardar avaliação da nossa equipa (resposta em até 48 horas)</li>
+      </ul>
+      <h4>O que não é aceite para troca</h4>
+      <ul>
+        <li>Produtos por encomenda onde o cliente escolheu o tamanho/cor e recebeu correctamente</li>
+        <li>Produtos com sinais de uso, lavagem ou danificados pelo cliente</li>
+        <li>Pedidos feitos mais de 24 horas após a entrega sem justificação válida</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="politica-bloco">
+    <div class="politica-header" onclick="togglePolitica(this)">
+      <div class="politica-icone">🔒</div>
+      <div class="politica-titulo">Política de Privacidade</div>
+      <span class="politica-toggle">▾</span>
+    </div>
+    <div class="politica-corpo">
+      <h4>Que dados recolhemos?</h4>
+      <ul>
+        <li>Nome, email e telefone fornecidos no registo</li>
+        <li>Endereços de entrega das encomendas</li>
+        <li>Histórico de compras e encomendas</li>
+      </ul>
+      <h4>Como usamos os seus dados?</h4>
+      <ul>
+        <li>Processar e entregar as suas encomendas</li>
+        <li>Comunicar sobre o estado das encomendas</li>
+        <li>Melhorar a experiência na nossa plataforma</li>
+      </ul>
+      <h4>Os seus dados estão seguros?</h4>
+      <p>Sim. Não vendemos nem partilhamos dados com terceiros para fins comerciais. Os dados são armazenados em servidores seguros (Supabase) com encriptação. Pode solicitar a eliminação da sua conta a qualquer momento via WhatsApp.</p>
+    </div>
+  </div>
+
+  <div class="politica-bloco">
+    <div class="politica-header" onclick="togglePolitica(this)">
+      <div class="politica-icone">📋</div>
+      <div class="politica-titulo">Termos e Condições de Uso</div>
+      <span class="politica-toggle">▾</span>
+    </div>
+    <div class="politica-corpo">
+      <h4>Aceitação dos Termos</h4>
+      <p>Ao usar a plataforma E'D Fashion, o utilizador aceita estes termos. O uso continuado após alterações constitui aceitação das mesmas.</p>
+      <h4>Conta de Utilizador</h4>
+      <ul>
+        <li>Cada pessoa pode ter apenas uma conta</li>
+        <li>O utilizador é responsável por manter a sua password segura</li>
+        <li>Contas com actividade suspeita podem ser suspensas</li>
+      </ul>
+      <h4>Responsabilidade</h4>
+      <ul>
+        <li>A E'D Fashion não é responsável por erros no endereço de entrega fornecido pelo cliente</li>
+        <li>O cliente assume a responsabilidade de fornecer informações correctas no momento da encomenda</li>
+        <li>Os preços podem ser alterados sem aviso prévio, mas as encomendas confirmadas mantêm o preço acordado</li>
+      </ul>
+      <h4>Propriedade Intelectual</h4>
+      <p>Todo o conteúdo do site (imagens, textos, logótipos) é propriedade da E'D Fashion. A reprodução sem autorização é proibida.</p>
+      <h4>Lei Aplicável</h4>
+      <p>Estes termos regem-se pela lei moçambicana. Qualquer litígio será resolvido nos tribunais competentes de Moçambique.</p>
+    </div>
+  </div>
+
+  <div class="politica-bloco">
+    <div class="politica-header" onclick="togglePolitica(this)">
+      <div class="politica-icone">🍪</div>
+      <div class="politica-titulo">Política de Cookies</div>
+      <span class="politica-toggle">▾</span>
+    </div>
+    <div class="politica-corpo">
+      <p>O nosso site utiliza armazenamento local (localStorage) para manter o seu carrinho de compras e preferências de sessão. Não utilizamos cookies de rastreamento de terceiros para publicidade. Os dados de sessão são necessários para o funcionamento correcto da plataforma e são eliminados quando fecha a sessão.</p>
+    </div>
+  </div>
+
+</div>
+
+<hr class="secao-divisor">
+
+<!-- CONTACTO -->
+<div class="sobre-secao" id="contacto">
+  <div style="text-align:center; margin-bottom:36px;">
+    <div class="secao-tag">Fala Connosco</div>
+    <h2 class="secao-titulo">Estamos <span>Aqui para Ti</span></h2>
+    <p class="secao-texto" style="max-width:500px; margin:0 auto;">Tens dúvidas, sugestões ou precisas de ajuda? A nossa equipa responde rapidamente.</p>
+  </div>
+
+  <div class="contacto-grid">
+    <div class="contacto-card">
+      <a href="https://wa.me/258866464666" target="_blank">
+        <span class="contacto-icone">💬</span>
+        <div class="contacto-titulo">WhatsApp</div>
+        <div class="contacto-detalhe">+258 86 646 4666</div>
+        <div class="contacto-sub">Resposta em menos de 1 hora (horário comercial)</div>
+      </a>
+    </div>
+    <div class="contacto-card">
+      <span class="contacto-icone">📍</span>
+      <div class="contacto-titulo">Loja Física</div>
+      <div class="contacto-detalhe">6º Bairro Esturro</div>
+      <div class="contacto-sub">Beira, Sofala — Moçambique</div>
+    </div>
+    <div class="contacto-card">
+      <span class="contacto-icone">🕐</span>
+      <div class="contacto-titulo">Horário de Atendimento</div>
+      <div class="contacto-detalhe">Seg — Sáb</div>
+      <div class="contacto-sub">08:00 — 18:00 (hora de Moçambique)</div>
+    </div>
+    <div class="contacto-card">
+      <a href="https://ed-fashion.github.io/ed.fashion/" target="_blank">
+        <span class="contacto-icone">🌐</span>
+        <div class="contacto-titulo">Loja Online</div>
+        <div class="contacto-detalhe">ed-fashion.github.io</div>
+        <div class="contacto-sub">Disponível 24h, 7 dias por semana</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- CTA FINAL -->
+<div style="padding: 0 0 60px;">
+  <div class="sobre-cta">
+    <h2>Pronta/o para descobrir a tua moda? ✨</h2>
+    <p>Explora o nosso catálogo, faz a tua primeira encomenda e descobre por que a Beira escolhe a E'D Fashion.</p>
+    <div class="sobre-cta-btns">
+      <a href="catalogo.html" class="btn-cta-branco">🛍️ Ver Catálogo</a>
+      <a href="https://wa.me/258866464666?text=Olá%20E'D%20Fashion!%20Gostaria%20de%20saber%20mais." target="_blank" class="btn-cta-outline">💬 Falar Connosco</a>
+    </div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<a href="https://wa.me/258866464666?text=Olá%20E'D%20Fashion!%20Gostaria%20de%20saber%20mais%20sobre%20os%20vossos%20produtos%20😊"
+   target="_blank" class="btn-whatsapp-fixo" title="WhatsApp">💬</a>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="components.js"></script>
+<script>
+
+  carregarNavbar();
+  carregarFooter();
+
+  function toggleFaq(el) {
+    const resposta = el.nextElementSibling;
+    const toggle = el.querySelector('.faq-toggle');
+    resposta.classList.toggle('aberto');
+    toggle.classList.toggle('aberto');
+  }
+
+  function togglePolitica(el) {
+    const corpo = el.nextElementSibling;
+    const toggle = el.querySelector('.politica-toggle');
+    corpo.classList.toggle('aberta');
+    toggle.classList.toggle('aberto');
+  }
+
+  function activarNav(el) {
+    document.querySelectorAll('.sobre-nav-link').forEach(a => a.classList.remove('activo'));
+    el.classList.add('activo');
+  }
+
+  // Activar nav com scroll
+  const secoes = document.querySelectorAll('.sobre-secao');
+  const navLinks = document.querySelectorAll('.sobre-nav-link');
+
+  window.addEventListener('scroll', () => {
+    let actual = '';
+    secoes.forEach(secao => {
+      if (window.scrollY >= secao.offsetTop - 100) actual = secao.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('activo', link.getAttribute('href') === '#' + actual);
+    });
+  });
+
+</script>
+
+</body>
+</html>
