@@ -143,13 +143,10 @@ function processarFotoSearch(event) {
 }
 
 function pesquisarNoGoogle() {
-  // Abre o Google Lens — o utilizador pode carregar a imagem lá
-  // Em mobile, o Google Lens funciona directamente com a câmara
   window.open('https://lens.google.com', '_blank');
   fecharModalFoto();
 }
 
-// Actualizar navbar conforme sessão
 async function atualizarNavbarSessao() {
   const { data: { session } } = await db.auth.getSession();
   const navPerfil = document.getElementById('navPerfil');
@@ -176,13 +173,15 @@ function carregarFooter() {
       <div class="footer-col">
         <h4>Loja</h4>
         <a href="catalogo.html">Produtos</a>
-        <a href="encomenda.html">Por Encomenda</a>
+        <a href="sobre.html">🏢 Sobre Nós</a>
       </div>
       <div class="footer-col">
         <h4>Conta</h4>
         <a href="perfil.html">Meu Perfil</a>
         <a href="encomendas-cliente.html">Minhas Encomendas</a>
         <a href="login.html">Login / Registo</a>
+        <a href="sobre.html#faq">❓ Perguntas Frequentes</a>
+        <a href="sobre.html#politicas">📜 Políticas e Termos</a>
       </div>
       <div class="footer-col">
         <h4>Contacto</h4>
@@ -197,7 +196,6 @@ function carregarFooter() {
   document.getElementById('footer').innerHTML = footer;
 }
 
-// Contador do carrinho
 function atualizarContadorCarrinho() {
   const carrinho = JSON.parse(localStorage.getItem('ed_carrinho') || '[]');
   const total = carrinho.reduce((sum, item) => sum + item.quantidade, 0);
@@ -205,7 +203,6 @@ function atualizarContadorCarrinho() {
   if (badge) badge.textContent = total;
 }
 
-// Pesquisa
 function pesquisar() {
   const termo = document.getElementById('searchInput')?.value?.trim();
   if (termo) window.location.href = `catalogo.html?search=${encodeURIComponent(termo)}`;
