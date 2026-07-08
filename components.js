@@ -173,15 +173,15 @@ function carregarFooter() {
       <div class="footer-col">
         <h4>Loja</h4>
         <a href="catalogo.html">Produtos</a>
-        <a href="sobre.html">🏢 Sobre Nós</a>
+        <a href="sobre.html">Sobre Nós</a>
       </div>
       <div class="footer-col">
         <h4>Conta</h4>
         <a href="perfil.html">Meu Perfil</a>
         <a href="encomendas-cliente.html">Minhas Encomendas</a>
         <a href="login.html">Login / Registo</a>
-        <a href="sobre.html#faq">❓ Perguntas Frequentes</a>
-        <a href="sobre.html#politicas">📜 Políticas e Termos</a>
+        <a href="sobre.html#faq">Perguntas Frequentes</a>
+        <a href="sobre.html#politicas">Políticas e Termos</a>
       </div>
       <div class="footer-col">
         <h4>Contacto</h4>
