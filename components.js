@@ -34,7 +34,6 @@ function carregarNavbar() {
       <a href="catalogo.html?cat=electronica">📱 Electrónica</a>
       <a href="catalogo.html?cat=desporto">🏃 Desporto</a>
       <a href="catalogo.html?cat=casa">🏠 Casa</a>
-      <a href="encomenda.html">📦 Por Encomenda</a>
       <a href="sobre.html">🏢 Sobre Nós</a>
     </div>
   </nav>
