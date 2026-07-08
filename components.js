@@ -24,6 +24,7 @@ function carregarNavbar() {
       </div>
     </div>
     <div class="navbar-categorias">
+      <a href="catalogo.html?tipo=stock">✅ Disponível Agora</a>
       <a href="catalogo.html?cat=feminino">👗 Feminino</a>
       <a href="catalogo.html?cat=masculino">👔 Masculino</a>
       <a href="catalogo.html?cat=crianca">🧒 Criança</a>

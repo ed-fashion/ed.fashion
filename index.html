@@ -444,6 +444,10 @@
       <span class="categoria-icone">🏷️</span>
       <span class="categoria-nome">Promoções</span>
     </a>
+    <a href="catalogo.html?tipo=stock" class="categoria-card">
+      <span class="categoria-icone">✅</span>
+      <span class="categoria-nome">Disponível Agora</span>
+    </a>
   </div>
 </div>
 
@@ -467,13 +471,13 @@
   <div id="produtosDestaque"></div>
 </div>
 
-<!-- MAIS VENDIDOS -->
+<!-- DISPONÍVEL AGORA (Em Stock) -->
 <div class="seccao" style="padding-top:0">
   <div class="seccao-titulo">
-    <h2>Mais <span>Vendidos</span></h2>
-    <a href="catalogo.html" class="ver-todos">Ver todos →</a>
+    <h2>✅ Disponível <span>Agora</span></h2>
+    <a href="catalogo.html?tipo=stock" class="ver-todos">Ver todos →</a>
   </div>
-  <div id="maisVendidos"></div>
+  <div id="produtosStock"></div>
 </div>
 
 <!-- FOOTER -->
@@ -658,19 +662,20 @@
       `<div class="produtos-grid">${produtos.map(renderProdutoCard).join('')}</div>`;
   }
 
-  async function carregarMaisVendidos() {
+  async function carregarProdutosStock() {
     const { data: produtos } = await db
       .from('products')
       .select('*')
       .eq('status', 'active')
+      .eq('availability_type', 'stock')
       .order('created_at', { ascending: false })
       .limit(8);
 
     if (!produtos || produtos.length === 0) {
-      mostrarVazio('maisVendidos', '⭐', 'Em breve!', 'Os produtos mais vendidos aparecerão aqui.');
+      mostrarVazio('produtosStock', '✅', 'Em breve!', 'Produtos disponíveis para entrega imediata aparecerão aqui.');
       return;
     }
-    document.getElementById('maisVendidos').innerHTML =
+    document.getElementById('produtosStock').innerHTML =
       `<div class="produtos-grid">${produtos.map(renderProdutoCard).join('')}</div>`;
   }
 
@@ -679,7 +684,7 @@
   // ============================
   carregarBanners();
   carregarProdutosDestaque();
-  carregarMaisVendidos();
+  carregarProdutosStock();
 
 </script>
 

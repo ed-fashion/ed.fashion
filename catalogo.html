@@ -24,9 +24,11 @@
       margin: 0 auto;
       padding: 24px 20px;
       display: grid;
-      grid-template-columns: 260px 1fr;
+      grid-template-columns: 240px 1fr;
       gap: 24px;
       align-items: start;
+      box-sizing: border-box;
+      width: 100%;
     }
 
     /* PAINEL DE FILTROS */
@@ -142,7 +144,16 @@
     .filtros-overlay.visivel { display: block; }
 
     /* ÁREA PRINCIPAL */
-    .catalogo-main {}
+    .catalogo-main {
+      min-width: 0; /* previne overflow na grelha CSS */
+    }
+
+    .catalogo-main .produtos-grid {
+      padding: 0;
+      max-width: 100%;
+      margin: 0;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
 
     .catalogo-topbar {
       display: flex;
@@ -505,6 +516,18 @@
   function verificarParametrosUrl() {
     const params = new URLSearchParams(window.location.search);
 
+    // Filtro por tipo de disponibilidade
+    const tipo = params.get('tipo');
+    if (tipo === 'stock') {
+      document.getElementById('filtroStock').checked = true;
+      document.getElementById('catalogoTitulo').innerHTML =
+        `✅ Disponível <span>Agora</span>`;
+    } else if (tipo === 'pre_order') {
+      document.getElementById('filtroEncomenda').checked = true;
+      document.getElementById('catalogoTitulo').innerHTML =
+        `📦 Por <span>Encomenda</span>`;
+    }
+
     // Filtro por categoria (slug)
     const catSlug = params.get('cat');
     if (catSlug && categorias.length > 0) {
@@ -523,7 +546,6 @@
     // Pesquisa
     const search = params.get('search');
     if (search) {
-      // Adicionar campo de pesquisa ao topbar se houver termo
       document.getElementById('catalogoTitulo').innerHTML =
         `Resultados para: <span>"${search}"</span>`;
     }
