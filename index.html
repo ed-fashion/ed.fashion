@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#e91e63">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>E'D Fashion — Moda para Todos</title>
@@ -687,6 +689,10 @@
   carregarProdutosStock();
 
 </script>
-
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/ed.fashion/service-worker.js');
+  }
+</script>
 </body>
 </html>
