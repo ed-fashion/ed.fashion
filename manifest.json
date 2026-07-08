@@ -1,0 +1,31 @@
+{
+  "name": "E'D Fashion",
+  "short_name": "E'D Fashion",
+  "description": "Loja de moda familiar - E'D Fashion",
+  "start_url": "/ed.fashion/",
+  "scope": "/ed.fashion/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#e91e63",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
