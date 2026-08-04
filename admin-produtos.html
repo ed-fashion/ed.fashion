@@ -108,6 +108,7 @@
       display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-bottom: 14px;
     }
     .imagem-slot {
+<<<<<<< HEAD
       position: relative; border-radius: 10px;
       border: 2px solid #ddd; background: var(--cinza-claro);
     }
@@ -119,6 +120,16 @@
     .imagem-slot-badge {
       position: absolute; top: 4px; left: 4px; background: var(--rosa); color: white;
       font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; z-index: 1;
+=======
+      position: relative; aspect-ratio: 3/4; border-radius: 10px; overflow: hidden;
+      border: 2px solid #ddd; background: var(--cinza-claro);
+    }
+    .imagem-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .imagem-slot.principal { border-color: var(--rosa); }
+    .imagem-slot-badge {
+      position: absolute; top: 4px; left: 4px; background: var(--rosa); color: white;
+      font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     }
     .imagem-slot-acoes {
       position: absolute; bottom: 0; left: 0; right: 0; display: flex; gap: 2px;
@@ -129,6 +140,7 @@
       font-size: 11px; padding: 4px 2px; cursor: pointer; border-radius: 4px;
     }
     .imagem-slot-acoes button:hover { background: rgba(255,255,255,0.35); }
+<<<<<<< HEAD
     .imagem-slot-cor {
       padding: 5px 6px;
     }
@@ -138,6 +150,8 @@
       background: white;
     }
     .imagem-slot-cor input:focus { border-color: var(--rosa); }
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     .add-imagem-slot {
       aspect-ratio: 3/4; border-radius: 10px; border: 2px dashed #ddd; background: var(--cinza-claro);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -147,6 +161,7 @@
     .add-imagem-slot span { font-size: 24px; }
     .add-imagem-slot small { font-size: 10px; color: var(--cinza); }
 
+<<<<<<< HEAD
     /* COMBINAÇÕES COR × TAMANHO */
     .combos-wrap { margin-top: 4px; }
     .combos-header-row {
@@ -178,6 +193,8 @@
       border: 1.5px dashed #eee; border-radius: 8px;
     }
 
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     /* VARIANTES */
     .variante-grupo {
       border: 1.5px solid #eee; border-radius: 10px; padding: 14px; margin-bottom: 12px;
@@ -457,6 +474,7 @@
         </div>
       </div>
 
+<<<<<<< HEAD
       <!-- SECÇÃO 6B: Combinações Cor × Tamanho -->
       <div class="secao-form" id="secaoCombos" style="display:none;">
         <div class="secao-form-titulo">
@@ -473,6 +491,8 @@
         </div>
       </div>
 
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
       <!-- SECÇÃO 7: Imagens -->
       <div class="secao-form">
         <div class="secao-form-titulo">🖼️ Imagens do Produto</div>
@@ -745,12 +765,15 @@
     // Carregar variantes
     await carregarVariantesExistentes(p.id);
 
+<<<<<<< HEAD
     // Carregar combinações cor × tamanho
     await carregarCombosExistentes(p.id);
 
     // Agora que tudo está carregado, montar a tabela de combos
     atualizarSecaoCombos();
 
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     mostrarVista('vistaForm');
   }
 
@@ -768,6 +791,7 @@
 
     if (media && media.length > 0) {
       imagensProduto = media.map(m => ({
+<<<<<<< HEAD
         id: m.id, url: m.url, isPrimary: m.is_primary, colorTag: m.color_tag || '', isNova: false
       }));
       if (!imagensProduto.some(i => i.isPrimary) && imagemPrincipalUrl) {
@@ -775,6 +799,15 @@
       }
     } else if (imagemPrincipalUrl) {
       imagensProduto = [{ id: null, url: imagemPrincipalUrl, isPrimary: true, colorTag: '', isNova: false }];
+=======
+        id: m.id, url: m.url, isPrimary: m.is_primary, isNova: false
+      }));
+      if (!imagensProduto.some(i => i.isPrimary) && imagemPrincipalUrl) {
+        imagensProduto.unshift({ id: null, url: imagemPrincipalUrl, isPrimary: true, isNova: false });
+      }
+    } else if (imagemPrincipalUrl) {
+      imagensProduto = [{ id: null, url: imagemPrincipalUrl, isPrimary: true, isNova: false }];
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     }
 
     renderImagens();
@@ -784,6 +817,7 @@
     const grid = document.getElementById('imagensGrid');
     let html = imagensProduto.map((img, idx) => `
       <div class="imagem-slot ${img.isPrimary ? 'principal' : ''}">
+<<<<<<< HEAD
         <div class="imagem-slot-img-wrap">
           ${img.isPrimary ? '<span class="imagem-slot-badge">Principal</span>' : ''}
           <img src="${img.url}" onerror="this.style.opacity='0.3'">
@@ -798,6 +832,13 @@
             value="${img.colorTag || ''}"
             title="Escreve a cor desta imagem igual ao nome da variante"
             oninput="imagensProduto[${idx}].colorTag = this.value.trim()">
+=======
+        ${img.isPrimary ? '<span class="imagem-slot-badge">Principal</span>' : ''}
+        <img src="${img.url}" onerror="this.style.opacity='0.3'">
+        <div class="imagem-slot-acoes">
+          ${!img.isPrimary ? `<button onclick="definirPrincipal(${idx})">⭐</button>` : ''}
+          <button onclick="removerImagem(${idx})">🗑️</button>
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
         </div>
       </div>`).join('');
 
@@ -829,7 +870,11 @@
   function adicionarImagemUrl() {
     const url = document.getElementById('novoImagemUrl').value.trim();
     if (!url) return;
+<<<<<<< HEAD
     imagensProduto.push({ id: null, url, isPrimary: imagensProduto.length === 0, colorTag: '', isNova: true });
+=======
+    imagensProduto.push({ id: null, url, isPrimary: imagensProduto.length === 0, isNova: true });
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     document.getElementById('novoImagemUrl').value = '';
     renderImagens();
   }
@@ -847,7 +892,11 @@
       reader.onload = e => {
         imagensProduto.push({
           id: null, url: e.target.result, isPrimary: imagensProduto.length === 0,
+<<<<<<< HEAD
           colorTag: '', isNova: true, file
+=======
+          isNova: true, file
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
         });
         renderImagens();
       };
@@ -991,6 +1040,7 @@
           ➕ Adicionar opção de ${grupo.tipo}
         </button>
       </div>`).join('');
+<<<<<<< HEAD
 
     // Atualizar secção de combinações sempre que as variantes mudam
     // (só chama se não estiver em modo carregamento inicial — nesse caso é chamado manualmente)
@@ -1003,6 +1053,13 @@
     gruposVariantesData = [];
     variantesParaApagar = [];
     _carregandoVariantes = true;
+=======
+  }
+
+  async function carregarVariantesExistentes(productId) {
+    gruposVariantesData = [];
+    variantesParaApagar = [];
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
 
     const { data: variantes } = await db
       .from('product_variants')
@@ -1012,7 +1069,10 @@
 
     if (!variantes || variantes.length === 0) {
       renderGruposVariantes();
+<<<<<<< HEAD
       _carregandoVariantes = false;
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
       return;
     }
 
@@ -1036,7 +1096,10 @@
     });
 
     renderGruposVariantes();
+<<<<<<< HEAD
     _carregandoVariantes = false;
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
   }
 
   async function guardarVariantes(productId) {
@@ -1065,6 +1128,7 @@
         }
       }
     }
+<<<<<<< HEAD
 
     // Guardar combinações cor × tamanho
     await guardarCombos(productId);
@@ -1272,6 +1336,8 @@
         .delete()
         .in('id', combosSemValor.map(c => c.id));
     }
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
   }
 
   // ============================
@@ -1369,8 +1435,12 @@
       const img = imagensProduto[i];
       const dadosMedia = {
         product_id: produtoFinal.id, url: img.url, tipo: 'image',
+<<<<<<< HEAD
         is_primary: img.isPrimary, sort_order: i,
         color_tag: img.colorTag || null
+=======
+        is_primary: img.isPrimary, sort_order: i
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
       };
       if (img.id) {
         await db.from('product_media').update(dadosMedia).eq('id', img.id);
@@ -1485,6 +1555,7 @@
     gruposVariantesData = [];
     variantesParaApagar = [];
     mediaParaApagar = [];
+<<<<<<< HEAD
     combosData = [];
     combosParaApagar = [];
 
@@ -1492,6 +1563,11 @@
     renderGruposVariantes();
     const secaoCombos = document.getElementById('secaoCombos');
     if (secaoCombos) secaoCombos.style.display = 'none';
+=======
+
+    renderImagens();
+    renderGruposVariantes();
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     toggleEncomenda();
     esconderMensagem('msgErroForm');
     esconderMensagem('msgSucessoForm');

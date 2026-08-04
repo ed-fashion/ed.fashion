@@ -371,6 +371,7 @@
       .banner-produto-card { width: 120px; }
     }
 
+<<<<<<< HEAD
     /* =====================
        POPUP BOAS-VINDAS
     ===================== */
@@ -527,6 +528,8 @@
 
     .bv-nao-mostrar input { accent-color: var(--rosa); cursor: pointer; }
 
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
   </style>
 </head>
 <body>
@@ -620,10 +623,17 @@
   </div>
 </div>
 
+<<<<<<< HEAD
 <!-- PRODUTOS MAIS ACESSADOS -->
 <div class="seccao" id="produtos">
   <div class="seccao-titulo">
     <h2>🔥 Mais <span>Acessados</span></h2>
+=======
+<!-- PRODUTOS EM DESTAQUE -->
+<div class="seccao" id="produtos">
+  <div class="seccao-titulo">
+    <h2>Produtos em <span>Destaque</span></h2>
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     <a href="catalogo.html" class="ver-todos">Ver todos →</a>
   </div>
   <div id="produtosDestaque"></div>
@@ -647,6 +657,7 @@
    class="btn-whatsapp-fixo"
    title="Falar connosco no WhatsApp">💬</a>
 
+<<<<<<< HEAD
 <!-- POPUP BOAS-VINDAS -->
 <div class="bv-overlay" id="bvOverlay" style="display:none;">
   <div class="bv-card">
@@ -684,6 +695,8 @@
   </div>
 </div>
 
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
 <script src="supabase.js"></script>
 <script src="utils.js"></script>
 <script src="components.js"></script>
@@ -693,6 +706,7 @@
   carregarFooter();
 
   // ============================
+<<<<<<< HEAD
   // POPUP BOAS-VINDAS
   // ============================
   function iniciarPopupBV() {
@@ -743,6 +757,8 @@
   iniciarPopupBV();
 
   // ============================
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
   // SLIDER DE BANNERS
   // ============================
   let bannersData = [];
@@ -892,13 +908,20 @@
   }
 
   async function carregarProdutosDestaque() {
+<<<<<<< HEAD
     // Produtos mais acessados — ordenados por view_count descendente
     // Se a coluna não existir ou todos tiverem 0, cai no fallback por created_at
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     const { data: produtos } = await db
       .from('products')
       .select('*')
       .eq('status', 'active')
+<<<<<<< HEAD
       .order('view_count', { ascending: false, nullsFirst: false })
+=======
+      .eq('is_featured', true)
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
       .limit(8);
 
     if (!produtos || produtos.length === 0) {

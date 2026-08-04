@@ -394,6 +394,7 @@
     }
 
     /* GALERIA */
+<<<<<<< HEAD
     .galeria-principal-wrap {
       position: relative;
       overflow: hidden;
@@ -402,6 +403,8 @@
       user-select: none;
     }
 
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     .galeria-thumbnails {
       display: flex;
       gap: 8px;
@@ -426,6 +429,7 @@
       opacity: 1;
     }
 
+<<<<<<< HEAD
     .galeria-thumb.oculta {
       display: none;
     }
@@ -482,6 +486,8 @@
       transform: scale(1.3);
     }
 
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     /* VARIANTES */
     .variantes-wrap {
       margin-bottom: 20px;
@@ -720,7 +726,10 @@
 <script>
 
   let produto = null;
+<<<<<<< HEAD
   let varianteCombos = []; // Combos Cor × Tamanho carregados da DB
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
 
   async function iniciar() {
     carregarNavbar();
@@ -738,6 +747,7 @@
   }
 
   async function carregarProduto(id) {
+<<<<<<< HEAD
     // Carregar produto e combos em paralelo
     const [{ data, error }, { data: combos }] = await Promise.all([
       db.from('products').select(`
@@ -749,6 +759,20 @@
       `).eq('id', id).eq('status', 'active').single(),
       db.from('product_variant_combos').select('*').eq('product_id', id)
     ]);
+=======
+    const { data, error } = await db
+      .from('products')
+      .select(`
+        *,
+        categories(id, name, slug),
+        product_stock(quantity, low_stock_threshold),
+        product_media(id, url, is_primary, sort_order),
+        product_variants(id, tipo, valor, stock, preco_adicional, sort_order)
+      `)
+      .eq('id', id)
+      .eq('status', 'active')
+      .single();
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
 
     if (error || !data) {
       document.getElementById('conteudoProduto').innerHTML = `
@@ -762,12 +786,16 @@
     }
 
     produto = data;
+<<<<<<< HEAD
     varianteCombos = combos || [];
     document.title = `${produto.name} — E'D Fashion`;
 
     // Incrementar visualizações (fire-and-forget, nunca bloqueia o render)
     (async () => { try { await db.rpc('incrementar_view', { produto_id: id }); } catch (_) {} })();
 
+=======
+    document.title = `${produto.name} — E'D Fashion`;
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     renderProduto();
     carregarRelacionados();
   }
@@ -784,7 +812,11 @@
     const stockBaixo = produto.availability_type === 'stock' && stock > 0 && stock <= 5;
     const eEncomenda = produto.availability_type === 'pre_order';
 
+<<<<<<< HEAD
     // Galeria de imagens — guardar no estado global para swipe e filtro de cor
+=======
+    // Galeria de imagens
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     const media = (produto.product_media || []).sort((a, b) => a.sort_order - b.sort_order);
     const imagemPrincipal = media.find(m => m.is_primary)?.url || media[0]?.url || produto.image_url;
     const todasImagens = media.length > 0
@@ -822,6 +854,7 @@
 
           <!-- COLUNA ESQUERDA: Imagens -->
           <div class="produto-imagem-wrap">
+<<<<<<< HEAD
             <div class="galeria-principal-wrap" id="galeriaPrincipalWrap">
               ${imagemPrincipal
                 ? `<img src="${imagemPrincipal}" alt="${produto.name}"
@@ -852,6 +885,23 @@
                        data-idx="${i}"
                        data-color="${m.color_tag || ''}"
                        onclick="irParaImagem(${i})"
+=======
+            ${imagemPrincipal
+              ? `<img src="${imagemPrincipal}" alt="${produto.name}"
+                   id="imagemPrincipal"
+                   class="produto-imagem-principal"
+                   onerror="this.style.display='none'; document.getElementById('semImagem').style.display='flex'">`
+              : ''}
+            <div id="semImagem" class="produto-sem-imagem" ${imagemPrincipal ? 'style="display:none"' : ''}>
+              👗
+            </div>
+            ${todasImagens.length > 1
+              ? `<div class="galeria-thumbnails" id="galeriaThumbs">
+                  ${todasImagens.map((url, i) =>
+                    `<img src="${url}" alt="Imagem ${i+1}"
+                       class="galeria-thumb ${i === 0 ? 'activa' : ''}"
+                       onclick="mudarImagem('${url}', this)"
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
                        onerror="this.style.display='none'">`
                   ).join('')}
                 </div>`
@@ -1017,6 +1067,7 @@
 
     // Carregar reviews após render
     carregarReviews();
+<<<<<<< HEAD
 
     // Inicializar galeria com swipe
     iniciarGaleria();
@@ -1069,10 +1120,16 @@
   }
 
   function atualizarImagemPrincipal(url) {
+=======
+  }
+
+  function mudarImagem(url, el) {
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     const principal = document.getElementById('imagemPrincipal');
     if (principal) {
       principal.src = url;
       principal.style.display = 'block';
+<<<<<<< HEAD
       const semImg = document.getElementById('semImagem');
       if (semImg) semImg.style.display = 'none';
     }
@@ -1156,6 +1213,12 @@
   function mudarImagem(url, el) {
     const idx = galeriaImagens.findIndex(m => m.url === url);
     if (idx >= 0) irParaImagem(idx);
+=======
+      document.getElementById('semImagem').style.display = 'none';
+    }
+    document.querySelectorAll('.galeria-thumb').forEach(t => t.classList.remove('activa'));
+    el.classList.add('activa');
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
   }
 
   // Normaliza o preco_adicional da DB para MT real.
@@ -1182,6 +1245,7 @@
     const precoMT = normalizarPrecoVariante(precoAdicional);
     variantesSelecionadas[tipo] = { valor, precoAdicional: precoMT };
 
+<<<<<<< HEAD
     // Recalcular o preço com combos
     const precoTotal = calcularPrecoComVariantes();
     const elPreco = document.querySelector('.produto-preco-actual');
@@ -1194,6 +1258,24 @@
       filtrarGaleriaPorCor(valor);
     }
 
+=======
+    // Se variante tem preço próprio → usa esse. Se = 0 → usa preço base.
+    const precoBase = produto.sale_price && produto.sale_price < produto.price
+      ? produto.sale_price
+      : produto.price;
+
+    const precosPropriosSeleccionados = Object.values(variantesSelecionadas)
+      .filter(v => v.precoAdicional > 0)
+      .map(v => v.precoAdicional);
+
+    const precoTotal = precosPropriosSeleccionados.length > 0
+      ? Math.max(...precosPropriosSeleccionados)
+      : precoBase;
+
+    const elPreco = document.querySelector('.produto-preco-actual');
+    if (elPreco) elPreco.textContent = formatMZN(precoTotal);
+
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     // Desbloquear botões quando todos os grupos tiverem seleção
     const todosGrupos = [...document.querySelectorAll('.variante-grupo')]
       .map(g => g.querySelector('.variante-grupo-label')?.textContent?.trim())
@@ -1206,12 +1288,17 @@
     if (btnCarrinho) btnCarrinho.disabled = !todosSeleccionados;
   }
 
+<<<<<<< HEAD
   // Calcula o preço considerando combos Cor × Tamanho
+=======
+  // Função auxiliar para obter o preço real com as variantes seleccionadas
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
   function calcularPrecoComVariantes() {
     const precoBase = produto.sale_price && produto.sale_price < produto.price
       ? produto.sale_price
       : produto.price;
 
+<<<<<<< HEAD
     // Obter cor e tamanho seleccionados (normaliza o nome do tipo)
     const corSel = Object.entries(variantesSelecionadas).find(([t]) => {
       const n = t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -1234,16 +1321,24 @@
     }
 
     // 2. Se há preço próprio na variante de cor ou tamanho → usa o maior
+=======
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     const precosPropriosSeleccionados = Object.values(variantesSelecionadas)
       .filter(v => v.precoAdicional > 0)
       .map(v => v.precoAdicional);
 
+<<<<<<< HEAD
     if (precosPropriosSeleccionados.length > 0) {
       return Math.max(...precosPropriosSeleccionados);
     }
 
     // 3. Fallback: preço base do produto
     return precoBase;
+=======
+    return precosPropriosSeleccionados.length > 0
+      ? Math.max(...precosPropriosSeleccionados)
+      : precoBase;
+>>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
   }
 
   function alterarQtd(delta) {
