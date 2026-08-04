@@ -1070,7 +1070,150 @@
     await guardarCombos(productId);
   }
 
-  // =====================  }
+  // ============================
+  // COMBINAÇÕES COR × TAMANHO
+  // ============================
+
+  let combosData = [];
+  let combosParaApagar = [];
+
+  function atualizarSecaoCombos() {
+    const secao = document.getElementById('secaoCombos');
+    const wrap = document.getElementById('combosWrap');
+    if (!secao || !wrap) return;
+
+    const grupoCores = gruposVariantesData.find(g =>
+      g.tipo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'') === 'cor'
+    );
+    const grupoTamanhos = gruposVariantesData.find(g => {
+      const n = g.tipo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      return n === 'tamanho' || n === 'tamanhos';
+    });
+
+    if (!grupoCores || !grupoTamanhos) { secao.style.display = 'none'; return; }
+
+    const cores = grupoCores.linhas.map(l => l.valor.trim()).filter(Boolean);
+    const tamanhos = grupoTamanhos.linhas.map(l => l.valor.trim()).filter(Boolean);
+
+    if (cores.length === 0 || tamanhos.length === 0) { secao.style.display = 'none'; return; }
+
+    secao.style.display = 'block';
+
+    cores.forEach(cor => {
+      tamanhos.forEach(tam => {
+        if (!combosData.find(c => c.cor === cor && c.tamanho === tam)) {
+          combosData.push({ cor, tamanho: tam, preco: 0, preco_usd: 0, stock: 0, id: null });
+        }
+      });
+    });
+
+    combosData = combosData.filter(c => cores.includes(c.cor) && tamanhos.includes(c.tamanho));
+    renderCombos(cores, tamanhos);
+  }
+
+  function renderCombos(cores, tamanhos) {
+    const wrap = document.getElementById('combosWrap');
+    const eEncomenda = document.getElementById('prodTipo')?.value === 'pre_order';
+
+    let html = `<div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:8px 10px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; min-width:130px;">Cor</th>
+            ${tamanhos.map(t => `<th style="text-align:center; padding:8px 6px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; min-width:110px;">${t}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${cores.map(cor => `
+            <tr style="border-top:1px solid #f0f0f0;">
+              <td style="padding:8px 10px; font-weight:700; color:var(--preto); white-space:nowrap;">${cor}</td>
+              ${tamanhos.map(tam => {
+                const combo = combosData.find(c => c.cor === cor && c.tamanho === tam) || { preco: 0, preco_usd: 0, stock: 0 };
+                const usdVal = combo.preco_usd > 0 ? combo.preco_usd : '';
+                const mtVal = combo.preco > 0 ? formatMZN(combo.preco) : '';
+                const temPreco = combo.preco > 0;
+                return `
+                  <td style="padding:4px 6px;">
+                    <div style="display:flex; flex-direction:column; gap:3px;">
+                      <input type="number" class="combo-input"
+                        placeholder="USD" value="${usdVal}" min="0" step="0.01"
+                        oninput="atualizarComboUsd('${cor}', '${tam}', this.value)">
+                      <input type="text" class="combo-input${temPreco ? ' tem-preco' : ''}"
+                        readonly id="combo_mt_${cor.replace(/\s/g,'_')}_${tam}"
+                        placeholder="= MT" value="${mtVal}">
+                      ${eEncomenda ? '' : `
+                      <input type="number" class="combo-stock-input"
+                        placeholder="Stock" value="${combo.stock > 0 ? combo.stock : ''}" min="0"
+                        oninput="atualizarCombo('${cor}', '${tam}', 'stock', this.value)">`}
+                    </div>
+                  </td>`;
+              }).join('')}
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="font-size:11px; color:var(--cinza); margin-top:10px; padding:0 2px;">
+        Linha 1 = USD → Linha 2 = MT calculado${eEncomenda ? '' : ' · Linha 3 = stock'}
+      </div>
+    </div>`;
+
+    wrap.innerHTML = html;
+  }
+
+  function atualizarComboUsd(cor, tamanho, usdValor) {
+    const combo = combosData.find(c => c.cor === cor && c.tamanho === tamanho);
+    if (!combo) return;
+    const usd = parseFloat(usdValor) || 0;
+    const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
+    const adicional = parseFloat(document.getElementById('valorAdicional')?.value) || 0;
+    combo.preco_usd = usd;
+    combo.preco = usd > 0 ? parseFloat(((usd * taxa) + adicional).toFixed(2)) : 0;
+    const mtEl = document.getElementById(`combo_mt_${cor.replace(/\s/g,'_')}_${tamanho}`);
+    if (mtEl) {
+      mtEl.value = combo.preco > 0 ? formatMZN(combo.preco) : '';
+      mtEl.classList.toggle('tem-preco', combo.preco > 0);
+    }
+  }
+
+  function atualizarCombo(cor, tamanho, campo, valor) {
+    const combo = combosData.find(c => c.cor === cor && c.tamanho === tamanho);
+    if (!combo) return;
+    combo[campo] = campo === 'preco' ? (parseFloat(valor) || 0) : (parseInt(valor) || 0);
+  }
+
+  async function carregarCombosExistentes(productId) {
+    combosData = [];
+    combosParaApagar = [];
+    const { data } = await db.from('product_variant_combos').select('*').eq('product_id', productId).order('sort_order');
+    if (data && data.length > 0) {
+      const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
+      const adicional = parseFloat(document.getElementById('valorAdicional')?.value) || 0;
+      combosData = data.map(c => {
+        const preco = c.preco || 0;
+        const usd = preco > 0 && taxa > 0 ? parseFloat(((preco - adicional) / taxa).toFixed(2)) : 0;
+        return { id: c.id, cor: c.cor, tamanho: c.tamanho, preco, preco_usd: usd > 0 ? usd : 0, stock: c.stock || 0 };
+      });
+    }
+  }
+
+  async function guardarCombos(productId) {
+    if (combosParaApagar.length > 0) {
+      await db.from('product_variant_combos').delete().in('id', combosParaApagar);
+    }
+    const combosValidos = combosData.filter(c => c.preco > 0 || c.stock > 0);
+    for (let i = 0; i < combosValidos.length; i++) {
+      const c = combosValidos[i];
+      const dados = { product_id: productId, cor: c.cor, tamanho: c.tamanho, preco: c.preco || 0, stock: c.stock || 0, sort_order: i };
+      if (c.id) {
+        await db.from('product_variant_combos').update(dados).eq('id', c.id);
+      } else {
+        await db.from('product_variant_combos').upsert(dados, { onConflict: 'product_id,cor,tamanho' });
+      }
+    }
+    const combosSemValor = combosData.filter(c => c.id && c.preco === 0 && c.stock === 0);
+    if (combosSemValor.length > 0) {
+      await db.from('product_variant_combos').delete().in('id', combosSemValor.map(c => c.id));
+    }
+  }
 
   // ============================
   // GUARDAR PRODUTO (completo)
