@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promoções — E'D Fashion Admin</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .vista { display: none; }
+    .vista.activa { display: block; }
+
+    .form-grupo { margin-bottom: 16px; }
+
+    .form-grupo label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .form-grupo input,
+    .form-grupo select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: var(--fonte);
+      background: white;
+    }
+
+    .form-grupo input:focus,
+    .form-grupo select:focus { border-color: var(--rosa); }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .secao-form {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .secao-form-titulo {
+      padding: 16px 24px;
+      border-bottom: 1px solid #F0F2F5;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--preto);
+    }
+
+    .secao-form-corpo { padding: 24px; }
+
+    .form-acoes {
+      display: flex;
+      gap: 12px;
+      padding: 20px 24px;
+      border-top: 1px solid #F0F2F5;
+      background: #FAFAFA;
+    }
+
+    .codigo-input-wrap {
+      display: flex;
+      gap: 8px;
+    }
+
+    .codigo-input-wrap input {
+      flex: 1;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .btn-gerar-codigo {
+      padding: 10px 16px;
+      background: var(--cinza-claro);
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .btn-gerar-codigo:hover { border-color: var(--rosa); color: var(--rosa); }
+
+    .tipo-desconto-btns {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tipo-desconto-btn {
+      flex: 1;
+      padding: 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .tipo-desconto-btn.activo { background: var(--rosa-claro); border-color: var(--rosa); color: var(--rosa); }
+
+    .cupao-codigo-tag {
+      display: inline-block;
+      background: var(--preto);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 1px;
+      font-family: monospace;
+    }
+
+    .uso-barra {
+      width: 100px;
+      height: 6px;
+      background: var(--cinza-claro);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .uso-barra-fill {
+      height: 100%;
+      background: var(--verde);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-slider {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #ddd;
+      border-radius: 24px;
+      transition: 0.3s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .toggle-switch input:checked + .toggle-slider { background: var(--verde); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    @media (max-width: 768px) {
+      .form-grid-2 { grid-template-columns: 1fr; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <div id="adminNav"></div>
+
+  <div class="admin-conteudo">
+
+    <!-- VISTA: LISTA -->
+    <div class="vista activa" id="vistaLista">
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+        <div class="admin-page-titulo" style="margin:0">🏷️ Promoções e Cupões</div>
+        <button class="btn-admin btn-admin-rosa" onclick="mostrarFormNovo()">➕ Novo Cupão</button>
+      </div>
+
+      <div class="msg-erro" id="msgErroLista"></div>
+      <div class="msg-sucesso" id="msgSucessoLista"></div>
+
+      <!-- KPIs -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:16px; margin-bottom:24px;">
+        <div class="kpi-card">
+          <div class="kpi-icone rosa">🏷️</div>
+          <div class="kpi-info">
+            <div class="kpi-valor" id="kpiTotalCupoes">—</div>
+            <div class="kpi-label">Cupões Criados</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icone verde">✅</div>
+          <div class="kpi-info">
+            <div class="kpi-valor" id="kpiActivos">—</div>
+            <div class="kpi-label">Activos</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icone azul">🛒</div>
+          <div class="kpi-info">
+            <div class="kpi-valor" id="kpiUsos">—</div>
+            <div class="kpi-label">Total de Usos</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>Lista de Cupões</h3>
+          <span id="totalCupoes" style="font-size:13px; color:var(--cinza);"></span>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Desconto</th>
+                <th>Mín. Compra</th>
+                <th>Uso</th>
+                <th>Validade</th>
+                <th>Estado</th>
+                <th>Acções</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaCupoes">
+              <tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">A carregar...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISTA: FORMULÁRIO -->
+    <div class="vista" id="vistaForm">
+
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
+        <button class="btn-admin btn-admin-outline" onclick="mostrarLista()">← Voltar</button>
+        <div class="admin-page-titulo" style="margin:0" id="formTitulo">➕ Novo Cupão</div>
+      </div>
+
+      <div class="msg-erro" id="msgErroForm"></div>
+      <div class="msg-sucesso" id="msgSucessoForm"></div>
+
+      <input type="hidden" id="cupaoId">
+
+      <!-- CÓDIGO -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">🏷️ Código do Cupão</div>
+        <div class="secao-form-corpo">
+          <div class="form-grupo">
+            <label>Código *</label>
+            <div class="codigo-input-wrap">
+              <input type="text" id="cupCodigo" placeholder="EX: NATAL10" maxlength="20">
+              <button class="btn-gerar-codigo" onclick="gerarCodigoAleatorio()">🎲 Gerar</button>
+            </div>
+            <div style="font-size:12px; color:var(--cinza); margin-top:6px;">
+              💡 O cliente vai escrever este código no carrinho. Usa algo fácil de lembrar.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESCONTO -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">💰 Tipo e Valor do Desconto</div>
+        <div class="secao-form-corpo">
+          <div class="tipo-desconto-btns">
+            <button class="tipo-desconto-btn" id="tipo-percentage" onclick="seleccionarTipoDesconto('percentage')">
+              % Percentagem
+            </button>
+            <button class="tipo-desconto-btn" id="tipo-fixed" onclick="seleccionarTipoDesconto('fixed')">
+              MT Valor Fixo
+            </button>
+          </div>
+          <input type="hidden" id="cupTipo" value="percentage">
+
+          <div class="form-grupo">
+            <label id="labelValor">Percentagem de Desconto (%)</label>
+            <input type="number" id="cupValor" placeholder="Ex: 10" min="0">
+          </div>
+
+          <div class="form-grupo">
+            <label>Valor Mínimo de Compra (MT)</label>
+            <input type="number" id="cupMinimo" placeholder="0 = sem mínimo" min="0">
+          </div>
+        </div>
+      </div>
+
+      <!-- LIMITES E VALIDADE -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">📅 Limites e Validade</div>
+        <div class="secao-form-corpo">
+          <div class="form-grid-2">
+            <div class="form-grupo">
+              <label>Limite de Utilizações</label>
+              <input type="number" id="cupLimite" placeholder="Vazio = ilimitado" min="0">
+            </div>
+            <div class="form-grupo">
+              <label>Válido Até</label>
+              <input type="date" id="cupValidade">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTADO -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">⚙️ Estado</div>
+        <div class="secao-form-corpo">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <label class="toggle-switch">
+              <input type="checkbox" id="cupActivo" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            <span style="font-size:14px; font-weight:600;">Cupão Activo</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-acoes">
+        <button class="btn-admin btn-admin-rosa" onclick="guardarCupao()" id="btnGuardar">
+          💾 Guardar Cupão
+        </button>
+        <button class="btn-admin btn-admin-outline" onclick="mostrarLista()">
+          Cancelar
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="admin-nav.js"></script>
+<script>
+
+  let todosCupoes = [];
+
+  async function iniciar() {
+    const ok = await verificarAdmin();
+    if (!ok) return;
+    carregarAdminNav('promocoes');
+    await carregarCupoes();
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('acao') === 'novo') mostrarFormNovo();
+  }
+
+  async function carregarCupoes() {
+    const { data, error } = await db
+      .from('coupons')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      mostrarErro('msgErroLista', 'Erro ao carregar cupões.');
+      return;
+    }
+
+    todosCupoes = data || [];
+    actualizarKPIs();
+    renderTabela();
+  }
+
+  function actualizarKPIs() {
+    document.getElementById('kpiTotalCupoes').textContent = todosCupoes.length;
+    document.getElementById('kpiActivos').textContent = todosCupoes.filter(c => c.is_active).length;
+    document.getElementById('kpiUsos').textContent = todosCupoes.reduce((s, c) => s + (c.used_count || 0), 0);
+  }
+
+  function renderTabela() {
+    document.getElementById('totalCupoes').textContent = `${todosCupoes.length} cupão(ões)`;
+    const tbody = document.getElementById('tabelaCupoes');
+
+    if (todosCupoes.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="7">
+          <div class="admin-vazio">
+            <span class="icone">🏷️</span>
+            <h3>Nenhum cupão criado ainda</h3>
+          </div>
+        </td></tr>`;
+      return;
+    }
+
+    const hoje = new Date();
+
+    tbody.innerHTML = todosCupoes.map(c => {
+      const expirado = c.valid_until && new Date(c.valid_until) < hoje;
+      const esgotado = c.usage_limit && c.used_count >= c.usage_limit;
+      const percentagemUso = c.usage_limit ? Math.min(100, (c.used_count / c.usage_limit) * 100) : 0;
+
+      return `
+        <tr>
+          <td><span class="cupao-codigo-tag">${c.code}</span></td>
+          <td><strong>${c.type === 'percentage' ? c.value + '%' : formatMZN(c.value)}</strong></td>
+          <td>${c.min_order_value > 0 ? formatMZN(c.min_order_value) : '—'}</td>
+          <td>
+            ${c.usage_limit
+              ? `${c.used_count || 0} / ${c.usage_limit}
+                 <div class="uso-barra"><div class="uso-barra-fill" style="width:${percentagemUso}%"></div></div>`
+              : `${c.used_count || 0} (ilimitado)`}
+          </td>
+          <td>${c.valid_until ? formatData(c.valid_until) : 'Sem validade'}</td>
+          <td>
+            ${!c.is_active
+              ? '<span class="status-badge status-cancelled">Inactivo</span>'
+              : expirado
+                ? '<span class="status-badge status-cancelled">Expirado</span>'
+                : esgotado
+                  ? '<span class="status-badge status-awaiting">Esgotado</span>'
+                  : '<span class="status-badge status-active">Activo</span>'}
+          </td>
+          <td>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="btn-admin btn-admin-outline" onclick="editarCupao('${c.id}')">✏️</button>
+              <button class="btn-admin btn-admin-outline" onclick="duplicarCupao('${c.id}')">📋</button>
+              <button class="btn-admin btn-admin-vermelho" onclick="removerCupao('${c.id}')">🗑️</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  function mostrarFormNovo() {
+    limparForm();
+    document.getElementById('formTitulo').textContent = '➕ Novo Cupão';
+    mostrarVista('vistaForm');
+  }
+
+  function seleccionarTipoDesconto(tipo) {
+    document.getElementById('cupTipo').value = tipo;
+    document.getElementById('tipo-percentage').classList.toggle('activo', tipo === 'percentage');
+    document.getElementById('tipo-fixed').classList.toggle('activo', tipo === 'fixed');
+    document.getElementById('labelValor').textContent = tipo === 'percentage'
+      ? 'Percentagem de Desconto (%)'
+      : 'Valor Fixo de Desconto (MT)';
+  }
+
+  function gerarCodigoAleatorio() {
+    const palavras = ['PROMO', 'OFERTA', 'DESC', 'ED', 'FASHION', 'VIP', 'BEIRA'];
+    const palavra = palavras[Math.floor(Math.random() * palavras.length)];
+    const numero = Math.floor(Math.random() * 90 + 10);
+    document.getElementById('cupCodigo').value = palavra + numero;
+  }
+
+  async function editarCupao(id) {
+    const c = todosCupoes.find(x => x.id === id);
+    if (!c) return;
+
+    limparForm();
+    document.getElementById('formTitulo').textContent = '✏️ Editar Cupão';
+    document.getElementById('cupaoId').value = c.id;
+    document.getElementById('cupCodigo').value = c.code;
+    document.getElementById('cupValor').value = c.value;
+    document.getElementById('cupMinimo').value = c.min_order_value || '';
+    document.getElementById('cupLimite').value = c.usage_limit || '';
+    document.getElementById('cupValidade').value = c.valid_until ? c.valid_until.split('T')[0] : '';
+    document.getElementById('cupActivo').checked = c.is_active;
+
+    seleccionarTipoDesconto(c.type);
+    mostrarVista('vistaForm');
+  }
+
+  function duplicarCupao(id) {
+    const c = todosCupoes.find(x => x.id === id);
+    if (!c) return;
+
+    limparForm();
+    document.getElementById('formTitulo').textContent = '➕ Duplicar Cupão';
+    document.getElementById('cupCodigo').value = c.code + '2';
+    document.getElementById('cupValor').value = c.value;
+    document.getElementById('cupMinimo').value = c.min_order_value || '';
+    document.getElementById('cupLimite').value = c.usage_limit || '';
+    document.getElementById('cupValidade').value = c.valid_until ? c.valid_until.split('T')[0] : '';
+    seleccionarTipoDesconto(c.type);
+    mostrarVista('vistaForm');
+  }
+
+  async function guardarCupao() {
+    const id = document.getElementById('cupaoId').value;
+    const codigo = document.getElementById('cupCodigo').value.trim().toUpperCase();
+    const valor = parseFloat(document.getElementById('cupValor').value);
+
+    esconderMensagem('msgErroForm');
+    esconderMensagem('msgSucessoForm');
+
+    if (!codigo) { mostrarErro('msgErroForm', 'O código do cupão é obrigatório.'); return; }
+    if (!valor || valor <= 0) { mostrarErro('msgErroForm', 'Introduz um valor de desconto válido.'); return; }
+
+    const tipo = document.getElementById('cupTipo').value;
+    if (tipo === 'percentage' && valor > 100) {
+      mostrarErro('msgErroForm', 'A percentagem não pode ser maior que 100%.');
+      return;
+    }
+
+    const btn = document.getElementById('btnGuardar');
+    btn.disabled = true;
+    btn.textContent = 'A guardar...';
+
+    const validadeInput = document.getElementById('cupValidade').value;
+
+    const dados = {
+      code: codigo,
+      type: tipo,
+      value: valor,
+      min_order_value: parseFloat(document.getElementById('cupMinimo').value) || 0,
+      usage_limit: parseInt(document.getElementById('cupLimite').value) || null,
+      valid_until: validadeInput ? new Date(validadeInput).toISOString() : null,
+      is_active: document.getElementById('cupActivo').checked
+    };
+
+    let error;
+    if (id) {
+      ({ error } = await db.from('coupons').update(dados).eq('id', id));
+    } else {
+      ({ error } = await db.from('coupons').insert(dados));
+    }
+
+    if (error) {
+      const msg = error.message.includes('duplicate')
+        ? 'Este código já existe. Escolhe outro.'
+        : 'Erro ao guardar: ' + error.message;
+      mostrarErro('msgErroForm', msg);
+      btn.disabled = false;
+      btn.textContent = '💾 Guardar Cupão';
+      return;
+    }
+
+    mostrarSucesso('msgSucessoForm', `✅ Cupão ${id ? 'actualizado' : 'criado'} com sucesso!`);
+    btn.disabled = false;
+    btn.textContent = '💾 Guardar Cupão';
+
+    await carregarCupoes();
+    setTimeout(() => mostrarLista(), 1200);
+  }
+
+  async function removerCupao(id) {
+    if (!confirm('Remover este cupão permanentemente?')) return;
+    await db.from('coupons').delete().eq('id', id);
+    await carregarCupoes();
+  }
+
+  function mostrarVista(id) {
+    document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
+    document.getElementById(id).classList.add('activa');
+    window.scrollTo(0, 0);
+  }
+
+  function mostrarLista() {
+    mostrarVista('vistaLista');
+  }
+
+  function limparForm() {
+    document.getElementById('cupaoId').value = '';
+    document.getElementById('cupCodigo').value = '';
+    document.getElementById('cupValor').value = '';
+    document.getElementById('cupMinimo').value = '';
+    document.getElementById('cupLimite').value = '';
+    document.getElementById('cupValidade').value = '';
+    document.getElementById('cupActivo').checked = true;
+    seleccionarTipoDesconto('percentage');
+    esconderMensagem('msgErroForm');
+    esconderMensagem('msgSucessoForm');
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>

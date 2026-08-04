@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatórios — E'D Fashion Admin</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+
+    .periodo-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .periodo-btn {
+      padding: 8px 18px;
+      border-radius: 20px;
+      border: 1.5px solid #ddd;
+      background: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--cinza-escuro);
+    }
+
+    .periodo-btn:hover { border-color: var(--rosa); color: var(--rosa); }
+    .periodo-btn.activo { background: var(--rosa); color: white; border-color: var(--rosa); }
+
+    .periodo-custom {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .periodo-custom input {
+      padding: 7px 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .secao-relatorio {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .secao-relatorio-titulo {
+      padding: 16px 24px;
+      border-bottom: 1px solid #F0F2F5;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--preto);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .secao-relatorio-corpo { padding: 24px; }
+
+    .grafico-wrap {
+      position: relative;
+      height: 320px;
+    }
+
+    .lucro-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    .lucro-card {
+      background: var(--cinza-claro);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .lucro-valor {
+      font-size: 22px;
+      font-weight: 800;
+      display: block;
+    }
+
+    .lucro-label {
+      font-size: 12px;
+      color: var(--cinza);
+      margin-top: 6px;
+    }
+
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid #F0F2F5;
+    }
+
+    .ranking-item:last-child { border-bottom: none; }
+
+    .ranking-posicao {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--cinza-claro);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--cinza-escuro);
+      flex-shrink: 0;
+    }
+
+    .ranking-posicao.top1 { background: #FEF3C7; color: #D97706; }
+    .ranking-posicao.top2 { background: #F0F0F0; color: #6B7280; }
+    .ranking-posicao.top3 { background: #FFEDD5; color: #C2410C; }
+
+    .ranking-img {
+      width: 44px;
+      height: 55px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: var(--cinza-claro);
+      flex-shrink: 0;
+    }
+
+    .ranking-sem-img {
+      width: 44px;
+      height: 55px;
+      background: var(--cinza-claro);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .ranking-info { flex: 1; min-width: 0; }
+    .ranking-nome { font-size: 13px; font-weight: 600; color: var(--preto); }
+    .ranking-sub { font-size: 12px; color: var(--cinza); margin-top: 2px; }
+    .ranking-valor { font-size: 14px; font-weight: 800; color: var(--rosa); flex-shrink: 0; }
+
+    .export-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .grid-2-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2-col { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .lucro-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <div id="adminNav"></div>
+
+  <div class="admin-conteudo">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+      <div class="admin-page-titulo" style="margin:0">📈 Relatórios</div>
+      <div class="export-btns">
+        <button class="btn-admin btn-admin-outline" onclick="exportarCSV()">📥 Exportar CSV</button>
+      </div>
+    </div>
+
+    <!-- SELECTOR DE PERÍODO -->
+    <div class="periodo-btns">
+      <button class="periodo-btn activo" onclick="seleccionarPeriodo('hoje', this)">Hoje</button>
+      <button class="periodo-btn" onclick="seleccionarPeriodo('semana', this)">Esta Semana</button>
+      <button class="periodo-btn" onclick="seleccionarPeriodo('mes', this)">Este Mês</button>
+      <button class="periodo-btn" onclick="seleccionarPeriodo('ano', this)">Este Ano</button>
+      <button class="periodo-btn" onclick="seleccionarPeriodo('tudo', this)">Tudo</button>
+    </div>
+
+    <div class="periodo-custom" style="margin-bottom:24px;">
+      <span style="font-size:13px; color:var(--cinza);">Personalizado:</span>
+      <input type="date" id="dataInicio" onchange="periodoPersonalizado()">
+      <span style="font-size:13px; color:var(--cinza);">até</span>
+      <input type="date" id="dataFim" onchange="periodoPersonalizado()">
+    </div>
+
+    <div class="msg-erro" id="msgErro"></div>
+
+    <!-- KPIs PRINCIPAIS -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:16px; margin-bottom:24px;">
+      <div class="kpi-card">
+        <div class="kpi-icone rosa">🛒</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiNumVendas">—</div>
+          <div class="kpi-label">Encomendas Concluídas</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icone verde">💰</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiReceitaTotal">—</div>
+          <div class="kpi-label">Receita Total</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icone azul">📦</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiUnidadesVendidas">—</div>
+          <div class="kpi-label">Unidades Vendidas</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icone amarelo">📊</div>
+        <div class="kpi-info">
+          <div class="kpi-valor" id="kpiTicketMedio">—</div>
+          <div class="kpi-label">Ticket Médio</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRÁFICO DE VENDAS -->
+    <div class="secao-relatorio">
+      <div class="secao-relatorio-titulo">
+        <span>📊 Evolução de Vendas</span>
+      </div>
+      <div class="secao-relatorio-corpo">
+        <div class="grafico-wrap">
+          <canvas id="graficoVendas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- LUCRO -->
+    <div class="secao-relatorio">
+      <div class="secao-relatorio-titulo">
+        <span>💵 Lucro Bruto vs Líquido</span>
+      </div>
+      <div class="secao-relatorio-corpo">
+        <div class="lucro-grid">
+          <div class="lucro-card">
+            <span class="lucro-valor" style="color:var(--preto)" id="lucroReceita">—</span>
+            <div class="lucro-label">Receita Total</div>
+          </div>
+          <div class="lucro-card">
+            <span class="lucro-valor" style="color:#D97706" id="lucroCusto">—</span>
+            <div class="lucro-label">Custo dos Produtos</div>
+          </div>
+          <div class="lucro-card">
+            <span class="lucro-valor" style="color:#2563EB" id="lucroBruto">—</span>
+            <div class="lucro-label">Lucro Bruto</div>
+          </div>
+          <div class="lucro-card">
+            <span class="lucro-valor" style="color:#16A34A" id="lucroMargem">—</span>
+            <div class="lucro-label">Margem (%)</div>
+          </div>
+        </div>
+        <div style="font-size:12px; color:var(--cinza); margin-top:16px;">
+          💡 Lucro Bruto = Receita − Custo dos Produtos. Não inclui despesas operacionais (entregas, comissões, etc).
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2-col">
+
+      <!-- PRODUTOS MAIS VENDIDOS -->
+      <div class="secao-relatorio">
+        <div class="secao-relatorio-titulo">
+          <span>🏆 Produtos Mais Vendidos</span>
+        </div>
+        <div class="secao-relatorio-corpo" id="rankingProdutos">
+          <p style="color:var(--cinza); font-size:13px;">A carregar...</p>
+        </div>
+      </div>
+
+      <!-- CLIENTES MAIS ACTIVOS -->
+      <div class="secao-relatorio">
+        <div class="secao-relatorio-titulo">
+          <span>⭐ Clientes Mais Activos</span>
+        </div>
+        <div class="secao-relatorio-corpo" id="rankingClientes">
+          <p style="color:var(--cinza); font-size:13px;">A carregar...</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- VENDAS POR CATEGORIA -->
+    <div class="secao-relatorio">
+      <div class="secao-relatorio-titulo">
+        <span>📦 Vendas por Categoria</span>
+      </div>
+      <div class="secao-relatorio-corpo">
+        <div class="grafico-wrap" style="height:280px;">
+          <canvas id="graficoCategoria"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUTOS SEM MOVIMENTO -->
+    <div class="secao-relatorio">
+      <div class="secao-relatorio-titulo">
+        <span>💤 Produtos Sem Vendas no Período</span>
+      </div>
+      <div class="secao-relatorio-corpo">
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr><th>Produto</th><th>Categoria</th><th>Stock Actual</th><th>Criado em</th></tr>
+            </thead>
+            <tbody id="tabelaSemMovimento">
+              <tr><td colspan="4" style="text-align:center;padding:30px;color:#888;">A carregar...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="admin-nav.js"></script>
+<script>
+
+  let periodoActivo = 'hoje';
+  let dataInicioActual = null;
+  let dataFimActual = null;
+  let encomendasPeriodo = [];
+  let graficoVendasChart = null;
+  let graficoCategoriaChart = null;
+
+  async function iniciar() {
+    const ok = await verificarAdmin();
+    if (!ok) return;
+    carregarAdminNav('relatorios');
+    seleccionarPeriodo('hoje', document.querySelector('.periodo-btn.activo'));
+  }
+
+  function getIntervaloPeriodo(periodo) {
+    const hoje = new Date();
+    let inicio = new Date();
+    let fim = new Date();
+
+    if (periodo === 'hoje') {
+      inicio.setHours(0,0,0,0);
+    } else if (periodo === 'semana') {
+      inicio.setDate(hoje.getDate() - hoje.getDay());
+      inicio.setHours(0,0,0,0);
+    } else if (periodo === 'mes') {
+      inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    } else if (periodo === 'ano') {
+      inicio = new Date(hoje.getFullYear(), 0, 1);
+    } else if (periodo === 'tudo') {
+      inicio = new Date(2020, 0, 1);
+    }
+
+    fim.setHours(23,59,59,999);
+    return { inicio, fim };
+  }
+
+  function seleccionarPeriodo(periodo, btn) {
+    periodoActivo = periodo;
+    document.querySelectorAll('.periodo-btn').forEach(b => b.classList.remove('activo'));
+    if (btn) btn.classList.add('activo');
+    document.getElementById('dataInicio').value = '';
+    document.getElementById('dataFim').value = '';
+
+    const { inicio, fim } = getIntervaloPeriodo(periodo);
+    dataInicioActual = inicio;
+    dataFimActual = fim;
+    carregarRelatorios();
+  }
+
+  function periodoPersonalizado() {
+    const inicio = document.getElementById('dataInicio').value;
+    const fim = document.getElementById('dataFim').value;
+    if (!inicio || !fim) return;
+
+    document.querySelectorAll('.periodo-btn').forEach(b => b.classList.remove('activo'));
+    dataInicioActual = new Date(inicio + 'T00:00:00');
+    dataFimActual = new Date(fim + 'T23:59:59');
+    carregarRelatorios();
+  }
+
+  async function carregarRelatorios() {
+    esconderMensagem('msgErro');
+
+    const { data, error } = await db
+      .from('orders')
+      .select(`
+        id, total, subtotal, status, created_at, user_id,
+        profiles (full_name),
+        order_items (id, quantity, unit_price, product_id, products (name, cost_price, category_id, categories(name), image_url, status))
+      `)
+      .gte('created_at', dataInicioActual.toISOString())
+      .lte('created_at', dataFimActual.toISOString())
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      mostrarErro('msgErro', 'Erro ao carregar relatórios.');
+      return;
+    }
+
+    encomendasPeriodo = data || [];
+
+    const concluidas = encomendasPeriodo.filter(e =>
+      ['paid','preparing','shipped','delivered'].includes(e.status)
+    );
+
+    actualizarKPIs(concluidas);
+    actualizarGraficoVendas(concluidas);
+    actualizarLucro(concluidas);
+    actualizarRankingProdutos(concluidas);
+    await actualizarRankingClientes(concluidas);
+    actualizarGraficoCategoria(concluidas);
+    await actualizarProdutosSemMovimento();
+  }
+
+  function actualizarKPIs(concluidas) {
+    const receitaTotal = concluidas.reduce((s, e) => s + (e.total || 0), 0);
+    const unidades = concluidas.reduce((s, e) =>
+      s + (e.order_items || []).reduce((s2, i) => s2 + i.quantity, 0), 0);
+    const ticketMedio = concluidas.length > 0 ? receitaTotal / concluidas.length : 0;
+
+    document.getElementById('kpiNumVendas').textContent = concluidas.length;
+    document.getElementById('kpiReceitaTotal').textContent = formatMZN(receitaTotal);
+    document.getElementById('kpiUnidadesVendidas').textContent = unidades;
+    document.getElementById('kpiTicketMedio').textContent = formatMZN(ticketMedio);
+  }
+
+  function actualizarLucro(concluidas) {
+    let receita = 0, custo = 0;
+
+    concluidas.forEach(e => {
+      (e.order_items || []).forEach(item => {
+        receita += item.unit_price * item.quantity;
+        const custoUnit = item.products?.cost_price || 0;
+        custo += custoUnit * item.quantity;
+      });
+    });
+
+    const lucroBruto = receita - custo;
+    const margem = receita > 0 ? (lucroBruto / receita) * 100 : 0;
+
+    document.getElementById('lucroReceita').textContent = formatMZN(receita);
+    document.getElementById('lucroCusto').textContent = formatMZN(custo);
+    document.getElementById('lucroBruto').textContent = formatMZN(lucroBruto);
+    document.getElementById('lucroMargem').textContent = margem.toFixed(1) + '%';
+  }
+
+  function actualizarGraficoVendas(concluidas) {
+    // Agrupar por dia
+    const porDia = {};
+    concluidas.forEach(e => {
+      const dia = new Date(e.created_at).toLocaleDateString('pt-PT', { day:'2-digit', month:'2-digit' });
+      porDia[dia] = (porDia[dia] || 0) + e.total;
+    });
+
+    const labels = Object.keys(porDia);
+    const valores = Object.values(porDia);
+
+    if (graficoVendasChart) graficoVendasChart.destroy();
+
+    const ctx = document.getElementById('graficoVendas');
+    if (labels.length === 0) {
+      ctx.parentElement.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--cinza); flex-direction:column;">
+          <span style="font-size:40px; margin-bottom:8px;">📊</span>
+          <p>Sem dados de vendas neste período.</p>
+        </div>`;
+      return;
+    }
+
+    graficoVendasChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Vendas (MT)',
+          data: valores,
+          borderColor: '#E91E8C',
+          backgroundColor: 'rgba(233,30,140,0.1)',
+          fill: true,
+          tension: 0.3,
+          pointBackgroundColor: '#E91E8C'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+
+  function actualizarRankingProdutos(concluidas) {
+    const produtosMap = {};
+
+    concluidas.forEach(e => {
+      (e.order_items || []).forEach(item => {
+        const id = item.product_id;
+        if (!produtosMap[id]) {
+          produtosMap[id] = {
+            nome: item.products?.name || 'Produto removido',
+            imagem: item.products?.image_url,
+            quantidade: 0,
+            receita: 0
+          };
+        }
+        produtosMap[id].quantidade += item.quantity;
+        produtosMap[id].receita += item.unit_price * item.quantity;
+      });
+    });
+
+    const ranking = Object.values(produtosMap)
+      .sort((a, b) => b.quantidade - a.quantidade)
+      .slice(0, 5);
+
+    const container = document.getElementById('rankingProdutos');
+
+    if (ranking.length === 0) {
+      container.innerHTML = '<p style="color:var(--cinza); font-size:13px; text-align:center; padding:20px;">Sem vendas neste período.</p>';
+      return;
+    }
+
+    container.innerHTML = ranking.map((p, idx) => `
+      <div class="ranking-item">
+        <div class="ranking-posicao ${idx === 0 ? 'top1' : idx === 1 ? 'top2' : idx === 2 ? 'top3' : ''}">${idx + 1}</div>
+        ${p.imagem
+          ? `<img src="${p.imagem}" class="ranking-img" onerror="this.style.display='none'">`
+          : `<div class="ranking-sem-img">👗</div>`}
+        <div class="ranking-info">
+          <div class="ranking-nome">${p.nome}</div>
+          <div class="ranking-sub">${p.quantidade} unidades vendidas</div>
+        </div>
+        <div class="ranking-valor">${formatMZN(p.receita)}</div>
+      </div>`).join('');
+  }
+
+  async function actualizarRankingClientes(concluidas) {
+    const clientesMap = {};
+
+    concluidas.forEach(e => {
+      const id = e.user_id;
+      if (!clientesMap[id]) {
+        clientesMap[id] = { nome: e.profiles?.full_name || 'Cliente', numEncomendas: 0, totalGasto: 0 };
+      }
+      clientesMap[id].numEncomendas += 1;
+      clientesMap[id].totalGasto += e.total;
+    });
+
+    const ranking = Object.values(clientesMap)
+      .sort((a, b) => b.totalGasto - a.totalGasto)
+      .slice(0, 5);
+
+    const container = document.getElementById('rankingClientes');
+
+    if (ranking.length === 0) {
+      container.innerHTML = '<p style="color:var(--cinza); font-size:13px; text-align:center; padding:20px;">Sem clientes neste período.</p>';
+      return;
+    }
+
+    container.innerHTML = ranking.map((c, idx) => `
+      <div class="ranking-item">
+        <div class="ranking-posicao ${idx === 0 ? 'top1' : idx === 1 ? 'top2' : idx === 2 ? 'top3' : ''}">${idx + 1}</div>
+        <div class="cliente-avatar" style="width:44px;height:44px;font-size:16px;">${c.nome.charAt(0).toUpperCase()}</div>
+        <div class="ranking-info">
+          <div class="ranking-nome">${c.nome}</div>
+          <div class="ranking-sub">${c.numEncomendas} encomenda(s)</div>
+        </div>
+        <div class="ranking-valor">${formatMZN(c.totalGasto)}</div>
+      </div>`).join('');
+  }
+
+  function actualizarGraficoCategoria(concluidas) {
+    const categoriasMap = {};
+
+    concluidas.forEach(e => {
+      (e.order_items || []).forEach(item => {
+        const nomeCategoria = item.products?.categories?.name || 'Sem categoria';
+        categoriasMap[nomeCategoria] = (categoriasMap[nomeCategoria] || 0) + (item.unit_price * item.quantity);
+      });
+    });
+
+    const labels = Object.keys(categoriasMap);
+    const valores = Object.values(categoriasMap);
+
+    if (graficoCategoriaChart) graficoCategoriaChart.destroy();
+
+    const ctx = document.getElementById('graficoCategoria');
+
+    if (labels.length === 0) {
+      ctx.parentElement.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--cinza); flex-direction:column;">
+          <span style="font-size:40px; margin-bottom:8px;">📦</span>
+          <p>Sem dados de categorias neste período.</p>
+        </div>`;
+      return;
+    }
+
+    const cores = ['#E91E8C', '#8DC63F', '#2563EB', '#D97706', '#7C3AED', '#DC2626', '#16A34A', '#0891B2', '#C2410C', '#4338CA'];
+
+    graficoCategoriaChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: valores,
+          backgroundColor: cores.slice(0, labels.length)
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'right' } }
+      }
+    });
+  }
+
+  async function actualizarProdutosSemMovimento() {
+    // Produtos activos sem nenhuma venda no período
+    const idsVendidos = new Set();
+    encomendasPeriodo.forEach(e => {
+      (e.order_items || []).forEach(item => idsVendidos.add(item.product_id));
+    });
+
+    const { data: produtos } = await db
+      .from('products')
+      .select('id, name, created_at, categories(name), product_stock(quantity)')
+      .eq('status', 'active')
+      .eq('availability_type', 'stock');
+
+    const semMovimento = (produtos || []).filter(p => !idsVendidos.has(p.id));
+
+    const tbody = document.getElementById('tabelaSemMovimento');
+
+    if (semMovimento.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:30px;color:#888;">✅ Todos os produtos tiveram movimento neste período.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = semMovimento.slice(0, 15).map(p => `
+      <tr>
+        <td><strong>${p.name}</strong></td>
+        <td>${p.categories?.name || '—'}</td>
+        <td>${p.product_stock?.quantity ?? '—'}</td>
+        <td>${formatData(p.created_at)}</td>
+      </tr>`).join('');
+  }
+
+  function exportarCSV() {
+    const concluidas = encomendasPeriodo.filter(e =>
+      ['paid','preparing','shipped','delivered'].includes(e.status)
+    );
+
+    if (concluidas.length === 0) {
+      alert('Sem dados para exportar neste período.');
+      return;
+    }
+
+    let csv = 'Numero,Cliente,Data,Subtotal,Total,Estado\n';
+    concluidas.forEach(e => {
+      csv += `"${e.id}","${e.profiles?.full_name || ''}","${formatData(e.created_at)}",${e.subtotal},${e.total},"${e.status}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `relatorio-vendas-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>

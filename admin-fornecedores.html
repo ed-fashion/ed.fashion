@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fornecedores — E'D Fashion Admin</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .vista { display: none; }
+    .vista.activa { display: block; }
+
+    .form-grupo { margin-bottom: 16px; }
+
+    .form-grupo label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .form-grupo input,
+    .form-grupo select,
+    .form-grupo textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: var(--fonte);
+      background: white;
+    }
+
+    .form-grupo input:focus,
+    .form-grupo select:focus,
+    .form-grupo textarea:focus { border-color: var(--rosa); }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .secao-form {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .secao-form-titulo {
+      padding: 16px 24px;
+      border-bottom: 1px solid #F0F2F5;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--preto);
+    }
+
+    .secao-form-corpo { padding: 24px; }
+
+    .form-acoes {
+      display: flex;
+      gap: 12px;
+      padding: 20px 24px;
+      border-top: 1px solid #F0F2F5;
+      background: #FAFAFA;
+    }
+
+    .tipo-fornecedor-card {
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .tipo-fornecedor-card:hover { border-color: var(--rosa); }
+    .tipo-fornecedor-card.seleccionado { border-color: var(--rosa); background: var(--rosa-claro); }
+
+    .tipo-fornecedor-icone { font-size: 28px; margin-bottom: 6px; display: block; }
+    .tipo-fornecedor-nome { font-size: 13px; font-weight: 700; color: var(--preto); }
+    .tipo-fornecedor-desc { font-size: 11px; color: var(--cinza); margin-top: 4px; line-height: 1.4; }
+
+    .tipos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .fornecedor-tipo-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .tipo-international { background: #DBEAFE; color: #2563EB; }
+    .tipo-local_partner { background: #FEF3C7; color: #D97706; }
+    .tipo-own_stock { background: #DCFCE7; color: #16A34A; }
+
+    @media (max-width: 768px) {
+      .form-grid-2 { grid-template-columns: 1fr; }
+      .tipos-grid { grid-template-columns: 1fr; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <div id="adminNav"></div>
+
+  <div class="admin-conteudo">
+
+    <!-- VISTA: LISTA -->
+    <div class="vista activa" id="vistaLista">
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+        <div class="admin-page-titulo" style="margin:0">🏭 Fornecedores</div>
+        <button class="btn-admin btn-admin-rosa" onclick="mostrarFormNovo()">➕ Novo Fornecedor</button>
+      </div>
+
+      <div class="msg-erro" id="msgErroLista"></div>
+      <div class="msg-sucesso" id="msgSucessoLista"></div>
+
+      <!-- KPIs -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:16px; margin-bottom:24px;">
+        <div class="kpi-card">
+          <div class="kpi-icone azul">🌍</div>
+          <div class="kpi-info">
+            <div class="kpi-valor" id="kpiInternacionais">—</div>
+            <div class="kpi-label">Internacionais</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icone amarelo">🤝</div>
+          <div class="kpi-info">
+            <div class="kpi-valor" id="kpiParceiros">—</div>
+            <div class="kpi-label">Parceiros Locais</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icone verde">📦</div>
+          <div class="kpi-info">
+            <div class="kpi-valor" id="kpiProdutosAssociados">—</div>
+            <div class="kpi-label">Produtos Associados</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>Lista de Fornecedores</h3>
+          <span id="totalFornecedores" style="font-size:13px; color:var(--cinza);"></span>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Contacto</th>
+                <th>País</th>
+                <th>Prazo Médio</th>
+                <th>Comissão</th>
+                <th>Produtos</th>
+                <th>Acções</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaFornecedores">
+              <tr><td colspan="8" style="text-align:center;padding:40px;color:#888;">A carregar...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISTA: FORMULÁRIO -->
+    <div class="vista" id="vistaForm">
+
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
+        <button class="btn-admin btn-admin-outline" onclick="mostrarLista()">← Voltar</button>
+        <div class="admin-page-titulo" style="margin:0" id="formTitulo">➕ Novo Fornecedor</div>
+      </div>
+
+      <div class="msg-erro" id="msgErroForm"></div>
+      <div class="msg-sucesso" id="msgSucessoForm"></div>
+
+      <input type="hidden" id="fornecedorId">
+
+      <!-- TIPO DE FORNECEDOR -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">🏷️ Tipo de Fornecedor</div>
+        <div class="secao-form-corpo">
+          <div class="tipos-grid">
+            <div class="tipo-fornecedor-card" id="tipo-international" onclick="seleccionarTipo('international')">
+              <span class="tipo-fornecedor-icone">🌍</span>
+              <div class="tipo-fornecedor-nome">Internacional</div>
+              <div class="tipo-fornecedor-desc">Shein, AliExpress, etc. Produtos por encomenda.</div>
+            </div>
+            <div class="tipo-fornecedor-card" id="tipo-local_partner" onclick="seleccionarTipo('local_partner')">
+              <span class="tipo-fornecedor-icone">🤝</span>
+              <div class="tipo-fornecedor-nome">Parceiro Local</div>
+              <div class="tipo-fornecedor-desc">Pessoa/empresa que vende na tua plataforma, com comissão.</div>
+            </div>
+            <div class="tipo-fornecedor-card" id="tipo-own_stock" onclick="seleccionarTipo('own_stock')">
+              <span class="tipo-fornecedor-icone">🏠</span>
+              <div class="tipo-fornecedor-nome">Stock Próprio</div>
+              <div class="tipo-fornecedor-desc">Produtos comprados directamente pela E'D Fashion.</div>
+            </div>
+          </div>
+          <input type="hidden" id="fornecedorTipo" value="own_stock">
+        </div>
+      </div>
+
+      <!-- INFORMAÇÃO PRINCIPAL -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">📋 Informação Principal</div>
+        <div class="secao-form-corpo">
+          <div class="form-grupo">
+            <label>Nome do Fornecedor *</label>
+            <input type="text" id="fornNome" placeholder="Ex: Shein, ou nome da pessoa/empresa parceira">
+          </div>
+          <div class="form-grid-2">
+            <div class="form-grupo">
+              <label>Nome do Contacto</label>
+              <input type="text" id="fornContactoNome" placeholder="Pessoa responsável">
+            </div>
+            <div class="form-grupo">
+              <label>Telefone / WhatsApp</label>
+              <input type="tel" id="fornTelefone" placeholder="+258 84 000 0000">
+            </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-grupo">
+              <label>Email</label>
+              <input type="email" id="fornEmail" placeholder="email@exemplo.com">
+            </div>
+            <div class="form-grupo">
+              <label>País</label>
+              <input type="text" id="fornPais" placeholder="Moçambique, China, etc." value="Moçambique">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOGÍSTICA -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">🚚 Logística</div>
+        <div class="secao-form-corpo">
+          <div class="form-grid-2">
+            <div class="form-grupo">
+              <label>Tempo Médio de Entrega (dias)</label>
+              <input type="number" id="fornPrazo" placeholder="Ex: 21" min="0">
+            </div>
+            <div class="form-grupo" id="comissaoWrap" style="display:none">
+              <label>Comissão da E'D Fashion (%)</label>
+              <input type="number" id="fornComissao" placeholder="Ex: 15" min="0" max="100">
+            </div>
+          </div>
+          <div id="comissaoInfo" style="font-size:12px; color:var(--cinza); margin-top:-8px;"></div>
+        </div>
+      </div>
+
+      <!-- NOTAS -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">📝 Notas Internas</div>
+        <div class="secao-form-corpo">
+          <div class="form-grupo">
+            <textarea id="fornNotas" rows="3" placeholder="Informações adicionais sobre este fornecedor..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTADO -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">⚙️ Estado</div>
+        <div class="secao-form-corpo">
+          <div class="form-grupo">
+            <label>Fornecedor Activo?</label>
+            <select id="fornAtivo">
+              <option value="true">Sim</option>
+              <option value="false">Não</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-acoes">
+        <button class="btn-admin btn-admin-rosa" onclick="guardarFornecedor()" id="btnGuardar">
+          💾 Guardar Fornecedor
+        </button>
+        <button class="btn-admin btn-admin-outline" onclick="mostrarLista()">
+          Cancelar
+        </button>
+      </div>
+
+    </div>
+
+    <!-- VISTA: DETALHE / PRODUTOS ASSOCIADOS -->
+    <div class="vista" id="vistaDetalhe">
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
+        <button class="btn-admin btn-admin-outline" onclick="mostrarLista()">← Voltar</button>
+        <div class="admin-page-titulo" style="margin:0" id="detalheTitulo">Fornecedor</div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>Produtos deste Fornecedor</h3>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaProdutosFornecedor">
+              <tr><td colspan="4" style="text-align:center;padding:40px;color:#888;">A carregar...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="admin-nav.js"></script>
+<script>
+
+  let todosFornecedores = [];
+
+  async function iniciar() {
+    const ok = await verificarAdmin();
+    if (!ok) return;
+    carregarAdminNav('fornecedores');
+    await carregarFornecedores();
+  }
+
+  async function carregarFornecedores() {
+    const { data, error } = await db
+      .from('suppliers')
+      .select('*, products(id)')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      mostrarErro('msgErroLista', 'Erro ao carregar fornecedores.');
+      return;
+    }
+
+    todosFornecedores = data || [];
+    actualizarKPIs();
+    renderTabela();
+  }
+
+  function actualizarKPIs() {
+    document.getElementById('kpiInternacionais').textContent =
+      todosFornecedores.filter(f => f.supplier_type === 'international').length;
+    document.getElementById('kpiParceiros').textContent =
+      todosFornecedores.filter(f => f.supplier_type === 'local_partner').length;
+    document.getElementById('kpiProdutosAssociados').textContent =
+      todosFornecedores.reduce((s, f) => s + (f.products?.length || 0), 0);
+  }
+
+  function renderTabela() {
+    document.getElementById('totalFornecedores').textContent = `${todosFornecedores.length} fornecedor(es)`;
+    const tbody = document.getElementById('tabelaFornecedores');
+
+    if (todosFornecedores.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="8">
+          <div class="admin-vazio">
+            <span class="icone">🏭</span>
+            <h3>Nenhum fornecedor registado</h3>
+          </div>
+        </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = todosFornecedores.map(f => `
+      <tr>
+        <td><strong>${f.name}</strong></td>
+        <td>${badgeTipo(f.supplier_type)}</td>
+        <td>${f.contact_name || '—'}${f.phone ? '<br><small>' + f.phone + '</small>' : ''}</td>
+        <td>${f.country || '—'}</td>
+        <td>${f.avg_delivery_days ? f.avg_delivery_days + ' dias' : '—'}</td>
+        <td>${f.commission_percentage ? f.commission_percentage + '%' : '—'}</td>
+        <td>
+          <button class="btn-admin btn-admin-outline" onclick="verProdutos('${f.id}', '${f.name.replace(/'/g,"\\'")}')">
+            ${f.products?.length || 0} produto(s)
+          </button>
+        </td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <button class="btn-admin btn-admin-outline" onclick="editarFornecedor('${f.id}')">✏️</button>
+            <button class="btn-admin btn-admin-vermelho" onclick="removerFornecedor('${f.id}')">🗑️</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function badgeTipo(tipo) {
+    const map = {
+      international: ['tipo-international', '🌍 Internacional'],
+      local_partner: ['tipo-local_partner', '🤝 Parceiro Local'],
+      own_stock: ['tipo-own_stock', '🏠 Stock Próprio']
+    };
+    const [cls, label] = map[tipo] || ['tipo-own_stock', tipo];
+    return `<span class="fornecedor-tipo-badge ${cls}">${label}</span>`;
+  }
+
+  function mostrarFormNovo() {
+    limparForm();
+    document.getElementById('formTitulo').textContent = '➕ Novo Fornecedor';
+    mostrarVista('vistaForm');
+  }
+
+  function seleccionarTipo(tipo) {
+    document.getElementById('fornecedorTipo').value = tipo;
+    document.querySelectorAll('.tipo-fornecedor-card').forEach(c => c.classList.remove('seleccionado'));
+    document.getElementById('tipo-' + tipo).classList.add('seleccionado');
+
+    const comissaoWrap = document.getElementById('comissaoWrap');
+    const comissaoInfo = document.getElementById('comissaoInfo');
+
+    if (tipo === 'local_partner') {
+      comissaoWrap.style.display = 'block';
+      comissaoInfo.textContent = '💡 Esta é a percentagem que a E\'D Fashion retém de cada venda deste parceiro.';
+    } else {
+      comissaoWrap.style.display = 'none';
+      comissaoInfo.textContent = '';
+    }
+  }
+
+  async function editarFornecedor(id) {
+    const f = todosFornecedores.find(x => x.id === id);
+    if (!f) return;
+
+    limparForm();
+    document.getElementById('formTitulo').textContent = '✏️ Editar Fornecedor';
+    document.getElementById('fornecedorId').value = f.id;
+    document.getElementById('fornNome').value = f.name || '';
+    document.getElementById('fornContactoNome').value = f.contact_name || '';
+    document.getElementById('fornTelefone').value = f.phone || '';
+    document.getElementById('fornEmail').value = f.email || '';
+    document.getElementById('fornPais').value = f.country || '';
+    document.getElementById('fornPrazo').value = f.avg_delivery_days || '';
+    document.getElementById('fornComissao').value = f.commission_percentage || '';
+    document.getElementById('fornNotas').value = f.notes || '';
+    document.getElementById('fornAtivo').value = f.is_active ? 'true' : 'false';
+
+    seleccionarTipo(f.supplier_type || 'own_stock');
+    mostrarVista('vistaForm');
+  }
+
+  async function guardarFornecedor() {
+    const id = document.getElementById('fornecedorId').value;
+    const nome = document.getElementById('fornNome').value.trim();
+
+    esconderMensagem('msgErroForm');
+    esconderMensagem('msgSucessoForm');
+
+    if (!nome) {
+      mostrarErro('msgErroForm', 'O nome do fornecedor é obrigatório.');
+      return;
+    }
+
+    const btn = document.getElementById('btnGuardar');
+    btn.disabled = true;
+    btn.textContent = 'A guardar...';
+
+    const dados = {
+      name: nome,
+      contact_name: document.getElementById('fornContactoNome').value.trim() || null,
+      phone: document.getElementById('fornTelefone').value.trim() || null,
+      email: document.getElementById('fornEmail').value.trim() || null,
+      country: document.getElementById('fornPais').value.trim() || null,
+      avg_delivery_days: parseInt(document.getElementById('fornPrazo').value) || 0,
+      supplier_type: document.getElementById('fornecedorTipo').value,
+      commission_percentage: parseFloat(document.getElementById('fornComissao').value) || 0,
+      notes: document.getElementById('fornNotas').value.trim() || null,
+      is_active: document.getElementById('fornAtivo').value === 'true'
+    };
+
+    let error;
+    if (id) {
+      ({ error } = await db.from('suppliers').update(dados).eq('id', id));
+    } else {
+      ({ error } = await db.from('suppliers').insert(dados));
+    }
+
+    if (error) {
+      mostrarErro('msgErroForm', 'Erro ao guardar: ' + error.message);
+      btn.disabled = false;
+      btn.textContent = '💾 Guardar Fornecedor';
+      return;
+    }
+
+    mostrarSucesso('msgSucessoForm', `✅ Fornecedor ${id ? 'actualizado' : 'criado'} com sucesso!`);
+    btn.disabled = false;
+    btn.textContent = '💾 Guardar Fornecedor';
+
+    await carregarFornecedores();
+    setTimeout(() => mostrarLista(), 1200);
+  }
+
+  async function removerFornecedor(id) {
+    const f = todosFornecedores.find(x => x.id === id);
+    if (f?.products?.length > 0) {
+      alert(`Este fornecedor tem ${f.products.length} produto(s) associado(s). Remove ou reatribui os produtos primeiro.`);
+      return;
+    }
+    if (!confirm('Remover este fornecedor permanentemente?')) return;
+
+    await db.from('suppliers').delete().eq('id', id);
+    await carregarFornecedores();
+  }
+
+  async function verProdutos(id, nome) {
+    document.getElementById('detalheTitulo').textContent = `📦 Produtos de: ${nome}`;
+
+    const { data } = await db
+      .from('products')
+      .select('id, name, price, status, categories(name)')
+      .eq('supplier_id', id);
+
+    const tbody = document.getElementById('tabelaProdutosFornecedor');
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:40px;color:#888;">Nenhum produto associado a este fornecedor ainda.</td></tr>`;
+    } else {
+      tbody.innerHTML = data.map(p => `
+        <tr>
+          <td><strong>${p.name}</strong></td>
+          <td>${p.categories?.name || '—'}</td>
+          <td>${formatMZN(p.price)}</td>
+          <td>${p.status === 'active' ? '<span class="status-badge status-active">Activo</span>' : '<span class="status-badge status-draft">Rascunho</span>'}</td>
+        </tr>`).join('');
+    }
+
+    mostrarVista('vistaDetalhe');
+  }
+
+  function mostrarVista(id) {
+    document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
+    document.getElementById(id).classList.add('activa');
+    window.scrollTo(0, 0);
+  }
+
+  function mostrarLista() {
+    mostrarVista('vistaLista');
+  }
+
+  function limparForm() {
+    document.getElementById('fornecedorId').value = '';
+    document.getElementById('fornNome').value = '';
+    document.getElementById('fornContactoNome').value = '';
+    document.getElementById('fornTelefone').value = '';
+    document.getElementById('fornEmail').value = '';
+    document.getElementById('fornPais').value = 'Moçambique';
+    document.getElementById('fornPrazo').value = '';
+    document.getElementById('fornComissao').value = '';
+    document.getElementById('fornNotas').value = '';
+    document.getElementById('fornAtivo').value = 'true';
+    seleccionarTipo('own_stock');
+    esconderMensagem('msgErroForm');
+    esconderMensagem('msgSucessoForm');
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>

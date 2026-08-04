@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+
+  <!-- Open Graph -->
+  <meta property="og:site_name" content="E'D Fashion">
+  <meta property="og:image"     content="https://ed-fashion.github.io/ed.fashion/logo.png">
+  <meta property="og:type"      content="website">
+
+  <title>Banners — E'D Fashion Admin</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .vista { display: none; }
+    .vista.activa { display: block; }
+
+    .banner-preview-card {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .banner-preview-img {
+      width: 220px;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .banner-preview-img.cor-rosa { background: linear-gradient(135deg, #E91E8C 0%, #c4186f 50%, #8DC63F 100%); }
+    .banner-preview-img.cor-verde { background: linear-gradient(135deg, #8DC63F 0%, #6ba02a 100%); }
+    .banner-preview-img.cor-escuro { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
+    .banner-preview-img.cor-azul { background: linear-gradient(135deg, #2563EB 0%, #1e3a8a 100%); }
+
+    .banner-preview-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      inset: 0;
+    }
+
+    .banner-preview-corpo {
+      flex: 1;
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .banner-preview-titulo {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--preto);
+      margin-bottom: 6px;
+    }
+
+    .banner-preview-sub {
+      font-size: 12px;
+      color: var(--cinza);
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .banner-preview-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--cinza);
+      flex-wrap: wrap;
+    }
+
+    .banner-ordem-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 12px;
+      border-left: 1px solid #F0F2F5;
+      justify-content: center;
+    }
+
+    .ordem-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      border: 1.5px solid #ddd;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .ordem-btn:hover { border-color: var(--rosa); color: var(--rosa); }
+    .ordem-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .banner-acoes-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 18px;
+      justify-content: center;
+      border-left: 1px solid #F0F2F5;
+    }
+
+    /* FORM */
+    .secao-form {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .secao-form-titulo {
+      padding: 16px 24px;
+      border-bottom: 1px solid #F0F2F5;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--preto);
+    }
+
+    .secao-form-corpo { padding: 24px; }
+
+    .form-grupo { margin-bottom: 16px; }
+
+    .form-grupo label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .form-grupo input,
+    .form-grupo select,
+    .form-grupo textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      font-family: var(--fonte);
+      background: white;
+    }
+
+    .form-grupo input:focus,
+    .form-grupo select:focus,
+    .form-grupo textarea:focus { border-color: var(--rosa); }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .cores-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .cor-opcao {
+      height: 50px;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .cor-opcao.seleccionada { border-color: var(--preto); transform: scale(1.05); }
+
+    .cor-rosa-bg { background: linear-gradient(135deg, #E91E8C, #8DC63F); }
+    .cor-verde-bg { background: linear-gradient(135deg, #8DC63F, #6ba02a); }
+    .cor-escuro-bg { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+    .cor-azul-bg { background: linear-gradient(135deg, #2563EB, #1e3a8a); }
+
+    .upload-area-banner {
+      border: 2px dashed #ddd;
+      border-radius: 10px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--cinza-claro);
+      margin-bottom: 10px;
+    }
+
+    .upload-area-banner:hover { border-color: var(--rosa); }
+
+    .imagem-preview-form {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    .form-acoes {
+      display: flex;
+      gap: 12px;
+      padding: 20px 24px;
+      border-top: 1px solid #F0F2F5;
+      background: #FAFAFA;
+    }
+
+    /* SELECTOR DE PRODUTO PARA BANNER */
+    .produto-slot {
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .produto-slot-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .produto-selecionado-preview {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: var(--rosa-claro);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .produto-selecionado-preview.visivel { display: flex; }
+
+    .produto-selecionado-img {
+      width: 40px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 5px;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .produto-selecionado-info { flex: 1; min-width: 0; font-size: 12px; }
+    .produto-selecionado-nome { font-weight: 700; color: var(--preto); }
+    .produto-selecionado-preco { color: var(--rosa); font-weight: 700; }
+
+    .btn-remover-produto {
+      background: none;
+      border: none;
+      color: var(--cinza);
+      cursor: pointer;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .produtos-busca-lista {
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1.5px solid #eee;
+      border-radius: 8px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .produtos-busca-lista.visivel { display: block; }
+
+    .produto-busca-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-bottom: 1px solid #F5F5F5;
+    }
+
+    .produto-busca-item:hover { background: #FAFAFA; }
+    .produto-busca-item:last-child { border-bottom: none; }
+
+    .produto-busca-img {
+      width: 32px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: var(--cinza-claro);
+      flex-shrink: 0;
+    }
+
+    .produto-busca-nome { font-size: 12px; flex: 1; }
+    .produto-busca-preco { font-size: 12px; color: var(--rosa); font-weight: 700; }
+
+    @media (max-width: 768px) {
+      .banner-preview-card { flex-direction: column; }
+      .banner-preview-img { width: 100%; height: 120px; }
+      .banner-ordem-btns, .banner-acoes-col { flex-direction: row; border-left: none; border-top: 1px solid #F0F2F5; }
+      .form-grid-2, .cores-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <div id="adminNav"></div>
+
+  <div class="admin-conteudo">
+
+    <!-- VISTA: LISTA -->
+    <div class="vista activa" id="vistaLista">
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+        <div class="admin-page-titulo" style="margin:0">🖼️ Banners da Página Inicial</div>
+        <button class="btn-admin btn-admin-rosa" onclick="mostrarFormNovo()">➕ Novo Banner</button>
+      </div>
+
+      <div class="msg-erro" id="msgErroLista"></div>
+      <div class="msg-sucesso" id="msgSucessoLista"></div>
+
+      <div style="font-size:13px; color:var(--cinza); margin-bottom:20px;">
+        💡 Os banners aparecem em rotação automática na página inicial. Podes destacar até 2 produtos directamente no banner.
+      </div>
+
+      <div id="listaBanners"></div>
+
+    </div>
+
+    <!-- VISTA: FORMULÁRIO -->
+    <div class="vista" id="vistaForm">
+
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
+        <button class="btn-admin btn-admin-outline" onclick="mostrarLista()">← Voltar</button>
+        <div class="admin-page-titulo" style="margin:0" id="formTitulo">➕ Novo Banner</div>
+      </div>
+
+      <div class="msg-erro" id="msgErroForm"></div>
+      <div class="msg-sucesso" id="msgSucessoForm"></div>
+
+      <input type="hidden" id="bannerId">
+      <input type="hidden" id="produtoId1">
+      <input type="hidden" id="produtoId2">
+      <input type="hidden" id="produtoId3">
+      <input type="hidden" id="produtoId4">
+
+      <div class="secao-form">
+        <div class="secao-form-titulo">📝 Conteúdo do Banner</div>
+        <div class="secao-form-corpo">
+          <div class="form-grupo">
+            <label>Título Principal *</label>
+            <input type="text" id="bannerTitulo" placeholder="Ex: Black Friday Chegou! 🔥">
+          </div>
+          <div class="form-grupo">
+            <label>Subtítulo / Descrição</label>
+            <textarea id="bannerSubtitulo" rows="2" placeholder="Texto de apoio que aparece abaixo do título"></textarea>
+          </div>
+
+          <!-- LIGAR A UMA COLECÇÃO -->
+          <div style="background:#EFF6FF; border:1.5px solid #2563EB; border-radius:10px; padding:16px; margin-bottom:16px;">
+            <div style="font-size:13px; font-weight:700; color:#2563EB; margin-bottom:10px;">
+              🎯 Ligar a uma Colecção (recomendado)
+            </div>
+            <div class="form-grupo" style="margin-bottom:8px;">
+              <label>Escolher Colecção</label>
+              <select id="bannerColecao" onchange="selecionarColecao(this.value)">
+                <option value="">— Nenhuma (preenche o link manualmente) —</option>
+              </select>
+            </div>
+            <div style="font-size:11px; color:#2563EB; margin-top:4px;">
+              💡 Ao escolher uma colecção, o link e os produtos são preenchidos automaticamente.
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-grupo">
+              <label>Texto do Botão</label>
+              <input type="text" id="bannerBotaoTexto" placeholder="Ex: Ver Ofertas" value="Ver Mais">
+            </div>
+            <div class="form-grupo">
+              <label>Link do Botão</label>
+              <input type="text" id="bannerLink" placeholder="Ex: catalogo.html ou colecao.html?slug=..." value="catalogo.html">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUTOS EM DESTAQUE NO BANNER -->
+      <div class="secao-form">
+        <div class="secao-form-titulo">🏷️ Produtos em Destaque no Banner (opcional)</div>
+        <div class="secao-form-corpo">
+          <div style="font-size:12px; color:var(--cinza); margin-bottom:14px;">
+            💡 Mostra até 4 produtos com preço sobrepostos na imagem do banner. Escolhe os que quiseres destacar.
+          </div>
+
+          <!-- SLOT 1 -->
+          <div class="produto-slot">
+            <div class="produto-slot-header">Produto 1</div>
+            <div class="produto-selecionado-preview" id="preview1">
+              <img class="produto-selecionado-img" id="previewImg1">
+              <div class="produto-selecionado-info">
+                <div class="produto-selecionado-nome" id="previewNome1"></div>
+                <div class="produto-selecionado-preco" id="previewPreco1"></div>
+              </div>
+              <button class="btn-remover-produto" onclick="removerProdutoSlot(1)">×</button>
+            </div>
+            <input type="text" id="buscaProduto1" placeholder="🔍 Pesquisar produto..." oninput="buscarProdutos(1)">
+            <div class="produtos-busca-lista" id="listaBusca1"></div>
+          </div>
+
+          <!-- SLOT 2 -->
+          <div class="produto-slot">
+            <div class="produto-slot-header">Produto 2</div>
+            <div class="produto-selecionado-preview" id="preview2">
+              <img class="produto-selecionado-img" id="previewImg2">
+              <div class="produto-selecionado-info">
+                <div class="produto-selecionado-nome" id="previewNome2"></div>
+                <div class="produto-selecionado-preco" id="previewPreco2"></div>
+              </div>
+              <button class="btn-remover-produto" onclick="removerProdutoSlot(2)">×</button>
+            </div>
+            <input type="text" id="buscaProduto2" placeholder="🔍 Pesquisar produto..." oninput="buscarProdutos(2)">
+            <div class="produtos-busca-lista" id="listaBusca2"></div>
+          </div>
+
+          <!-- SLOT 3 -->
+          <div class="produto-slot">
+            <div class="produto-slot-header">Produto 3</div>
+            <div class="produto-selecionado-preview" id="preview3">
+              <img class="produto-selecionado-img" id="previewImg3">
+              <div class="produto-selecionado-info">
+                <div class="produto-selecionado-nome" id="previewNome3"></div>
+                <div class="produto-selecionado-preco" id="previewPreco3"></div>
+              </div>
+              <button class="btn-remover-produto" onclick="removerProdutoSlot(3)">×</button>
+            </div>
+            <input type="text" id="buscaProduto3" placeholder="🔍 Pesquisar produto..." oninput="buscarProdutos(3)">
+            <div class="produtos-busca-lista" id="listaBusca3"></div>
+          </div>
+
+          <!-- SLOT 4 -->
+          <div class="produto-slot">
+            <div class="produto-slot-header">Produto 4</div>
+            <div class="produto-selecionado-preview" id="preview4">
+              <img class="produto-selecionado-img" id="previewImg4">
+              <div class="produto-selecionado-info">
+                <div class="produto-selecionado-nome" id="previewNome4"></div>
+                <div class="produto-selecionado-preco" id="previewPreco4"></div>
+              </div>
+              <button class="btn-remover-produto" onclick="removerProdutoSlot(4)">×</button>
+            </div>
+            <input type="text" id="buscaProduto4" placeholder="🔍 Pesquisar produto..." oninput="buscarProdutos(4)">
+            <div class="produtos-busca-lista" id="listaBusca4"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="secao-form">
+        <div class="secao-form-titulo">🎨 Aparência</div>
+        <div class="secao-form-corpo">
+          <div class="form-grupo">
+            <label>Imagem de Fundo (opcional)</label>
+            <img id="imagemPreviewBanner" class="imagem-preview-form">
+            <div class="upload-area-banner" id="uploadAreaBanner" onclick="document.getElementById('inputImagemBanner').click()">
+              <span style="font-size:28px; display:block; margin-bottom:6px;">🖼️</span>
+              <p style="font-size:13px; color:var(--cinza); margin:0;">Clica para enviar uma imagem (opcional)</p>
+            </div>
+            <input type="file" id="inputImagemBanner" accept="image/*" style="display:none" onchange="previewImagemBanner(event)">
+            <div style="margin-top:8px;">
+              <button class="btn-admin btn-admin-outline" onclick="removerImagemBanner()" style="font-size:12px;">🗑️ Remover imagem</button>
+            </div>
+          </div>
+
+          <div class="form-grupo">
+            <label>Ou escolhe uma cor de fundo (se não houver imagem)</label>
+            <div class="cores-grid">
+              <div class="cor-opcao cor-rosa-bg" onclick="seleccionarCor('rosa')" id="cor-rosa"></div>
+              <div class="cor-opcao cor-verde-bg" onclick="seleccionarCor('verde')" id="cor-verde"></div>
+              <div class="cor-opcao cor-escuro-bg" onclick="seleccionarCor('escuro')" id="cor-escuro"></div>
+              <div class="cor-opcao cor-azul-bg" onclick="seleccionarCor('azul')" id="cor-azul"></div>
+            </div>
+            <input type="hidden" id="bannerCor" value="rosa">
+          </div>
+        </div>
+      </div>
+
+      <div class="secao-form">
+        <div class="secao-form-titulo">⚙️ Estado</div>
+        <div class="secao-form-corpo">
+          <div class="form-grupo">
+            <label>Banner Activo?</label>
+            <select id="bannerAtivo">
+              <option value="true">Sim — aparece na loja</option>
+              <option value="false">Não — fica guardado mas escondido</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-acoes">
+        <button class="btn-admin btn-admin-rosa" onclick="guardarBanner()" id="btnGuardar">
+          💾 Guardar Banner
+        </button>
+        <button class="btn-admin btn-admin-outline" onclick="mostrarLista()">
+          Cancelar
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="admin-nav.js"></script>
+<script>
+
+  let todosBanners = [];
+  let imagemFicheiroBanner = null;
+  let imagemUrlBannerActual = '';
+  let todosProdutosCache = [];
+  let todasColecoes = [];
+
+  async function iniciar() {
+    const ok = await verificarAdmin();
+    if (!ok) return;
+    carregarAdminNav('produtos');
+    await Promise.all([carregarBanners(), carregarProdutosCache(), carregarColecoesDropdown()]);
+  }
+
+  async function carregarColecoesDropdown() {
+    const { data } = await db
+      .from('collections')
+      .select('id, nome, slug, descricao, collection_products(product_id, sort_order)')
+      .eq('is_active', true)
+      .order('nome');
+
+    todasColecoes = data || [];
+
+    const sel = document.getElementById('bannerColecao');
+    if (!sel) return;
+    // Manter opção vazia
+    sel.innerHTML = `<option value="">— Nenhuma (preenche o link manualmente) —</option>` +
+      todasColecoes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+  }
+
+  async function selecionarColecao(colecaoId) {
+    if (!colecaoId) return;
+
+    const col = todasColecoes.find(c => c.id === colecaoId);
+    if (!col) return;
+
+    // Preencher título, subtítulo e link automaticamente (só se estiverem vazios ou forem o padrão)
+    const tituloEl = document.getElementById('bannerTitulo');
+    const subEl = document.getElementById('bannerSubtitulo');
+    const linkEl = document.getElementById('bannerLink');
+
+    if (!tituloEl.value || tituloEl.value === tituloEl.dataset.auto) {
+      tituloEl.value = col.nome;
+      tituloEl.dataset.auto = col.nome;
+    }
+    if (!subEl.value || subEl.value === subEl.dataset.auto) {
+      subEl.value = col.descricao || '';
+      subEl.dataset.auto = col.descricao || '';
+    }
+    linkEl.value = `colecao.html?slug=${col.slug}`;
+
+    // Preencher slots com produtos da colecção (até 4)
+    const produtosCol = (col.collection_products || [])
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .slice(0, 4)
+      .map(cp => cp.product_id);
+
+    // Limpar slots primeiro
+    [1,2,3,4].forEach(i => removerProdutoSlot(i));
+
+    // Preencher com os produtos da colecção
+    produtosCol.forEach((pid, i) => {
+      const slot = i + 1;
+      const p = todosProdutosCache.find(x => x.id === pid);
+      if (p) preencherProdutoSlot(slot, p.id);
+    });
+  }
+
+  async function carregarProdutosCache() {
+    const { data } = await db
+      .from('products')
+      .select('id, name, price, sale_price, image_url')
+      .eq('status', 'active')
+      .order('name');
+    todosProdutosCache = data || [];
+  }
+
+  async function carregarBanners() {
+    const { data, error } = await db
+      .from('banners')
+      .select('*')
+      .order('sort_order');
+
+    if (error) {
+      mostrarErro('msgErroLista', 'Erro ao carregar banners.');
+      return;
+    }
+
+    todosBanners = data || [];
+    renderLista();
+  }
+
+  function renderLista() {
+    const container = document.getElementById('listaBanners');
+
+    if (todosBanners.length === 0) {
+      container.innerHTML = `
+        <div class="admin-vazio">
+          <span class="icone">🖼️</span>
+          <h3>Nenhum banner criado ainda</h3>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = todosBanners.map((b, idx) => `
+      <div class="banner-preview-card">
+        <div class="banner-preview-img cor-${b.cor_overlay}">
+          ${b.imagem_url ? `<img src="${b.imagem_url}" onerror="this.style.display='none'">` : ''}
+        </div>
+        <div class="banner-preview-corpo">
+          <div class="banner-preview-titulo">${b.titulo}</div>
+          <div class="banner-preview-sub">${b.subtitulo || '—'}</div>
+          <div class="banner-preview-meta">
+            <span class="status-badge ${b.is_active ? 'status-active' : 'status-draft'}">
+              ${b.is_active ? '✅ Activo' : '⏸️ Inactivo'}
+            </span>
+            <span>🔗 ${b.link_url}</span>
+            ${b.produto_id_1 || b.produto_id_2 || b.produto_id_3 || b.produto_id_4
+              ? `<span>🏷️ ${[b.produto_id_1, b.produto_id_2, b.produto_id_3, b.produto_id_4].filter(Boolean).length} produto(s) destacado(s)</span>`
+              : ''}
+          </div>
+        </div>
+        <div class="banner-ordem-btns">
+          <button class="ordem-btn" onclick="moverBanner('${b.id}', -1)" ${idx === 0 ? 'disabled' : ''}>↑</button>
+          <button class="ordem-btn" onclick="moverBanner('${b.id}', 1)" ${idx === todosBanners.length - 1 ? 'disabled' : ''}>↓</button>
+        </div>
+        <div class="banner-acoes-col">
+          <button class="btn-admin btn-admin-outline" onclick="editarBanner('${b.id}')">✏️ Editar</button>
+          <button class="btn-admin btn-admin-vermelho" onclick="removerBanner('${b.id}')">🗑️ Remover</button>
+        </div>
+      </div>`).join('');
+  }
+
+  async function moverBanner(id, direccao) {
+    const idx = todosBanners.findIndex(b => b.id === id);
+    const novoIdx = idx + direccao;
+    if (novoIdx < 0 || novoIdx >= todosBanners.length) return;
+
+    const a = todosBanners[idx];
+    const b = todosBanners[novoIdx];
+
+    await db.from('banners').update({ sort_order: b.sort_order }).eq('id', a.id);
+    await db.from('banners').update({ sort_order: a.sort_order }).eq('id', b.id);
+
+    await carregarBanners();
+  }
+
+  function mostrarFormNovo() {
+    limparForm();
+    document.getElementById('formTitulo').textContent = '➕ Novo Banner';
+    mostrarVista('vistaForm');
+  }
+
+  function editarBanner(id) {
+    const b = todosBanners.find(x => x.id === id);
+    if (!b) return;
+
+    limparForm();
+    document.getElementById('formTitulo').textContent = '✏️ Editar Banner';
+    document.getElementById('bannerId').value = b.id;
+    document.getElementById('bannerTitulo').value = b.titulo || '';
+    document.getElementById('bannerSubtitulo').value = b.subtitulo || '';
+    document.getElementById('bannerBotaoTexto').value = b.texto_botao || 'Ver Mais';
+    document.getElementById('bannerLink').value = b.link_url || 'catalogo.html';
+    document.getElementById('bannerAtivo').value = b.is_active ? 'true' : 'false';
+
+    // Restaurar colecção se o link corresponder a alguma
+    const matchCol = todasColecoes.find(c => (b.link_url || '').includes('slug=' + c.slug));
+    document.getElementById('bannerColecao').value = matchCol ? matchCol.id : '';
+
+    seleccionarCor(b.cor_overlay || 'rosa');
+
+    if (b.imagem_url) {
+      document.getElementById('imagemPreviewBanner').src = b.imagem_url;
+      document.getElementById('imagemPreviewBanner').style.display = 'block';
+      document.getElementById('uploadAreaBanner').style.display = 'none';
+      imagemUrlBannerActual = b.imagem_url;
+    }
+
+    if (b.produto_id_1) preencherProdutoSlot(1, b.produto_id_1);
+    if (b.produto_id_2) preencherProdutoSlot(2, b.produto_id_2);
+    if (b.produto_id_3) preencherProdutoSlot(3, b.produto_id_3);
+    if (b.produto_id_4) preencherProdutoSlot(4, b.produto_id_4);
+
+    mostrarVista('vistaForm');
+  }
+
+  function preencherProdutoSlot(slot, productId) {
+    const p = todosProdutosCache.find(x => x.id === productId);
+    if (!p) return;
+
+    document.getElementById('produtoId' + slot).value = p.id;
+    document.getElementById('previewImg' + slot).src = p.image_url || 'assets/sem-imagem.png';
+    document.getElementById('previewNome' + slot).textContent = p.name;
+    const preco = (p.sale_price && p.sale_price < p.price) ? p.sale_price : p.price;
+    document.getElementById('previewPreco' + slot).textContent = formatMZN(preco);
+    document.getElementById('preview' + slot).classList.add('visivel');
+  }
+
+  function buscarProdutos(slot) {
+    const termo = document.getElementById('buscaProduto' + slot).value.toLowerCase();
+    const listaEl = document.getElementById('listaBusca' + slot);
+
+    if (!termo) {
+      listaEl.classList.remove('visivel');
+      listaEl.innerHTML = '';
+      return;
+    }
+
+    const resultados = todosProdutosCache
+      .filter(p => p.name.toLowerCase().includes(termo))
+      .slice(0, 8);
+
+    if (resultados.length === 0) {
+      listaEl.innerHTML = `<div style="padding:10px; font-size:12px; color:var(--cinza);">Nenhum produto encontrado.</div>`;
+      listaEl.classList.add('visivel');
+      return;
+    }
+
+    listaEl.innerHTML = resultados.map(p => {
+      const preco = (p.sale_price && p.sale_price < p.price) ? p.sale_price : p.price;
+      return `
+        <div class="produto-busca-item" onclick="seleccionarProdutoSlot(${slot}, '${p.id}')">
+          ${p.image_url
+            ? `<img src="${p.image_url}" class="produto-busca-img" onerror="this.style.display='none'">`
+            : `<div class="produto-busca-img"></div>`}
+          <span class="produto-busca-nome">${p.name}</span>
+          <span class="produto-busca-preco">${formatMZN(preco)}</span>
+        </div>`;
+    }).join('');
+    listaEl.classList.add('visivel');
+  }
+
+  function seleccionarProdutoSlot(slot, productId) {
+    preencherProdutoSlot(slot, productId);
+    document.getElementById('buscaProduto' + slot).value = '';
+    document.getElementById('listaBusca' + slot).classList.remove('visivel');
+    document.getElementById('listaBusca' + slot).innerHTML = '';
+  }
+
+  function removerProdutoSlot(slot) {
+    document.getElementById('produtoId' + slot).value = '';
+    document.getElementById('preview' + slot).classList.remove('visivel');
+  }
+
+  function seleccionarCor(cor) {
+    document.getElementById('bannerCor').value = cor;
+    document.querySelectorAll('.cor-opcao').forEach(c => c.classList.remove('seleccionada'));
+    document.getElementById('cor-' + cor).classList.add('seleccionada');
+  }
+
+  function previewImagemBanner(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('A imagem não pode ter mais de 5 MB.');
+      return;
+    }
+    imagemFicheiroBanner = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('imagemPreviewBanner').src = e.target.result;
+      document.getElementById('imagemPreviewBanner').style.display = 'block';
+      document.getElementById('uploadAreaBanner').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removerImagemBanner() {
+    imagemFicheiroBanner = null;
+    imagemUrlBannerActual = '';
+    document.getElementById('imagemPreviewBanner').style.display = 'none';
+    document.getElementById('uploadAreaBanner').style.display = 'block';
+    document.getElementById('inputImagemBanner').value = '';
+  }
+
+  async function guardarBanner() {
+    const id = document.getElementById('bannerId').value;
+    const titulo = document.getElementById('bannerTitulo').value.trim();
+
+    esconderMensagem('msgErroForm');
+    esconderMensagem('msgSucessoForm');
+
+    if (!titulo) {
+      mostrarErro('msgErroForm', 'O título é obrigatório.');
+      return;
+    }
+
+    const btn = document.getElementById('btnGuardar');
+    btn.disabled = true;
+    btn.textContent = 'A guardar...';
+
+    let imageUrl = imagemUrlBannerActual;
+
+    if (imagemFicheiroBanner) {
+      const ext = imagemFicheiroBanner.name.split('.').pop();
+      const nomeFile = `banner_${Date.now()}.${ext}`;
+
+      const { error: uploadErr } = await db.storage
+        .from('produtos')
+        .upload(nomeFile, imagemFicheiroBanner, { upsert: true });
+
+      if (uploadErr) {
+        mostrarErro('msgErroForm', 'Erro ao enviar imagem: ' + uploadErr.message);
+        btn.disabled = false;
+        btn.textContent = '💾 Guardar Banner';
+        return;
+      }
+
+      const { data: urlData } = db.storage.from('produtos').getPublicUrl(nomeFile);
+      imageUrl = urlData.publicUrl;
+    }
+
+    const dados = {
+      titulo,
+      subtitulo: document.getElementById('bannerSubtitulo').value.trim() || null,
+      texto_botao: document.getElementById('bannerBotaoTexto').value.trim() || 'Ver Mais',
+      link_url: document.getElementById('bannerLink').value.trim() || 'catalogo.html',
+      cor_overlay: document.getElementById('bannerCor').value,
+      imagem_url: imageUrl || null,
+      produto_id_1: document.getElementById('produtoId1').value || null,
+      produto_id_2: document.getElementById('produtoId2').value || null,
+      produto_id_3: document.getElementById('produtoId3').value || null,
+      produto_id_4: document.getElementById('produtoId4').value || null,
+      is_active: document.getElementById('bannerAtivo').value === 'true'
+    };
+
+    let error;
+    if (id) {
+      ({ error } = await db.from('banners').update(dados).eq('id', id));
+    } else {
+      const maxOrder = todosBanners.length > 0 ? Math.max(...todosBanners.map(b => b.sort_order)) : 0;
+      dados.sort_order = maxOrder + 1;
+      ({ error } = await db.from('banners').insert(dados));
+    }
+
+    if (error) {
+      mostrarErro('msgErroForm', 'Erro ao guardar: ' + error.message);
+      btn.disabled = false;
+      btn.textContent = '💾 Guardar Banner';
+      return;
+    }
+
+    mostrarSucesso('msgSucessoForm', `✅ Banner ${id ? 'actualizado' : 'criado'} com sucesso!`);
+    btn.disabled = false;
+    btn.textContent = '💾 Guardar Banner';
+
+    await carregarBanners();
+    setTimeout(() => mostrarLista(), 1200);
+  }
+
+  async function removerBanner(id) {
+    if (!confirm('Remover este banner permanentemente?')) return;
+    await db.from('banners').delete().eq('id', id);
+    await carregarBanners();
+  }
+
+  function mostrarVista(id) {
+    document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
+    document.getElementById(id).classList.add('activa');
+    window.scrollTo(0, 0);
+  }
+
+  function mostrarLista() {
+    mostrarVista('vistaLista');
+  }
+
+  function limparForm() {
+    document.getElementById('bannerId').value = '';
+    document.getElementById('bannerTitulo').value = '';
+    document.getElementById('bannerSubtitulo').value = '';
+    document.getElementById('bannerBotaoTexto').value = 'Ver Mais';
+    document.getElementById('bannerLink').value = 'catalogo.html';
+    document.getElementById('bannerAtivo').value = 'true';
+    document.getElementById('imagemPreviewBanner').style.display = 'none';
+    document.getElementById('uploadAreaBanner').style.display = 'block';
+    removerProdutoSlot(1);
+    removerProdutoSlot(2);
+    removerProdutoSlot(3);
+    removerProdutoSlot(4);
+    document.getElementById('buscaProduto1').value = '';
+    document.getElementById('buscaProduto2').value = '';
+    document.getElementById('buscaProduto3').value = '';
+    document.getElementById('buscaProduto4').value = '';
+    const colSel = document.getElementById('bannerColecao');
+    if (colSel) colSel.value = '';
+    imagemFicheiroBanner = null;
+    imagemUrlBannerActual = '';
+    seleccionarCor('rosa');
+    esconderMensagem('msgErroForm');
+    esconderMensagem('msgSucessoForm');
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.ed_fashion.twa",
+    "sha256_cert_fingerprints": ["C4:19:64:7C:89:9B:E0:70:05:AC:93:FB:5F:38:81:00:04:6E:53:84:1F:EE:1F:83:0A:E9:55:E8:5E:22:34:60"]
+  }
+}]

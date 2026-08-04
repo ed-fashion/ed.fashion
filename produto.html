@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+
+  <!-- Open Graph -->
+  <meta property="og:site_name" content="E'D Fashion">
+  <meta property="og:image"     content="https://ed-fashion.github.io/ed.fashion/logo.png">
+  <meta property="og:type"      content="website">
+
+  <title>Produto — E'D Fashion</title>
+  <link rel="stylesheet" href="main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .produto-layout {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--cinza);
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .breadcrumb a { color: var(--cinza); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--rosa); }
+    .breadcrumb span { color: var(--preto); font-weight: 600; }
+
+    .produto-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .produto-imagem-wrap {
+      position: sticky;
+      top: 80px;
+    }
+
+    .produto-imagem-principal {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      border-radius: 16px;
+      background: var(--cinza-claro);
+      display: block;
+    }
+
+    .produto-sem-imagem {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: var(--cinza-claro);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+    }
+
+    .produto-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .produto-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-categoria { background: var(--cinza-claro); color: var(--cinza-escuro); }
+    .badge-promo { background: var(--rosa); color: white; }
+    .badge-encomenda { background: var(--verde); color: white; }
+    .badge-esgotado { background: #888; color: white; }
+
+    .produto-nome {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--preto);
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+
+    .produto-precos {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .produto-preco-actual {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--rosa);
+    }
+
+    .produto-preco-antigo {
+      font-size: 18px;
+      color: var(--cinza);
+      text-decoration: line-through;
+    }
+
+    .produto-desconto {
+      background: var(--rosa);
+      color: white;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .produto-stock {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .stock-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .stock-dot.verde { background: #16A34A; }
+    .stock-dot.amarelo { background: #D97706; }
+    .stock-dot.vermelho { background: #DC2626; }
+
+    .encomenda-info {
+      background: #F0F7E6;
+      border: 1px solid var(--verde);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .encomenda-info h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #16A34A;
+      margin-bottom: 8px;
+    }
+
+    .encomenda-info ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .encomenda-info ul li {
+      font-size: 13px;
+      color: var(--cinza-escuro);
+      padding: 3px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .quantidade-wrap {
+      margin-bottom: 20px;
+    }
+
+    .quantidade-wrap label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .quantidade-controlo {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      width: fit-content;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .qtd-btn {
+      width: 40px;
+      height: 40px;
+      background: var(--cinza-claro);
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      color: var(--preto);
+    }
+
+    .qtd-btn:hover { background: #ddd; }
+
+    .qtd-input {
+      width: 50px;
+      height: 40px;
+      border: none;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 700;
+      outline: none;
+      color: var(--preto);
+    }
+
+    .produto-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .btn-comprar-agora {
+      width: 100%;
+      padding: 14px;
+      background: var(--preto);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-comprar-agora:hover { background: #333; transform: translateY(-1px); }
+
+    .btn-carrinho {
+      width: 100%;
+      padding: 14px;
+      background: var(--rosa);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-carrinho:hover { background: #c4186f; transform: translateY(-1px); }
+    .btn-carrinho:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+    .btn-whatsapp {
+      width: 100%;
+      padding: 14px;
+      background: #25D366;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn-whatsapp:hover { background: #1da851; transform: translateY(-1px); }
+
+    .produto-tabs {
+      display: flex;
+      border-bottom: 2px solid #eee;
+      margin-bottom: 20px;
+      gap: 0;
+    }
+
+    .produto-tab {
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--cinza);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .produto-tab.activa {
+      color: var(--rosa);
+      border-bottom-color: var(--rosa);
+    }
+
+    .produto-tab-conteudo { display: none; }
+    .produto-tab-conteudo.activa { display: block; }
+
+    .produto-descricao {
+      font-size: 14px;
+      color: var(--cinza-escuro);
+      line-height: 1.7;
+    }
+
+    .produto-partilha {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .produto-partilha span {
+      font-size: 13px;
+      color: var(--cinza);
+      font-weight: 600;
+    }
+
+    .partilha-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid #ddd;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .partilha-btn:hover { border-color: var(--rosa); }
+
+    .relacionados {
+      margin-top: 50px;
+      padding-top: 30px;
+      border-top: 2px solid #eee;
+    }
+
+    .relacionados h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--preto);
+      margin-bottom: 20px;
+    }
+
+    .relacionados h2 span { color: var(--rosa); }
+
+    .notif-carrinho {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--preto);
+      color: white;
+      padding: 14px 24px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 999;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+
+    .notif-carrinho.visivel {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* GALERIA */
+    .galeria-principal-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      touch-action: pan-y;
+      user-select: none;
+    }
+
+    .galeria-thumbnails {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .galeria-thumb {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s, opacity 0.2s;
+      opacity: 0.7;
+    }
+
+    .galeria-thumb:hover,
+    .galeria-thumb.activa {
+      border-color: var(--rosa);
+      opacity: 1;
+    }
+
+    .galeria-thumb.oculta {
+      display: none;
+    }
+
+    .galeria-setas {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+      padding: 0 8px;
+      box-sizing: border-box;
+    }
+
+    .galeria-seta {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.85);
+      border: none;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: all;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: background 0.2s;
+      opacity: 0.9;
+    }
+
+    .galeria-seta:hover { background: white; opacity: 1; }
+
+    .galeria-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .galeria-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ddd;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .galeria-dot.activo {
+      background: var(--rosa);
+      transform: scale(1.3);
+    }
+
+    /* VARIANTES */
+    .variantes-wrap {
+      margin-bottom: 20px;
+    }
+
+    .variante-grupo {
+      margin-bottom: 14px;
+    }
+
+    .variante-grupo-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .variante-opcoes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .variante-opcao {
+      padding: 7px 16px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      color: var(--preto);
+      user-select: none;
+    }
+
+    .variante-opcao:hover {
+      border-color: var(--rosa);
+      color: var(--rosa);
+    }
+
+    .variante-opcao.seleccionada {
+      background: var(--rosa);
+      border-color: var(--rosa);
+      color: white;
+    }
+
+    .variante-opcao.sem-stock {
+      opacity: 0.4;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+
+    /* COMENTÁRIOS */
+    .comentarios-secao {
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 2px solid #eee;
+    }
+
+    .comentarios-secao h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--preto);
+      margin-bottom: 6px;
+    }
+
+    .comentarios-secao h2 span { color: var(--rosa); }
+
+    .rating-resumo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .rating-numero {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--preto);
+      line-height: 1;
+    }
+
+    .rating-estrelas {
+      font-size: 22px;
+      letter-spacing: 2px;
+    }
+
+    .rating-total {
+      font-size: 13px;
+      color: var(--cinza);
+    }
+
+    .comentario-item {
+      padding: 16px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .comentario-cabecalho {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .comentario-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--rosa);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .comentario-autor {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--preto);
+    }
+
+    .comentario-data {
+      font-size: 12px;
+      color: var(--cinza);
+      margin-left: auto;
+    }
+
+    .comentario-estrelas { font-size: 14px; }
+
+    .comentario-texto {
+      font-size: 14px;
+      color: var(--cinza-escuro);
+      line-height: 1.6;
+      margin-top: 4px;
+    }
+
+    .form-review {
+      background: var(--cinza-claro);
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+
+    .form-review h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--preto);
+    }
+
+    .estrelas-picker {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .estrela-pick {
+      font-size: 28px;
+      cursor: pointer;
+      transition: transform 0.1s;
+      filter: grayscale(1);
+      opacity: 0.4;
+      line-height: 1;
+    }
+
+    .estrela-pick.activa {
+      filter: none;
+      opacity: 1;
+    }
+
+    .estrela-pick:hover { transform: scale(1.2); }
+
+    .form-review textarea {
+      width: 100%;
+      min-height: 90px;
+      padding: 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      font-size: 14px;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    .form-review textarea:focus { border-color: var(--rosa); }
+
+    .produto-loading {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    @media (max-width: 768px) {
+      .produto-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .produto-imagem-wrap { position: static; }
+      .produto-nome { font-size: 20px; }
+      .produto-preco-actual { font-size: 26px; }
+      .galeria-thumb { width: 58px; height: 58px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div id="conteudoProduto">
+  <div class="produto-loading">
+    <div style="text-align:center; padding:80px 20px; color:var(--cinza);">
+      <div style="font-size:40px; margin-bottom:12px;">⏳</div>
+      <p>A carregar produto...</p>
+    </div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<div class="notif-carrinho" id="notifCarrinho">✅ Produto adicionado ao carrinho!</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="components.js"></script>
+<script>
+
+  let produto = null;
+  let varianteCombos = []; // Combos Cor × Tamanho carregados da DB
+
+  async function iniciar() {
+    carregarNavbar();
+    carregarFooter();
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    if (!id) {
+      window.location.href = 'catalogo.html';
+      return;
+    }
+
+    await carregarProduto(id);
+  }
+
+  async function carregarProduto(id) {
+    // Carregar produto e combos em paralelo
+    const [{ data, error }, { data: combos }] = await Promise.all([
+      db.from('products').select(`
+        *,
+        categories(id, name, slug),
+        product_stock(quantity, low_stock_threshold),
+        product_media(id, url, is_primary, sort_order, color_tag),
+        product_variants(id, tipo, valor, stock, preco_adicional, sort_order)
+      `).eq('id', id).eq('status', 'active').single(),
+      db.from('product_variant_combos').select('*').eq('product_id', id)
+    ]);
+
+    if (error || !data) {
+      document.getElementById('conteudoProduto').innerHTML = `
+        <div style="text-align:center; padding:80px 20px;">
+          <div style="font-size:60px; margin-bottom:16px;">😕</div>
+          <h2 style="font-size:22px; margin-bottom:8px;">Produto não encontrado</h2>
+          <p style="color:var(--cinza); margin-bottom:24px;">Este produto pode ter sido removido ou não existe.</p>
+          <a href="catalogo.html" class="btn btn-rosa">Ver Catálogo</a>
+        </div>`;
+      return;
+    }
+
+    produto = data;
+    varianteCombos = combos || [];
+    document.title = `${produto.name} — E'D Fashion`;
+
+    // Incrementar visualizações (fire-and-forget, nunca bloqueia o render)
+    (async () => { try { await db.rpc('incrementar_view', { produto_id: id }); } catch (_) {} })();
+
+    renderProduto();
+    carregarRelacionados();
+  }
+
+  // Variantes seleccionadas globalmente
+  let variantesSelecionadas = {};
+
+  function renderProduto() {
+    const temPromo = produto.sale_price && produto.sale_price < produto.price;
+    const precoFinal = temPromo ? produto.sale_price : produto.price;
+    const desconto = temPromo ? Math.round((1 - produto.sale_price / produto.price) * 100) : 0;
+    const stock = produto.product_stock?.quantity ?? 0;
+    const esgotado = produto.availability_type === 'stock' && stock === 0;
+    const stockBaixo = produto.availability_type === 'stock' && stock > 0 && stock <= 5;
+    const eEncomenda = produto.availability_type === 'pre_order';
+
+    // Galeria de imagens — guardar no estado global para swipe e filtro de cor
+    const media = (produto.product_media || []).sort((a, b) => a.sort_order - b.sort_order);
+    const imagemPrincipal = media.find(m => m.is_primary)?.url || media[0]?.url || produto.image_url;
+    const todasImagens = media.length > 0
+      ? media.map(m => m.url)
+      : (produto.image_url ? [produto.image_url] : []);
+
+    // Variantes agrupadas por tipo
+    const variantes = produto.product_variants || [];
+    const gruposVariantes = variantes.reduce((acc, v) => {
+      if (!acc[v.tipo]) acc[v.tipo] = [];
+      acc[v.tipo].push(v);
+      return acc;
+    }, {});
+    variantesSelecionadas = {};
+
+    const whatsappMsg = encodeURIComponent(
+      `Olá E'D Fashion! 👋\n\nTenho interesse no seguinte produto:\n\n` +
+      `*${produto.name}*\n` +
+      `Preço: ${formatMZN(precoFinal)}\n` +
+      (eEncomenda ? `Tipo: Por Encomenda\n` : '') +
+      `\nPoderia dar mais informações?`
+    );
+
+    document.getElementById('conteudoProduto').innerHTML = `
+      <div class="produto-layout">
+
+        <div class="breadcrumb">
+          <a href="index.html">Início</a> ›
+          <a href="catalogo.html">Catálogo</a> ›
+          ${produto.categories ? `<a href="catalogo.html?cat=${produto.categories.slug}">${produto.categories.name}</a> ›` : ''}
+          <span>${produto.name.substring(0, 40)}${produto.name.length > 40 ? '...' : ''}</span>
+        </div>
+
+        <div class="produto-grid">
+
+          <!-- COLUNA ESQUERDA: Imagens -->
+          <div class="produto-imagem-wrap">
+            <div class="galeria-principal-wrap" id="galeriaPrincipalWrap">
+              ${imagemPrincipal
+                ? `<img src="${imagemPrincipal}" alt="${produto.name}"
+                     id="imagemPrincipal"
+                     class="produto-imagem-principal"
+                     onerror="this.style.display='none'; document.getElementById('semImagem').style.display='flex'">`
+                : ''}
+              <div id="semImagem" class="produto-sem-imagem" ${imagemPrincipal ? 'style="display:none"' : ''}>
+                👗
+              </div>
+              ${todasImagens.length > 1
+                ? `<div class="galeria-setas">
+                    <button class="galeria-seta" onclick="navegarGaleria(-1)" title="Anterior">‹</button>
+                    <button class="galeria-seta" onclick="navegarGaleria(1)" title="Próxima">›</button>
+                  </div>`
+                : ''}
+            </div>
+            ${todasImagens.length > 1
+              ? `<div class="galeria-dots" id="galeriaDots">
+                  ${todasImagens.map((_, i) =>
+                    `<div class="galeria-dot ${i === 0 ? 'activo' : ''}" onclick="irParaImagem(${i})"></div>`
+                  ).join('')}
+                </div>
+                <div class="galeria-thumbnails" id="galeriaThumbs">
+                  ${media.map((m, i) =>
+                    `<img src="${m.url}" alt="Imagem ${i+1}"
+                       class="galeria-thumb ${i === 0 ? 'activa' : ''}"
+                       data-idx="${i}"
+                       data-color="${m.color_tag || ''}"
+                       onclick="irParaImagem(${i})"
+                       onerror="this.style.display='none'">`
+                  ).join('')}
+                </div>`
+              : ''}
+          </div>
+
+          <!-- COLUNA DIREITA: Info -->
+          <div class="produto-info">
+
+            <div class="produto-badges">
+              ${produto.categories ? `<span class="produto-badge badge-categoria">${produto.categories.name}</span>` : ''}
+              ${temPromo ? `<span class="produto-badge badge-promo">-${desconto}% Promoção</span>` : ''}
+              ${eEncomenda ? `<span class="produto-badge badge-encomenda">📦 Por Encomenda</span>` : ''}
+              ${esgotado ? `<span class="produto-badge badge-esgotado">Esgotado</span>` : ''}
+            </div>
+
+            <h1 class="produto-nome">${produto.name}</h1>
+
+            <div class="produto-precos">
+              <span class="produto-preco-actual">${formatMZN(precoFinal)}</span>
+              ${temPromo ? `<span class="produto-preco-antigo">${formatMZN(produto.price)}</span>` : ''}
+              ${temPromo ? `<span class="produto-desconto">-${desconto}%</span>` : ''}
+            </div>
+
+            ${eEncomenda
+              ? `<div class="encomenda-info">
+                  <h4>📦 Produto por Encomenda</h4>
+                  <ul>
+                    ${produto.estimated_delivery_days
+                      ? `<li>⏱️ Prazo estimado: <strong>${produto.estimated_delivery_days} dias</strong> após submissão da encomenda</li>`
+                      : ''}
+                    ${produto.deposit_percentage ? `<li>💰 Adiantamento: <strong>${produto.deposit_percentage}% do valor total</strong> (${formatMZN(precoFinal * produto.deposit_percentage / 100)})</li>` : ''}
+                    <li>✅ Acompanhamento de todo o processo</li>
+                    <li>🔒 Compra segura e garantida</li>
+                  </ul>
+                </div>`
+              : `<div class="produto-stock">
+                  <div class="stock-dot ${esgotado ? 'vermelho' : stockBaixo ? 'amarelo' : 'verde'}"></div>
+                  <span>
+                    ${esgotado
+                      ? 'Produto esgotado'
+                      : stockBaixo
+                        ? `Últimas ${stock} unidades`
+                        : `Em stock (${stock} disponíveis)`}
+                  </span>
+                </div>`}
+
+            ${produto.short_description
+              ? `<p style="font-size:14px; color:var(--cinza-escuro); line-height:1.6; margin-bottom:20px;">
+                  ${produto.short_description}
+                </p>`
+              : ''}
+
+            ${Object.keys(gruposVariantes).length > 0
+              ? `<div class="variantes-wrap" id="variantesWrap">
+                  ${Object.entries(gruposVariantes).map(([tipo, opcoes]) => `
+                    <div class="variante-grupo">
+                      <span class="variante-grupo-label">${tipo}</span>
+                      <div class="variante-opcoes">
+                        ${opcoes.sort((a,b) => a.sort_order - b.sort_order).map(op => {
+                          // Só bloqueia por stock se o produto for de stock físico
+                          const semStock = !eEncomenda && op.stock !== null && op.stock !== undefined && op.stock === 0;
+                          return `<button
+                            class="variante-opcao${semStock ? ' sem-stock' : ''}"
+                            data-tipo="${tipo}"
+                            data-valor="${op.valor}"
+                            data-preco="${op.preco_adicional || 0}"
+                            ${semStock ? 'disabled title="Sem stock"' : `onclick="selecionarVariante('${tipo}', '${op.valor}', ${op.preco_adicional || 0}, this)"`}>
+                            ${op.valor}
+                          </button>`;
+                        }).join('')}
+                      </div>
+                    </div>`
+                  ).join('')}
+                </div>`
+              : ''}
+
+            ${!esgotado ? `
+            <div class="quantidade-wrap">
+              <label>Quantidade</label>
+              <div class="quantidade-controlo">
+                <button class="qtd-btn" onclick="alterarQtd(-1)">−</button>
+                <input type="number" class="qtd-input" id="quantidade" value="1" min="1"
+                  max="${eEncomenda ? 99 : stock}" readonly>
+                <button class="qtd-btn" onclick="alterarQtd(1)">+</button>
+              </div>
+            </div>` : ''}
+
+            <div class="msg-sucesso" id="msgSucesso"></div>
+            <div class="msg-erro" id="msgErro"></div>
+
+            <div class="produto-btns">
+              ${!esgotado
+                ? `<button class="btn-comprar-agora" onclick="comprarAgora()" id="btnComprarAgora"
+                    ${Object.keys(gruposVariantes).length > 0 ? 'disabled' : ''}>
+                    ⚡ Comprar Agora
+                  </button>
+                  <button class="btn-carrinho" onclick="adicionarCarrinho()" id="btnCarrinho"
+                    ${Object.keys(gruposVariantes).length > 0 ? 'disabled' : ''}>
+                    🛒 Adicionar ao Carrinho
+                  </button>`
+                : `<button class="btn-carrinho" disabled>😔 Produto Esgotado</button>`}
+
+              <a href="https://wa.me/258866464666?text=${whatsappMsg}"
+                 target="_blank" class="btn-whatsapp">
+                💬 Comprar via WhatsApp
+              </a>
+            </div>
+
+            <div class="produto-partilha">
+              <span>Partilhar:</span>
+              <a href="https://wa.me/?text=${encodeURIComponent(window.location.href)}"
+                 target="_blank" class="partilha-btn" title="WhatsApp">💬</a>
+              <button class="partilha-btn" onclick="copiarLink()" title="Copiar link">🔗</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TABS: Descrição / Especificações / Avaliações -->
+        <div>
+          <div class="produto-tabs">
+            <div class="produto-tab activa" onclick="mudarTab('descricao', this)">Descrição</div>
+            ${produto.specifications && Object.keys(produto.specifications).length > 0
+              ? `<div class="produto-tab" onclick="mudarTab('especificacoes', this)">Especificações</div>`
+              : ''}
+            <div class="produto-tab" onclick="mudarTab('avaliacoes', this)">
+              Avaliações <span id="contadorReviews" style="font-size:11px; background:#eee; padding:2px 6px; border-radius:10px; margin-left:4px;">0</span>
+            </div>
+          </div>
+
+          <div class="produto-tab-conteudo activa" id="tab-descricao">
+            <div class="produto-descricao">
+              ${produto.full_description
+                ? produto.full_description.replace(/\n/g, '<br>')
+                : produto.short_description || 'Sem descrição disponível.'}
+            </div>
+          </div>
+
+          ${produto.specifications && Object.keys(produto.specifications).length > 0
+            ? `<div class="produto-tab-conteudo" id="tab-especificacoes">
+                <div class="produto-descricao">
+                  ${Object.entries(produto.specifications).map(([k, v]) =>
+                    `<div style="display:flex; gap:16px; padding:10px 0; border-bottom:1px solid #eee;">
+                      <span style="font-weight:600; min-width:140px;">${k}</span>
+                      <span>${v}</span>
+                    </div>`
+                  ).join('')}
+                </div>
+              </div>`
+            : ''}
+
+          <div class="produto-tab-conteudo" id="tab-avaliacoes">
+            <div id="reviewsConteudo">
+              <div style="text-align:center; padding:30px; color:var(--cinza);">⏳ A carregar avaliações...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="relacionados" id="relacionados"></div>
+
+      </div>`;
+
+    // Carregar reviews após render
+    carregarReviews();
+
+    // Inicializar galeria com swipe
+    iniciarGaleria();
+  }
+
+  // ============================
+  // GALERIA — SWIPE + NAVEGAÇÃO + FILTRO COR
+  // ============================
+
+  let galeriaIndiceActual = 0;
+  let galeriaImagens = []; // Array de { url, colorTag }
+  let galeriaFiltro = null; // null = todas, 'Roxo' = só roxo
+
+  function iniciarGaleria() {
+    const media = (produto.product_media || []).sort((a, b) => a.sort_order - b.sort_order);
+
+    if (media.length > 0) {
+      galeriaImagens = media.map(m => ({ url: m.url, colorTag: m.color_tag || null }));
+    } else if (produto.image_url) {
+      galeriaImagens = [{ url: produto.image_url, colorTag: null }];
+    } else {
+      galeriaImagens = [];
+    }
+
+    galeriaIndiceActual = 0;
+    galeriaFiltro = null;
+    configurarSwipe();
+  }
+
+  function obterImagensFiltradas() {
+    if (!galeriaFiltro) return galeriaImagens;
+    const filtradas = galeriaImagens.filter(m => !m.colorTag || m.colorTag.toLowerCase() === galeriaFiltro.toLowerCase());
+    return filtradas.length > 0 ? filtradas : galeriaImagens; // fallback: todas
+  }
+
+  function irParaImagem(idxFiltrado) {
+    const imgs = obterImagensFiltradas();
+    if (idxFiltrado < 0 || idxFiltrado >= imgs.length) return;
+    galeriaIndiceActual = idxFiltrado;
+    atualizarImagemPrincipal(imgs[idxFiltrado].url);
+    atualizarThumbsEDots(idxFiltrado);
+  }
+
+  function navegarGaleria(delta) {
+    const imgs = obterImagensFiltradas();
+    if (imgs.length <= 1) return;
+    galeriaIndiceActual = (galeriaIndiceActual + delta + imgs.length) % imgs.length;
+    atualizarImagemPrincipal(imgs[galeriaIndiceActual].url);
+    atualizarThumbsEDots(galeriaIndiceActual);
+  }
+
+  function atualizarImagemPrincipal(url) {
+    const principal = document.getElementById('imagemPrincipal');
+    if (principal) {
+      principal.src = url;
+      principal.style.display = 'block';
+      const semImg = document.getElementById('semImagem');
+      if (semImg) semImg.style.display = 'none';
+    }
+  }
+
+  function atualizarThumbsEDots(idxFiltrado) {
+    const imgs = obterImagensFiltradas();
+
+    // Actualizar thumbnails: mostrar apenas as filtradas, marcar activa
+    const thumbs = document.querySelectorAll('.galeria-thumb');
+    let thumbFiltradoIdx = 0;
+    thumbs.forEach(t => {
+      const colorTag = t.dataset.color || '';
+      const visivel = !galeriaFiltro || !colorTag || colorTag.toLowerCase() === galeriaFiltro.toLowerCase();
+      t.classList.toggle('oculta', !visivel);
+      if (visivel) {
+        t.classList.toggle('activa', thumbFiltradoIdx === idxFiltrado);
+        thumbFiltradoIdx++;
+      } else {
+        t.classList.remove('activa');
+      }
+    });
+
+    // Actualizar dots
+    const dots = document.querySelectorAll('.galeria-dot');
+    dots.forEach((d, i) => d.classList.toggle('activo', i === idxFiltrado));
+
+    // Reconstruir dots se o filtro mudou (quantidade diferente)
+    const dotsWrap = document.getElementById('galeriaDots');
+    if (dotsWrap) {
+      dotsWrap.innerHTML = imgs.map((_, i) =>
+        `<div class="galeria-dot ${i === idxFiltrado ? 'activo' : ''}" onclick="irParaImagem(${i})"></div>`
+      ).join('');
+    }
+  }
+
+  function filtrarGaleriaPorCor(cor) {
+    // cor = null para mostrar tudo, ou string como 'Roxo'
+    galeriaFiltro = cor;
+    galeriaIndiceActual = 0;
+    const imgs = obterImagensFiltradas();
+    if (imgs.length > 0) {
+      atualizarImagemPrincipal(imgs[0].url);
+    }
+    atualizarThumbsEDots(0);
+  }
+
+  function configurarSwipe() {
+    const wrap = document.getElementById('galeriaPrincipalWrap');
+    if (!wrap) return;
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let arrastando = false;
+
+    wrap.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      arrastando = false;
+    }, { passive: true });
+
+    wrap.addEventListener('touchmove', e => {
+      const dx = e.touches[0].clientX - touchStartX;
+      const dy = e.touches[0].clientY - touchStartY;
+      // Só captura swipe horizontal (evitar conflito com scroll vertical)
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+        arrastando = true;
+      }
+    }, { passive: true });
+
+    wrap.addEventListener('touchend', e => {
+      if (!arrastando) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 40) {
+        navegarGaleria(dx < 0 ? 1 : -1);
+      }
+    }, { passive: true });
+  }
+
+  // Mantida por compatibilidade com código legado
+  function mudarImagem(url, el) {
+    const idx = galeriaImagens.findIndex(m => m.url === url);
+    if (idx >= 0) irParaImagem(idx);
+  }
+
+  // Normaliza o preco_adicional da DB para MT real.
+  // Valores < 500 foram guardados como USD bruto (antes da feature de conversão).
+  // Converte: USD × taxa + valorAdicional.
+  // Valores >= 500 já estão em MT correcto.
+  function normalizarPrecoVariante(precoAdicional) {
+    if (!precoAdicional || precoAdicional === 0) return 0;
+    const taxa = 71; // taxa de referência; valores < 500 são claramente USD
+    if (precoAdicional < 500) {
+      // É um valor USD bruto — converter para MT com valor adicional
+      const adicional = 200; // valor adicional padrão
+      return parseFloat(((precoAdicional * taxa) + adicional).toFixed(2));
+    }
+    return precoAdicional; // já está em MT
+  }
+
+  function selecionarVariante(tipo, valor, precoAdicional, el) {
+    // Desselecionar outros do mesmo grupo
+    document.querySelectorAll(`.variante-opcao[data-tipo="${tipo}"]`).forEach(b => b.classList.remove('seleccionada'));
+    el.classList.add('seleccionada');
+
+    // Normalizar o preco_adicional para MT real
+    const precoMT = normalizarPrecoVariante(precoAdicional);
+    variantesSelecionadas[tipo] = { valor, precoAdicional: precoMT };
+
+    // Recalcular o preço com combos
+    const precoTotal = calcularPrecoComVariantes();
+    const elPreco = document.querySelector('.produto-preco-actual');
+    if (elPreco) elPreco.textContent = formatMZN(precoTotal);
+
+    // Filtrar galeria por cor se esta variante for do tipo "Cor"
+    const tipoNorm = tipo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const eCor = tipoNorm === 'cor' || tipoNorm === 'color' || tipoNorm === 'colour' || tipoNorm === 'cores';
+    if (eCor) {
+      filtrarGaleriaPorCor(valor);
+    }
+
+    // Desbloquear botões quando todos os grupos tiverem seleção
+    const todosGrupos = [...document.querySelectorAll('.variante-grupo')]
+      .map(g => g.querySelector('.variante-grupo-label')?.textContent?.trim())
+      .filter(Boolean);
+    const todosSeleccionados = todosGrupos.every(t => variantesSelecionadas[t]);
+
+    const btnComprar = document.getElementById('btnComprarAgora');
+    const btnCarrinho = document.getElementById('btnCarrinho');
+    if (btnComprar) btnComprar.disabled = !todosSeleccionados;
+    if (btnCarrinho) btnCarrinho.disabled = !todosSeleccionados;
+  }
+
+  // Calcula o preço considerando combos Cor × Tamanho
+  function calcularPrecoComVariantes() {
+    const precoBase = produto.sale_price && produto.sale_price < produto.price
+      ? produto.sale_price
+      : produto.price;
+
+    // Obter cor e tamanho seleccionados (normaliza o nome do tipo)
+    const corSel = Object.entries(variantesSelecionadas).find(([t]) => {
+      const n = t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return n === 'cor' || n === 'cores' || n === 'color';
+    })?.[1]?.valor;
+
+    const tamSel = Object.entries(variantesSelecionadas).find(([t]) => {
+      const n = t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return n === 'tamanho' || n === 'tamanhos' || n === 'size';
+    })?.[1]?.valor;
+
+    // 1. Se há combo específico Cor+Tamanho com preço → usa esse
+    if (corSel && tamSel && varianteCombos.length > 0) {
+      const combo = varianteCombos.find(c =>
+        c.cor.toLowerCase() === corSel.toLowerCase() &&
+        c.tamanho.toLowerCase() === tamSel.toLowerCase() &&
+        c.preco > 0
+      );
+      if (combo) return combo.preco;
+    }
+
+    // 2. Se há preço próprio na variante de cor ou tamanho → usa o maior
+    const precosPropriosSeleccionados = Object.values(variantesSelecionadas)
+      .filter(v => v.precoAdicional > 0)
+      .map(v => v.precoAdicional);
+
+    if (precosPropriosSeleccionados.length > 0) {
+      return Math.max(...precosPropriosSeleccionados);
+    }
+
+    // 3. Fallback: preço base do produto
+    return precoBase;
+  }
+
+  function alterarQtd(delta) {
+    const input = document.getElementById('quantidade');
+    if (!input) return;
+    const max = parseInt(input.max) || 99;
+    const novoVal = Math.max(1, Math.min(max, parseInt(input.value) + delta));
+    input.value = novoVal;
+  }
+
+  // COMPRAR AGORA — vai directo ao checkout
+  function comprarAgora() {
+    const quantidade = parseInt(document.getElementById('quantidade')?.value || 1);
+    const preco = calcularPrecoComVariantes();
+
+    const itemCompra = [{
+      id: produto.id,
+      nome: produto.name,
+      preco,
+      imagem: produto.image_url || '',
+      quantidade,
+      tipo: produto.availability_type,
+      variantes: { ...variantesSelecionadas }
+    }];
+
+    localStorage.setItem('ed_compra_directa', JSON.stringify(itemCompra));
+    window.location.href = 'checkout.html?directa=true';
+  }
+
+  function adicionarCarrinho() {
+    const quantidade = parseInt(document.getElementById('quantidade')?.value || 1);
+    const preco = calcularPrecoComVariantes();
+    const carrinho = JSON.parse(localStorage.getItem('ed_carrinho') || '[]');
+
+    const chaveVariantes = JSON.stringify(variantesSelecionadas);
+    const idx = carrinho.findIndex(i => i.id === produto.id && JSON.stringify(i.variantes || {}) === chaveVariantes);
+
+    if (idx >= 0) {
+      carrinho[idx].quantidade += quantidade;
+    } else {
+      carrinho.push({
+        id: produto.id,
+        nome: produto.name,
+        preco,
+        imagem: produto.image_url || '',
+        quantidade,
+        tipo: produto.availability_type,
+        variantes: { ...variantesSelecionadas }
+      });
+    }
+
+    localStorage.setItem('ed_carrinho', JSON.stringify(carrinho));
+    atualizarContadorCarrinho();
+    mostrarNotifCarrinho();
+  }
+
+  function mostrarNotifCarrinho() {
+    const notif = document.getElementById('notifCarrinho');
+    notif.classList.add('visivel');
+    setTimeout(() => notif.classList.remove('visivel'), 3000);
+  }
+
+  function mudarTab(id, el) {
+    document.querySelectorAll('.produto-tab').forEach(t => t.classList.remove('activa'));
+    document.querySelectorAll('.produto-tab-conteudo').forEach(t => t.classList.remove('activa'));
+    el.classList.add('activa');
+    document.getElementById('tab-' + id)?.classList.add('activa');
+  }
+
+  function copiarLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      mostrarSucesso('msgSucesso', '🔗 Link copiado!');
+      setTimeout(() => esconderMensagem('msgSucesso'), 2000);
+    });
+  }
+
+  async function carregarRelacionados() {
+    if (!produto.categories?.id) return;
+
+    const { data } = await db
+      .from('products')
+      .select('id, name, price, sale_price, image_url')
+      .eq('status', 'active')
+      .eq('category_id', produto.categories.id)
+      .neq('id', produto.id)
+      .limit(4);
+
+    if (!data || data.length === 0) return;
+
+    document.getElementById('relacionados').innerHTML = `
+      <h2>Também podes <span>gostar</span></h2>
+      <div class="produtos-grid">
+        ${data.map(p => {
+          const temPromo = p.sale_price && p.sale_price < p.price;
+          const precoFinal = temPromo ? p.sale_price : p.price;
+          return `
+            <div class="produto-card" onclick="window.location.href='produto.html?id=${p.id}'">
+              ${temPromo ? `<div class="produto-card-badge">Promoção</div>` : ''}
+              <img src="${p.image_url || 'assets/sem-imagem.png'}" alt="${p.name}" loading="lazy"
+                   onerror="this.src='assets/sem-imagem.png'">
+              <div class="produto-card-info">
+                <div class="produto-card-nome">${p.name}</div>
+                <div>
+                  ${temPromo ? `<span class="produto-card-preco-antigo">${formatMZN(p.price)}</span>` : ''}
+                  <span class="produto-card-preco">${formatMZN(precoFinal)}</span>
+                </div>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>`;
+  }
+
+  // ============================
+  // REVIEWS / AVALIAÇÕES
+  // ============================
+
+  let ratingEscolhido = 0;
+
+  async function carregarReviews() {
+    const { data: reviews, error } = await db
+      .from('product_reviews')
+      .select('id, rating, comment, created_at, profiles(full_name)')
+      .eq('product_id', produto.id)
+      .eq('is_approved', true)
+      .order('created_at', { ascending: false });
+
+    const container = document.getElementById('reviewsConteudo');
+    if (!container) return;
+
+    if (error) {
+      // Se a tabela ainda não existir, mostra o formulário na mesma
+      const container = document.getElementById('reviewsConteudo');
+      if (!container) return;
+      const sessaoActiva = await verificarSessao();
+      container.innerHTML = `
+        <p style="color:var(--cinza); font-size:14px; margin-bottom:16px;">Ainda sem avaliações. Sê o primeiro!</p>
+        <div class="form-review">
+          <h3>✍️ Deixar uma Avaliação</h3>
+          ${sessaoActiva
+            ? `<div class="estrelas-picker" id="estrelasPicker">
+                 ${[1,2,3,4,5].map(n =>
+                   `<span class="estrela-pick" data-n="${n}" onclick="escolherEstrela(${n})">⭐</span>`
+                 ).join('')}
+               </div>
+               <p id="labelRating" style="font-size:12px; color:var(--cinza); margin-bottom:10px;">Selecciona uma classificação</p>
+               <textarea id="comentarioTexto" placeholder="Partilha a tua experiência com este produto (opcional)..."></textarea>
+               <div class="msg-erro" id="msgErroReview" style="margin-top:8px;"></div>
+               <div class="msg-sucesso" id="msgSucessoReview" style="margin-top:8px;"></div>
+               <button class="btn-carrinho" style="margin-top:12px; width:auto; padding:12px 28px;"
+                 onclick="submeterReview()">Publicar Avaliação</button>`
+            : `<p style="font-size:14px; color:var(--cinza);">
+                 <a href="login.html" style="color:var(--rosa); font-weight:700;">Inicia sessão</a> para deixar uma avaliação.
+               </p>`}
+        </div>`;
+      return;
+    }
+
+    const lista = reviews || [];
+    const contador = document.getElementById('contadorReviews');
+    if (contador) contador.textContent = lista.length;
+
+    const mediaRating = lista.length > 0
+      ? (lista.reduce((s, r) => s + r.rating, 0) / lista.length).toFixed(1)
+      : 0;
+
+    const estrelas = (n) => '⭐'.repeat(Math.round(n)) + '☆'.repeat(5 - Math.round(n));
+
+    const sessaoActiva = await verificarSessao();
+
+    container.innerHTML = `
+      ${lista.length > 0 ? `
+        <div class="rating-resumo">
+          <div class="rating-numero">${mediaRating}</div>
+          <div>
+            <div class="rating-estrelas">${estrelas(mediaRating)}</div>
+            <div class="rating-total">${lista.length} avaliação${lista.length !== 1 ? 'ões' : ''}</div>
+          </div>
+        </div>` : ''}
+
+      ${lista.length === 0
+        ? `<p style="color:var(--cinza); font-size:14px; margin-bottom:20px;">Ainda sem avaliações. Sê o primeiro!</p>`
+        : lista.map(r => {
+            const nome = r.profiles?.full_name || 'Cliente';
+            const inicial = nome.charAt(0).toUpperCase();
+            const data = new Date(r.created_at).toLocaleDateString('pt-PT', { day:'2-digit', month:'short', year:'numeric' });
+            return `
+              <div class="comentario-item">
+                <div class="comentario-cabecalho">
+                  <div class="comentario-avatar">${inicial}</div>
+                  <div>
+                    <div class="comentario-autor">${nome}</div>
+                    <div class="comentario-estrelas">${'⭐'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+                  </div>
+                  <div class="comentario-data">${data}</div>
+                </div>
+                ${r.comment ? `<div class="comentario-texto">${r.comment}</div>` : ''}
+              </div>`;
+          }).join('')}
+
+      <div class="form-review">
+        <h3>✍️ Deixar uma Avaliação</h3>
+        ${sessaoActiva
+          ? `<div class="estrelas-picker" id="estrelasPicker">
+               ${[1,2,3,4,5].map(n =>
+                 `<span class="estrela-pick" data-n="${n}" onclick="escolherEstrela(${n})">⭐</span>`
+               ).join('')}
+             </div>
+             <p id="labelRating" style="font-size:12px; color:var(--cinza); margin-bottom:10px;">Selecciona uma classificação</p>
+             <textarea id="comentarioTexto" placeholder="Partilha a tua experiência com este produto (opcional)..."></textarea>
+             <div class="msg-erro" id="msgErroReview" style="margin-top:8px;"></div>
+             <div class="msg-sucesso" id="msgSucessoReview" style="margin-top:8px;"></div>
+             <button class="btn-carrinho" style="margin-top:12px; width:auto; padding:12px 28px;"
+               onclick="submeterReview()">Publicar Avaliação</button>`
+          : `<p style="font-size:14px; color:var(--cinza);">
+               <a href="login.html" style="color:var(--rosa); font-weight:700;">Inicia sessão</a> para deixar uma avaliação.
+             </p>`}
+      </div>`;
+
+    // Re-init estrelas picker
+    ratingEscolhido = 0;
+  }
+
+  async function verificarSessao() {
+    try {
+      const { data: { user } } = await db.auth.getUser();
+      return !!user;
+    } catch { return false; }
+  }
+
+  function escolherEstrela(n) {
+    ratingEscolhido = n;
+    const labels = ['Muito mau', 'Mau', 'Razoável', 'Bom', 'Excelente'];
+    const label = document.getElementById('labelRating');
+    if (label) label.textContent = labels[n - 1];
+    document.querySelectorAll('.estrela-pick').forEach(el => {
+      el.classList.toggle('activa', parseInt(el.dataset.n) <= n);
+    });
+  }
+
+  async function submeterReview() {
+    if (ratingEscolhido === 0) {
+      mostrarErro('msgErroReview', 'Selecciona uma classificação de 1 a 5 estrelas.');
+      return;
+    }
+
+    const { data: { user } } = await db.auth.getUser();
+    if (!user) {
+      mostrarErro('msgErroReview', 'Precisas de iniciar sessão.');
+      return;
+    }
+
+    const comentario = document.getElementById('comentarioTexto')?.value.trim() || null;
+
+    // Verificar se já avaliou
+    const { data: jaExiste } = await db
+      .from('product_reviews')
+      .select('id')
+      .eq('product_id', produto.id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (jaExiste) {
+      mostrarErro('msgErroReview', 'Já avaliaste este produto.');
+      return;
+    }
+
+    const { error } = await db.from('product_reviews').insert({
+      product_id: produto.id,
+      user_id: user.id,
+      rating: ratingEscolhido,
+      comment: comentario,
+      is_approved: true
+    });
+
+    if (error) {
+      mostrarErro('msgErroReview', 'Erro ao publicar: ' + error.message);
+      return;
+    }
+
+    mostrarSucesso('msgSucessoReview', '✅ Avaliação publicada com sucesso!');
+    setTimeout(() => carregarReviews(), 1500);
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>

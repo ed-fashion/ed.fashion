@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#e91e63">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E'D Fashion — Moda para Todos</title>
+  <meta name="description" content="E'D Fashion — Loja de moda online em Moçambique. Roupa, calçado, acessórios, cabelos e electrónica. Entrega em todo Moçambique.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+
+  <!-- Open Graph (WhatsApp, Facebook, etc.) -->
+  <meta property="og:type"        content="website">
+  <meta property="og:site_name"   content="E'D Fashion">
+  <meta property="og:title"       content="E'D Fashion — Moda para Todos">
+  <meta property="og:description" content="Loja de moda online em Moçambique. Roupa, calçado, acessórios, cabelos e electrónica. Entrega em todo Moçambique.">
+  <meta property="og:image"       content="https://ed-fashion.github.io/ed.fashion/logo.png">
+  <meta property="og:url"         content="https://ed-fashion.github.io/ed.fashion/">
+  <meta property="og:locale"      content="pt_MZ">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="E'D Fashion — Moda para Todos">
+  <meta name="twitter:description" content="Loja de moda online em Moçambique.">
+  <meta name="twitter:image"       content="https://ed-fashion.github.io/ed.fashion/logo.png">
+
+  <link rel="stylesheet" href="main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    .banner {
+      color: white;
+      padding: 70px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      min-height: 340px;
+      display: flex;
+      align-items: center;
+    }
+
+    .banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .banner-conteudo { position: relative; z-index: 2; }
+
+    .banner h1 {
+      font-size: 38px;
+      font-weight: 800;
+      margin-bottom: 14px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .banner p {
+      font-size: 16px;
+      opacity: 0.92;
+      margin-bottom: 30px;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    .banner-btns {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-banner-principal {
+      background: white;
+      color: var(--rosa);
+      padding: 13px 30px;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+
+    .btn-banner-principal:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .btn-banner-secundario {
+      background: transparent;
+      color: white;
+      border: 2px solid rgba(255,255,255,0.8);
+      padding: 13px 30px;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-banner-secundario:hover {
+      background: white;
+      color: var(--rosa);
+    }
+
+    /* PRODUTOS DENTRO DO BANNER */
+.banner-produtos-wrap {
+  display: flex;
+  gap: 12px;
+  z-index: 3;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 48px;
+  max-width: 55%;
+}
+
+.banner-produto-card {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  width: 140px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+  cursor: pointer;
+  transition: transform 0.2s;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+    .banner-produto-card:hover { transform: translateY(-3px); }
+
+    .banner-produto-card img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+  .banner-produto-card .nome {
+  font-size: 12px;
+  color: var(--preto);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.banner-produto-card .preco {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--rosa);
+}
+
+    /* SLIDER */
+    .banner-slider { position: relative; }
+
+    .slider-dots {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 5;
+    }
+
+    .slider-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+
+    .slider-dot.activo { background: white; width: 24px; border-radius: 5px; }
+
+    /* CATEGORIAS */
+    .seccao {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .seccao-titulo {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .seccao-titulo h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--preto);
+    }
+
+    .seccao-titulo h2 span { color: var(--rosa); }
+
+    .ver-todos {
+      font-size: 13px;
+      color: var(--rosa);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .ver-todos:hover { text-decoration: underline; }
+
+    .categorias-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px;
+    }
+
+    .categoria-card {
+      background: white;
+      border-radius: 14px;
+      padding: 18px 10px;
+      text-align: center;
+      box-shadow: var(--sombra);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: block;
+      border: 2px solid transparent;
+    }
+
+    .categoria-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--rosa);
+      box-shadow: 0 8px 24px rgba(233,30,140,0.15);
+    }
+
+    .categoria-icone {
+      font-size: 30px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .categoria-nome {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--preto);
+    }
+
+    /* BANNER ENCOMENDA */
+    .banner-encomenda-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+    }
+
+    .banner-encomenda {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 16px;
+      padding: 32px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .banner-encomenda-texto { flex: 1; min-width: 200px; }
+
+    .banner-encomenda-texto h3 {
+      color: white;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .banner-encomenda-texto p {
+      color: #aaa;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .btn-encomenda {
+      background: var(--rosa);
+      color: white;
+      padding: 13px 26px;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .btn-encomenda:hover { background: #c4186f; }
+
+    /* PRODUTOS */
+    .produtos-vazio {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--cinza);
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--sombra);
+    }
+
+    .produtos-vazio .icone-vazio {
+      font-size: 56px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .produtos-vazio h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--cinza-escuro);
+      margin-bottom: 8px;
+    }
+
+    .produtos-vazio p {
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    /* WHATSAPP FIXO */
+    .btn-whatsapp-fixo {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #25D366;
+      color: white;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.5);
+      text-decoration: none;
+      z-index: 999;
+      transition: transform 0.2s;
+    }
+
+    .btn-whatsapp-fixo:hover { transform: scale(1.12); }
+
+    @media (max-width: 768px) {
+      .banner h1 { font-size: 26px; }
+      .banner p { font-size: 14px; }
+      .banner-encomenda { flex-direction: column; text-align: center; }
+      .banner { flex-direction: column; padding: 40px 16px; }
+      .banner-produtos-wrap {
+        max-width: 100%;
+        padding-right: 0;
+        justify-content: center;
+        margin-top: 20px;
+      }
+      .banner-produto-card { width: 120px; }
+    }
+
+    /* =====================
+       POPUP BOAS-VINDAS
+    ===================== */
+    .bv-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      z-index: 10000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      animation: bv-fade-in 0.4s ease;
+    }
+
+    @keyframes bv-fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .bv-card {
+      background: white;
+      border-radius: 28px;
+      max-width: 420px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.35);
+      animation: bv-slide-up 0.5s cubic-bezier(0.34,1.56,0.64,1);
+      position: relative;
+    }
+
+    @keyframes bv-slide-up {
+      from { opacity: 0; transform: translateY(60px) scale(0.92); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .bv-topo {
+      background: linear-gradient(135deg, #E91E8C 0%, #c4186f 60%, #8DC63F 100%);
+      padding: 36px 28px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bv-topo::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.15) 0%, transparent 60%);
+    }
+
+    .bv-logo-wrap {
+      width: 72px; height: 72px;
+      background: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      animation: bv-pulse 2s ease-in-out infinite;
+      position: relative; z-index: 1;
+    }
+
+    @keyframes bv-pulse {
+      0%, 100% { box-shadow: 0 8px 24px rgba(0,0,0,0.2), 0 0 0 0 rgba(233,30,140,0.3); }
+      50%       { box-shadow: 0 8px 24px rgba(0,0,0,0.2), 0 0 0 10px rgba(233,30,140,0); }
+    }
+
+    .bv-logo-wrap img { width: 48px; height: 48px; object-fit: contain; }
+
+    .bv-topo h2 {
+      color: white; font-size: 22px; font-weight: 800;
+      margin-bottom: 6px; position: relative; z-index: 1;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .bv-topo p {
+      color: rgba(255,255,255,0.88); font-size: 13px; line-height: 1.5;
+      position: relative; z-index: 1;
+    }
+
+    .bv-particulas {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    }
+
+    .bv-particula {
+      position: absolute;
+      border-radius: 50%;
+      animation: bv-float linear infinite;
+      opacity: 0.35;
+    }
+
+    @keyframes bv-float {
+      0%   { transform: translateY(100%) rotate(0deg); opacity: 0; }
+      10%  { opacity: 0.35; }
+      90%  { opacity: 0.35; }
+      100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+    }
+
+    .bv-corpo {
+      padding: 24px 28px 28px;
+    }
+
+    .bv-pills {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center; margin-bottom: 20px;
+    }
+
+    .bv-pill {
+      background: #FFF0F7; color: var(--rosa);
+      border-radius: 20px; padding: 6px 14px;
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; gap: 5px;
+      animation: bv-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    .bv-pill:nth-child(1) { animation-delay: 0.2s; }
+    .bv-pill:nth-child(2) { animation-delay: 0.3s; }
+    .bv-pill:nth-child(3) { animation-delay: 0.4s; }
+    .bv-pill:nth-child(4) { animation-delay: 0.5s; }
+
+    @keyframes bv-pop {
+      from { opacity: 0; transform: scale(0.6); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .bv-btn-principal {
+      display: block; width: 100%;
+      padding: 15px; border-radius: 25px;
+      background: linear-gradient(135deg, #E91E8C, #c4186f);
+      color: white; font-size: 15px; font-weight: 800;
+      text-align: center; text-decoration: none;
+      border: none; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(233,30,140,0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-bottom: 10px;
+    }
+
+    .bv-btn-principal:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(233,30,140,0.45);
+    }
+
+    .bv-btn-fechar {
+      display: block; width: 100%; padding: 11px;
+      background: transparent; border: 1.5px solid #eee;
+      border-radius: 25px; font-size: 13px; color: var(--cinza);
+      font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+
+    .bv-btn-fechar:hover { border-color: var(--rosa); color: var(--rosa); }
+
+    .bv-nao-mostrar {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; margin-top: 12px; font-size: 12px; color: var(--cinza);
+      cursor: pointer; user-select: none;
+    }
+
+    .bv-nao-mostrar input { accent-color: var(--rosa); cursor: pointer; }
+
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div id="navbar"></div>
+
+<!-- SLIDER DE BANNERS -->
+<div class="banner-slider" id="bannerSlider">
+  <div class="banner" id="bannerConteudo">
+    <div class="banner-conteudo">
+      <h1>A carregar...</h1>
+    </div>
+  </div>
+  <div class="slider-dots" id="sliderDots"></div>
+</div>
+
+<!-- CATEGORIAS -->
+<div class="seccao">
+  <div class="seccao-titulo">
+    <h2>Comprar por <span>Categoria</span></h2>
+  </div>
+  <div class="categorias-grid">
+    <a href="catalogo.html?cat=feminino" class="categoria-card">
+      <span class="categoria-icone">👗</span>
+      <span class="categoria-nome">Feminino</span>
+    </a>
+    <a href="catalogo.html?cat=masculino" class="categoria-card">
+      <span class="categoria-icone">👔</span>
+      <span class="categoria-nome">Masculino</span>
+    </a>
+    <a href="catalogo.html?cat=crianca" class="categoria-card">
+      <span class="categoria-icone">🧒</span>
+      <span class="categoria-nome">Criança</span>
+    </a>
+    <a href="catalogo.html?cat=calcado" class="categoria-card">
+      <span class="categoria-icone">👠</span>
+      <span class="categoria-nome">Calçado</span>
+    </a>
+    <a href="catalogo.html?cat=acessorios" class="categoria-card">
+      <span class="categoria-icone">👜</span>
+      <span class="categoria-nome">Acessórios</span>
+    </a>
+    <a href="catalogo.html?cat=cabelos" class="categoria-card">
+      <span class="categoria-icone">💇</span>
+      <span class="categoria-nome">Cabelos</span>
+    </a>
+    <a href="catalogo.html?cat=electronica" class="categoria-card">
+      <span class="categoria-icone">📱</span>
+      <span class="categoria-nome">Electrónica</span>
+    </a>
+    <a href="catalogo.html?cat=desporto" class="categoria-card">
+      <span class="categoria-icone">🏃</span>
+      <span class="categoria-nome">Desporto</span>
+    </a>
+    <a href="catalogo.html?cat=casa" class="categoria-card">
+      <span class="categoria-icone">🏠</span>
+      <span class="categoria-nome">Casa</span>
+    </a>
+    <a href="catalogo.html?cat=intima" class="categoria-card">
+      <span class="categoria-icone">👙</span>
+      <span class="categoria-nome">Praia & Íntima</span>
+    </a>
+    <a href="catalogo.html?cat=perfumes" class="categoria-card">
+      <span class="categoria-icone">💄</span>
+      <span class="categoria-nome">Perfumes</span>
+    </a>
+    <a href="catalogo.html?cat=bijuteria" class="categoria-card">
+      <span class="categoria-icone">💍</span>
+      <span class="categoria-nome">Bijuteria</span>
+    </a>
+    <a href="catalogo.html?cat=promocoes" class="categoria-card">
+      <span class="categoria-icone">🏷️</span>
+      <span class="categoria-nome">Promoções</span>
+    </a>
+    <a href="catalogo.html?tipo=stock" class="categoria-card">
+      <span class="categoria-icone">✅</span>
+      <span class="categoria-nome">Disponível Agora</span>
+    </a>
+  </div>
+</div>
+
+<!-- BANNER ENCOMENDA -->
+<div class="banner-encomenda-wrap">
+  <div class="banner-encomenda">
+    <div class="banner-encomenda-texto">
+      <h3>📦 Produtos por Encomenda</h3>
+      <p>Encontra qualquer produto da Shein e nós importamos para ti. Rápido, seguro e com acompanhamento do processo.</p>
+    </div>
+    <a href="encomenda.html" class="btn-encomenda">Saber Mais →</a>
+  </div>
+</div>
+
+<!-- PRODUTOS MAIS ACESSADOS -->
+<div class="seccao" id="produtos">
+  <div class="seccao-titulo">
+    <h2>🔥 Mais <span>Acessados</span></h2>
+    <a href="catalogo.html" class="ver-todos">Ver todos →</a>
+  </div>
+  <div id="produtosDestaque"></div>
+</div>
+
+<!-- DISPONÍVEL AGORA (Em Stock) -->
+<div class="seccao" style="padding-top:0">
+  <div class="seccao-titulo">
+    <h2>✅ Disponível <span>Agora</span></h2>
+    <a href="catalogo.html?tipo=stock" class="ver-todos">Ver todos →</a>
+  </div>
+  <div id="produtosStock"></div>
+</div>
+
+<!-- FOOTER -->
+<div id="footer"></div>
+
+<!-- WHATSAPP FIXO COM MENSAGEM -->
+<a href="https://wa.me/258866464666?text=Olá%20E'D%20Fashion!%20Gostaria%20de%20saber%20mais%20sobre%20os%20vossos%20produtos%20😊"
+   target="_blank"
+   class="btn-whatsapp-fixo"
+   title="Falar connosco no WhatsApp">💬</a>
+
+<!-- POPUP BOAS-VINDAS -->
+<div class="bv-overlay" id="bvOverlay" style="display:none;">
+  <div class="bv-card">
+
+    <div class="bv-topo">
+      <!-- Partículas decorativas -->
+      <div class="bv-particulas" id="bvParticulas"></div>
+
+      <div class="bv-logo-wrap">
+        <img src="logo.png" alt="E'D Fashion">
+      </div>
+      <h2>Bem-vindo à E'D Fashion! ✨</h2>
+      <p>A tua loja de moda online em Moçambique.<br>Estilo, qualidade e entrega em todo o país.</p>
+    </div>
+
+    <div class="bv-corpo">
+      <div class="bv-pills">
+        <div class="bv-pill">👗 Roupa & Moda</div>
+        <div class="bv-pill">👠 Calçado</div>
+        <div class="bv-pill">📦 Por Encomenda</div>
+        <div class="bv-pill">🚚 Entrega Nacional</div>
+      </div>
+
+      <a href="catalogo.html" class="bv-btn-principal">
+        🛍️ Explorar Produtos
+      </a>
+      <button class="bv-btn-fechar" onclick="fecharBV()">
+        Continuar a navegar
+      </button>
+
+      <label class="bv-nao-mostrar">
+        <input type="checkbox" id="bvNaoMostrar"> Não mostrar novamente
+      </label>
+    </div>
+  </div>
+</div>
+
+<script src="supabase.js"></script>
+<script src="utils.js"></script>
+<script src="components.js"></script>
+<script>
+
+  carregarNavbar();
+  carregarFooter();
+
+  // ============================
+  // POPUP BOAS-VINDAS
+  // ============================
+  function iniciarPopupBV() {
+    if (localStorage.getItem('ed_bv_skip') === '1') return;
+
+    // Gerar partículas animadas
+    const wrap = document.getElementById('bvParticulas');
+    if (wrap) {
+      const cores = ['#E91E8C','#fff','#8DC63F','#ffb3d9','#c8f5a0'];
+      for (let i = 0; i < 18; i++) {
+        const el = document.createElement('div');
+        el.className = 'bv-particula';
+        const size = Math.random() * 10 + 4;
+        el.style.cssText = `
+          width:${size}px; height:${size}px;
+          left:${Math.random()*100}%;
+          bottom:-10px;
+          background:${cores[Math.floor(Math.random()*cores.length)]};
+          animation-duration:${Math.random()*4+3}s;
+          animation-delay:${Math.random()*3}s;
+        `;
+        wrap.appendChild(el);
+      }
+    }
+
+    setTimeout(() => {
+      const overlay = document.getElementById('bvOverlay');
+      if (overlay) overlay.style.display = 'flex';
+    }, 800);
+  }
+
+  function fecharBV() {
+    const overlay = document.getElementById('bvOverlay');
+    if (overlay) {
+      overlay.style.animation = 'bv-fade-in 0.3s ease reverse forwards';
+      setTimeout(() => overlay.style.display = 'none', 280);
+    }
+    if (document.getElementById('bvNaoMostrar')?.checked) {
+      localStorage.setItem('ed_bv_skip', '1');
+    }
+  }
+
+  // Fechar ao clicar no overlay
+  document.getElementById('bvOverlay').addEventListener('click', function(e) {
+    if (e.target === this) fecharBV();
+  });
+
+  iniciarPopupBV();
+
+  // ============================
+  // SLIDER DE BANNERS
+  // ============================
+  let bannersData = [];
+  let bannerActualIdx = 0;
+  let bannerInterval = null;
+
+  async function carregarBanners() {
+    const { data } = await db
+      .from('banners')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order');
+
+    bannersData = data || [];
+
+    if (bannersData.length === 0) {
+      bannersData = [{
+        titulo: "Moda para Todos ✨",
+        subtitulo: "Descobre as últimas tendências em roupa, calçado, acessórios, cabelos e muito mais.",
+        link_url: "catalogo.html",
+        texto_botao: "Ver Produtos",
+        cor_overlay: "rosa",
+        produto_id_1: null,
+        produto_id_2: null
+      }];
+    }
+
+    await renderBanner(0);
+    renderDots();
+
+    if (bannersData.length > 1) {
+      bannerInterval = setInterval(() => {
+        bannerActualIdx = (bannerActualIdx + 1) % bannersData.length;
+        renderBanner(bannerActualIdx);
+      }, 5000);
+    }
+  }
+
+  async function renderBanner(idx) {
+    const b = bannersData[idx];
+    const cores = {
+      rosa: 'linear-gradient(135deg, #E91E8C 0%, #c4186f 50%, #8DC63F 100%)',
+      verde: 'linear-gradient(135deg, #8DC63F 0%, #6ba02a 100%)',
+      escuro: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+      azul: 'linear-gradient(135deg, #2563EB 0%, #1e3a8a 100%)'
+    };
+
+    const banner = document.getElementById('bannerConteudo');
+    banner.style.background = b.imagem_url
+      ? `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('${b.imagem_url}') center/cover`
+      : (cores[b.cor_overlay] || cores.rosa);
+    banner.style.position = 'relative';
+
+    let produtosHtml = '';
+    const idsProdutos = [b.produto_id_1, b.produto_id_2, b.produto_id_3, b.produto_id_4].filter(Boolean);
+
+    if (idsProdutos.length > 0) {
+      const { data: produtos } = await db
+        .from('products')
+        .select('id, name, price, sale_price, image_url')
+        .in('id', idsProdutos);
+
+      if (produtos && produtos.length > 0) {
+        // Ordenar pela ordem dos IDs definida no banner
+        const produtosOrdenados = idsProdutos
+          .map(id => produtos.find(p => p.id === id))
+          .filter(Boolean);
+
+        produtosHtml = `
+          <div class="banner-produtos-wrap">
+            ${produtosOrdenados.map(p => {
+              const preco = (p.sale_price && p.sale_price < p.price) ? p.sale_price : p.price;
+              return `
+                <a href="produto.html?id=${p.id}" class="banner-produto-card">
+                  <img src="${p.image_url || 'assets/sem-imagem.png'}" onerror="this.src='assets/sem-imagem.png'">
+                  <div class="nome">${p.name}</div>
+                  <div class="preco">${formatMZN(preco)}</div>
+                </a>`;
+            }).join('')}
+          </div>`;
+      }
+    }
+
+    banner.innerHTML = `
+      <div class="banner-conteudo">
+        <h1>${b.titulo}</h1>
+        ${b.subtitulo ? `<p>${b.subtitulo}</p>` : ''}
+        <div class="banner-btns">
+          <a href="${b.link_url}" class="btn-banner-principal">${b.texto_botao}</a>
+        </div>
+      </div>
+      ${produtosHtml}`;
+
+    bannerActualIdx = idx;
+    renderDots();
+  }
+
+  function renderDots() {
+    if (bannersData.length <= 1) {
+      document.getElementById('sliderDots').innerHTML = '';
+      return;
+    }
+    document.getElementById('sliderDots').innerHTML = bannersData.map((_, i) => `
+      <button class="slider-dot ${i === bannerActualIdx ? 'activo' : ''}" onclick="irParaBanner(${i})"></button>
+    `).join('');
+  }
+
+  function irParaBanner(idx) {
+    clearInterval(bannerInterval);
+    renderBanner(idx);
+    bannerInterval = setInterval(() => {
+      bannerActualIdx = (bannerActualIdx + 1) % bannersData.length;
+      renderBanner(bannerActualIdx);
+    }, 5000);
+  }
+
+  // ============================
+  // PRODUTOS
+  // ============================
+  function renderProdutoCard(p) {
+    const temPromocao = p.sale_price && p.sale_price < p.price;
+    const precoFinal = temPromocao ? p.sale_price : p.price;
+    const desconto = temPromocao ? Math.round((1 - p.sale_price / p.price) * 100) : 0;
+
+    return `
+      <div class="produto-card" onclick="window.location.href='produto.html?id=${p.id}'">
+        ${temPromocao ? `<div class="produto-card-badge">-${desconto}%</div>` : ''}
+        <img src="${p.image_url || 'assets/sem-imagem.png'}" alt="${p.name}" loading="lazy"
+             onerror="this.src='assets/sem-imagem.png'">
+        <div class="produto-card-info">
+          <div class="produto-card-nome">${p.name}</div>
+          <div>
+            ${temPromocao ? `<span class="produto-card-preco-antigo">${formatMZN(p.price)}</span>` : ''}
+            <span class="produto-card-preco">${formatMZN(precoFinal)}</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function mostrarVazio(containerId, icone, titulo, texto) {
+    document.getElementById(containerId).innerHTML = `
+      <div class="produtos-vazio">
+        <span class="icone-vazio">${icone}</span>
+        <h3>${titulo}</h3>
+        <p>${texto}</p>
+      </div>`;
+  }
+
+  async function carregarProdutosDestaque() {
+    // Produtos mais acessados — ordenados por view_count descendente
+    // Se a coluna não existir ou todos tiverem 0, cai no fallback por created_at
+    const { data: produtos } = await db
+      .from('products')
+      .select('*')
+      .eq('status', 'active')
+      .order('view_count', { ascending: false, nullsFirst: false })
+      .limit(8);
+
+    if (!produtos || produtos.length === 0) {
+      mostrarVazio('produtosDestaque', '🛍️', 'Em breve novos produtos!', 'Estamos a preparar o catálogo. Volta em breve.');
+      return;
+    }
+    document.getElementById('produtosDestaque').innerHTML =
+      `<div class="produtos-grid">${produtos.map(renderProdutoCard).join('')}</div>`;
+  }
+
+  async function carregarProdutosStock() {
+    const { data: produtos } = await db
+      .from('products')
+      .select('*')
+      .eq('status', 'active')
+      .eq('availability_type', 'stock')
+      .order('created_at', { ascending: false })
+      .limit(8);
+
+    if (!produtos || produtos.length === 0) {
+      mostrarVazio('produtosStock', '✅', 'Em breve!', 'Produtos disponíveis para entrega imediata aparecerão aqui.');
+      return;
+    }
+    document.getElementById('produtosStock').innerHTML =
+      `<div class="produtos-grid">${produtos.map(renderProdutoCard).join('')}</div>`;
+  }
+
+  // ============================
+  // INICIAR
+  // ============================
+  carregarBanners();
+  carregarProdutosDestaque();
+  carregarProdutosStock();
+
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/ed.fashion/service-worker.js');
+  }
+</script>
+</body>
+</html>
