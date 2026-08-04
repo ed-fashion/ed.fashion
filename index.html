@@ -453,16 +453,7 @@
   </div>
 </div>
 
-<!-- BANNER ENCOMENDA -->
-<div class="banner-encomenda-wrap">
-  <div class="banner-encomenda">
-    <div class="banner-encomenda-texto">
-      <h3>📦 Produtos por Encomenda</h3>
-      <p>Encontra qualquer produto da Shein e nós importamos para ti. Rápido, seguro e com acompanhamento do processo.</p>
-    </div>
-    <a href="encomenda.html" class="btn-encomenda">Saber Mais →</a>
-  </div>
-</div>
+<!-- BANNER ENCOMENDA REMOVIDO -->
 
 <!-- PRODUTOS MAIS ACESSADOS -->
 <div class="seccao" id="produtos">
@@ -538,7 +529,54 @@
 
   // ============================
   // POPUP BOAS-VINDAS
-  // =====================  // SLIDER DE BANNERS
+  // ============================
+  function iniciarPopupBV() {
+    if (localStorage.getItem('ed_bv_skip') === '1') return;
+
+    const wrap = document.getElementById('bvParticulas');
+    if (wrap) {
+      const cores = ['#E91E8C','#fff','#8DC63F','#ffb3d9','#c8f5a0'];
+      for (let i = 0; i < 18; i++) {
+        const el = document.createElement('div');
+        el.className = 'bv-particula';
+        const size = Math.random() * 10 + 4;
+        el.style.cssText = `
+          width:${size}px; height:${size}px;
+          left:${Math.random()*100}%;
+          bottom:-10px;
+          background:${cores[Math.floor(Math.random()*cores.length)]};
+          animation-duration:${Math.random()*4+3}s;
+          animation-delay:${Math.random()*3}s;
+        `;
+        wrap.appendChild(el);
+      }
+    }
+
+    setTimeout(() => {
+      const overlay = document.getElementById('bvOverlay');
+      if (overlay) overlay.style.display = 'flex';
+    }, 800);
+  }
+
+  function fecharBV() {
+    const overlay = document.getElementById('bvOverlay');
+    if (overlay) {
+      overlay.style.animation = 'bv-fade-in 0.3s ease reverse forwards';
+      setTimeout(() => overlay.style.display = 'none', 280);
+    }
+    if (document.getElementById('bvNaoMostrar')?.checked) {
+      localStorage.setItem('ed_bv_skip', '1');
+    }
+  }
+
+  document.getElementById('bvOverlay').addEventListener('click', function(e) {
+    if (e.target === this) fecharBV();
+  });
+
+  iniciarPopupBV();
+
+  // ============================
+  // SLIDER DE BANNERS
   // ============================
   let bannersData = [];
   let bannerActualIdx = 0;
