@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
@@ -108,7 +108,6 @@
       display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-bottom: 14px;
     }
     .imagem-slot {
-<<<<<<< HEAD
       position: relative; border-radius: 10px;
       border: 2px solid #ddd; background: var(--cinza-claro);
     }
@@ -120,16 +119,6 @@
     .imagem-slot-badge {
       position: absolute; top: 4px; left: 4px; background: var(--rosa); color: white;
       font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; z-index: 1;
-=======
-      position: relative; aspect-ratio: 3/4; border-radius: 10px; overflow: hidden;
-      border: 2px solid #ddd; background: var(--cinza-claro);
-    }
-    .imagem-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .imagem-slot.principal { border-color: var(--rosa); }
-    .imagem-slot-badge {
-      position: absolute; top: 4px; left: 4px; background: var(--rosa); color: white;
-      font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     }
     .imagem-slot-acoes {
       position: absolute; bottom: 0; left: 0; right: 0; display: flex; gap: 2px;
@@ -140,7 +129,6 @@
       font-size: 11px; padding: 4px 2px; cursor: pointer; border-radius: 4px;
     }
     .imagem-slot-acoes button:hover { background: rgba(255,255,255,0.35); }
-<<<<<<< HEAD
     .imagem-slot-cor {
       padding: 5px 6px;
     }
@@ -150,8 +138,6 @@
       background: white;
     }
     .imagem-slot-cor input:focus { border-color: var(--rosa); }
-=======
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     .add-imagem-slot {
       aspect-ratio: 3/4; border-radius: 10px; border: 2px dashed #ddd; background: var(--cinza-claro);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -161,7 +147,6 @@
     .add-imagem-slot span { font-size: 24px; }
     .add-imagem-slot small { font-size: 10px; color: var(--cinza); }
 
-<<<<<<< HEAD
     /* COMBINAÇÕES COR × TAMANHO */
     .combos-wrap { margin-top: 4px; }
     .combos-header-row {
@@ -193,8 +178,6 @@
       border: 1.5px dashed #eee; border-radius: 8px;
     }
 
-=======
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     /* VARIANTES */
     .variante-grupo {
       border: 1.5px solid #eee; border-radius: 10px; padding: 14px; margin-bottom: 12px;
@@ -474,7 +457,6 @@
         </div>
       </div>
 
-<<<<<<< HEAD
       <!-- SECÇÃO 6B: Combinações Cor × Tamanho -->
       <div class="secao-form" id="secaoCombos" style="display:none;">
         <div class="secao-form-titulo">
@@ -491,8 +473,6 @@
         </div>
       </div>
 
-=======
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
       <!-- SECÇÃO 7: Imagens -->
       <div class="secao-form">
         <div class="secao-form-titulo">🖼️ Imagens do Produto</div>
@@ -765,15 +745,12 @@
     // Carregar variantes
     await carregarVariantesExistentes(p.id);
 
-<<<<<<< HEAD
     // Carregar combinações cor × tamanho
     await carregarCombosExistentes(p.id);
 
     // Agora que tudo está carregado, montar a tabela de combos
     atualizarSecaoCombos();
 
-=======
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     mostrarVista('vistaForm');
   }
 
@@ -791,7 +768,6 @@
 
     if (media && media.length > 0) {
       imagensProduto = media.map(m => ({
-<<<<<<< HEAD
         id: m.id, url: m.url, isPrimary: m.is_primary, colorTag: m.color_tag || '', isNova: false
       }));
       if (!imagensProduto.some(i => i.isPrimary) && imagemPrincipalUrl) {
@@ -799,15 +775,6 @@
       }
     } else if (imagemPrincipalUrl) {
       imagensProduto = [{ id: null, url: imagemPrincipalUrl, isPrimary: true, colorTag: '', isNova: false }];
-=======
-        id: m.id, url: m.url, isPrimary: m.is_primary, isNova: false
-      }));
-      if (!imagensProduto.some(i => i.isPrimary) && imagemPrincipalUrl) {
-        imagensProduto.unshift({ id: null, url: imagemPrincipalUrl, isPrimary: true, isNova: false });
-      }
-    } else if (imagemPrincipalUrl) {
-      imagensProduto = [{ id: null, url: imagemPrincipalUrl, isPrimary: true, isNova: false }];
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     }
 
     renderImagens();
@@ -817,7 +784,6 @@
     const grid = document.getElementById('imagensGrid');
     let html = imagensProduto.map((img, idx) => `
       <div class="imagem-slot ${img.isPrimary ? 'principal' : ''}">
-<<<<<<< HEAD
         <div class="imagem-slot-img-wrap">
           ${img.isPrimary ? '<span class="imagem-slot-badge">Principal</span>' : ''}
           <img src="${img.url}" onerror="this.style.opacity='0.3'">
@@ -832,13 +798,6 @@
             value="${img.colorTag || ''}"
             title="Escreve a cor desta imagem igual ao nome da variante"
             oninput="imagensProduto[${idx}].colorTag = this.value.trim()">
-=======
-        ${img.isPrimary ? '<span class="imagem-slot-badge">Principal</span>' : ''}
-        <img src="${img.url}" onerror="this.style.opacity='0.3'">
-        <div class="imagem-slot-acoes">
-          ${!img.isPrimary ? `<button onclick="definirPrincipal(${idx})">⭐</button>` : ''}
-          <button onclick="removerImagem(${idx})">🗑️</button>
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
         </div>
       </div>`).join('');
 
@@ -870,11 +829,7 @@
   function adicionarImagemUrl() {
     const url = document.getElementById('novoImagemUrl').value.trim();
     if (!url) return;
-<<<<<<< HEAD
     imagensProduto.push({ id: null, url, isPrimary: imagensProduto.length === 0, colorTag: '', isNova: true });
-=======
-    imagensProduto.push({ id: null, url, isPrimary: imagensProduto.length === 0, isNova: true });
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     document.getElementById('novoImagemUrl').value = '';
     renderImagens();
   }
@@ -892,11 +847,7 @@
       reader.onload = e => {
         imagensProduto.push({
           id: null, url: e.target.result, isPrimary: imagensProduto.length === 0,
-<<<<<<< HEAD
           colorTag: '', isNova: true, file
-=======
-          isNova: true, file
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
         });
         renderImagens();
       };
@@ -1040,7 +991,6 @@
           ➕ Adicionar opção de ${grupo.tipo}
         </button>
       </div>`).join('');
-<<<<<<< HEAD
 
     // Atualizar secção de combinações sempre que as variantes mudam
     // (só chama se não estiver em modo carregamento inicial — nesse caso é chamado manualmente)
@@ -1053,13 +1003,6 @@
     gruposVariantesData = [];
     variantesParaApagar = [];
     _carregandoVariantes = true;
-=======
-  }
-
-  async function carregarVariantesExistentes(productId) {
-    gruposVariantesData = [];
-    variantesParaApagar = [];
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
 
     const { data: variantes } = await db
       .from('product_variants')
@@ -1069,10 +1012,7 @@
 
     if (!variantes || variantes.length === 0) {
       renderGruposVariantes();
-<<<<<<< HEAD
       _carregandoVariantes = false;
-=======
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
       return;
     }
 
@@ -1096,10 +1036,7 @@
     });
 
     renderGruposVariantes();
-<<<<<<< HEAD
     _carregandoVariantes = false;
-=======
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
   }
 
   async function guardarVariantes(productId) {
@@ -1128,217 +1065,12 @@
         }
       }
     }
-<<<<<<< HEAD
 
     // Guardar combinações cor × tamanho
     await guardarCombos(productId);
   }
 
-  // ============================
-  // COMBINAÇÕES COR × TAMANHO
-  // ============================
-
-  let combosData = []; // [{cor, tamanho, preco, preco_usd, stock, id}]
-  let combosParaApagar = [];
-
-  function atualizarSecaoCombos() {
-    const secao = document.getElementById('secaoCombos');
-    const wrap = document.getElementById('combosWrap');
-    if (!secao || !wrap) return;
-
-    // Ler directamente do array de dados (não do DOM)
-    const grupoCores = gruposVariantesData.find(g =>
-      g.tipo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'') === 'cor'
-    );
-    const grupoTamanhos = gruposVariantesData.find(g => {
-      const n = g.tipo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-      return n === 'tamanho' || n === 'tamanhos';
-    });
-
-    if (!grupoCores || !grupoTamanhos) {
-      secao.style.display = 'none';
-      return;
-    }
-
-    const cores = grupoCores.linhas.map(l => l.valor.trim()).filter(Boolean);
-    const tamanhos = grupoTamanhos.linhas.map(l => l.valor.trim()).filter(Boolean);
-
-    if (cores.length === 0 || tamanhos.length === 0) {
-      secao.style.display = 'none';
-      return;
-    }
-
-    secao.style.display = 'block';
-
-    // Garantir que combosData tem entradas para TODAS as combinações actuais
-    cores.forEach(cor => {
-      tamanhos.forEach(tam => {
-        const existe = combosData.find(c => c.cor === cor && c.tamanho === tam);
-        if (!existe) {
-          combosData.push({ cor, tamanho: tam, preco: 0, preco_usd: 0, stock: 0, id: null });
-        }
-      });
-    });
-
-    // Remover combos que já não fazem parte das variantes actuais
-    combosData = combosData.filter(c =>
-      cores.includes(c.cor) && tamanhos.includes(c.tamanho)
-    );
-
-    renderCombos(cores, tamanhos);
-  }
-
-  function renderCombos(cores, tamanhos) {
-    const wrap = document.getElementById('combosWrap');
-    const eEncomenda = document.getElementById('prodTipo')?.value === 'pre_order';
-    const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
-    const adicional = parseFloat(document.getElementById('valorAdicional')?.value) || 0;
-
-    let html = `<div style="overflow-x:auto;">
-      <table style="width:100%; border-collapse:collapse; font-size:13px;">
-        <thead>
-          <tr>
-            <th style="text-align:left; padding:8px 10px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; min-width:130px;">Cor</th>
-            ${tamanhos.map(t => `<th style="text-align:center; padding:8px 6px; font-size:11px; font-weight:700; color:var(--cinza); text-transform:uppercase; min-width:110px;">${t}</th>`).join('')}
-          </tr>
-        </thead>
-        <tbody>
-          ${cores.map(cor => `
-            <tr style="border-top:1px solid #f0f0f0;">
-              <td style="padding:8px 10px; font-weight:700; color:var(--preto); white-space:nowrap;">${cor}</td>
-              ${tamanhos.map(tam => {
-                const combo = combosData.find(c => c.cor === cor && c.tamanho === tam) || { preco: 0, preco_usd: 0, stock: 0 };
-                const usdVal = combo.preco_usd > 0 ? combo.preco_usd : '';
-                const mtVal = combo.preco > 0 ? formatMZN(combo.preco) : '';
-                const temPreco = combo.preco > 0;
-                return `
-                  <td style="padding:4px 6px;">
-                    <div style="display:flex; flex-direction:column; gap:3px;">
-                      <input type="number" class="combo-input"
-                        placeholder="USD"
-                        value="${usdVal}"
-                        min="0" step="0.01"
-                        title="${cor} + ${tam} — Valor em USD"
-                        oninput="atualizarComboUsd('${cor}', '${tam}', this.value)">
-                      <input type="text" class="combo-input${temPreco ? ' tem-preco' : ''}"
-                        readonly
-                        id="combo_mt_${cor.replace(/\s/g,'_')}_${tam}"
-                        placeholder="= MT"
-                        value="${mtVal}"
-                        title="${cor} + ${tam} — Preço calculado em MT">
-                      ${eEncomenda ? '' : `
-                      <input type="number" class="combo-stock-input"
-                        placeholder="Stock"
-                        value="${combo.stock > 0 ? combo.stock : ''}"
-                        min="0"
-                        title="${cor} + ${tam} — Stock"
-                        oninput="atualizarCombo('${cor}', '${tam}', 'stock', this.value)">`}
-                    </div>
-                  </td>`;
-              }).join('')}
-            </tr>`).join('')}
-        </tbody>
-      </table>
-      <div style="font-size:11px; color:var(--cinza); margin-top:10px; padding:0 2px;">
-        Linha 1 = USD → Linha 2 = MT calculado (só leitura)${eEncomenda ? '' : ' · Linha 3 = stock desta combinação'}
-      </div>
-    </div>`;
-
-    wrap.innerHTML = html;
-  }
-
-  function atualizarComboUsd(cor, tamanho, usdValor) {
-    const combo = combosData.find(c => c.cor === cor && c.tamanho === tamanho);
-    if (!combo) return;
-
-    const usd = parseFloat(usdValor) || 0;
-    const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
-    const adicional = parseFloat(document.getElementById('valorAdicional')?.value) || 0;
-
-    combo.preco_usd = usd;
-    combo.preco = usd > 0 ? parseFloat(((usd * taxa) + adicional).toFixed(2)) : 0;
-
-    // Atualizar campo MT readonly
-    const corKey = cor.replace(/\s/g, '_');
-    const mtEl = document.getElementById(`combo_mt_${corKey}_${tamanho}`);
-    if (mtEl) {
-      mtEl.value = combo.preco > 0 ? formatMZN(combo.preco) : '';
-      mtEl.classList.toggle('tem-preco', combo.preco > 0);
-    }
-  }
-
-  function atualizarCombo(cor, tamanho, campo, valor) {
-    const combo = combosData.find(c => c.cor === cor && c.tamanho === tamanho);
-    if (!combo) return;
-    combo[campo] = campo === 'preco' ? (parseFloat(valor) || 0) : (parseInt(valor) || 0);
-  }
-
-  async function carregarCombosExistentes(productId) {
-    combosData = [];
-    combosParaApagar = [];
-
-    const { data } = await db
-      .from('product_variant_combos')
-      .select('*')
-      .eq('product_id', productId)
-      .order('sort_order');
-
-    if (data && data.length > 0) {
-      const taxa = parseFloat(localStorage.getItem('ed_taxa_usd_mzn') || '64.00');
-      const adicional = parseFloat(document.getElementById('valorAdicional')?.value) || 0;
-      combosData = data.map(c => {
-        // Recalcular USD a partir do preço MT guardado
-        const preco = c.preco || 0;
-        const usd = preco > 0 && taxa > 0
-          ? parseFloat(((preco - adicional) / taxa).toFixed(2))
-          : 0;
-        return {
-          id: c.id, cor: c.cor, tamanho: c.tamanho,
-          preco, preco_usd: usd > 0 ? usd : 0, stock: c.stock || 0
-        };
-      });
-    }
-  }
-
-  async function guardarCombos(productId) {
-    // Apagar os que foram removidos
-    if (combosParaApagar.length > 0) {
-      await db.from('product_variant_combos').delete().in('id', combosParaApagar);
-    }
-
-    // Só guarda combos com preço > 0 ou stock > 0
-    const combosValidos = combosData.filter(c => c.preco > 0 || c.stock > 0);
-
-    for (let i = 0; i < combosValidos.length; i++) {
-      const c = combosValidos[i];
-      const dados = {
-        product_id: productId,
-        cor: c.cor,
-        tamanho: c.tamanho,
-        preco: c.preco || 0,
-        stock: c.stock || 0,
-        sort_order: i
-      };
-      if (c.id) {
-        await db.from('product_variant_combos').update(dados).eq('id', c.id);
-      } else {
-        // Upsert por unicidade (cor+tamanho+product_id)
-        await db.from('product_variant_combos').upsert(dados, {
-          onConflict: 'product_id,cor,tamanho'
-        });
-      }
-    }
-
-    // Apagar combos com preço 0 e stock 0 que possam ter ficado na DB
-    const combosSemValor = combosData.filter(c => c.id && c.preco === 0 && c.stock === 0);
-    if (combosSemValor.length > 0) {
-      await db.from('product_variant_combos')
-        .delete()
-        .in('id', combosSemValor.map(c => c.id));
-    }
-=======
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
-  }
+  // =====================  }
 
   // ============================
   // GUARDAR PRODUTO (completo)
@@ -1435,12 +1167,8 @@
       const img = imagensProduto[i];
       const dadosMedia = {
         product_id: produtoFinal.id, url: img.url, tipo: 'image',
-<<<<<<< HEAD
         is_primary: img.isPrimary, sort_order: i,
         color_tag: img.colorTag || null
-=======
-        is_primary: img.isPrimary, sort_order: i
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
       };
       if (img.id) {
         await db.from('product_media').update(dadosMedia).eq('id', img.id);
@@ -1555,7 +1283,6 @@
     gruposVariantesData = [];
     variantesParaApagar = [];
     mediaParaApagar = [];
-<<<<<<< HEAD
     combosData = [];
     combosParaApagar = [];
 
@@ -1563,11 +1290,6 @@
     renderGruposVariantes();
     const secaoCombos = document.getElementById('secaoCombos');
     if (secaoCombos) secaoCombos.style.display = 'none';
-=======
-
-    renderImagens();
-    renderGruposVariantes();
->>>>>>> 6143e63a8744bd753198e0191432a065bbcb89c7
     toggleEncomenda();
     esconderMensagem('msgErroForm');
     esconderMensagem('msgSucessoForm');
