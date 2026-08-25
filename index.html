@@ -371,7 +371,32 @@
       .banner-produto-card { width: 120px; }
     }
 
-    /* ==============  </style>
+    /* ==============    /* SCROLL INFINITO — LOADER */
+    .scroll-loader {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 28px;
+      color: var(--cinza);
+      font-size: 14px;
+    }
+
+    .scroll-spinner {
+      width: 22px;
+      height: 22px;
+      border: 3px solid #eee;
+      border-top-color: var(--rosa);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+  </style>
 </head>
 <body>
 
@@ -462,6 +487,10 @@
     <a href="catalogo.html" class="ver-todos">Ver todos →</a>
   </div>
   <div id="produtosDestaque"></div>
+  <div id="loaderDestaque" class="scroll-loader" style="display:none;">
+    <div class="scroll-spinner"></div>
+    <span>A carregar mais produtos...</span>
+  </div>
 </div>
 
 <!-- DISPONÍVEL AGORA (Em Stock) -->
@@ -471,6 +500,10 @@
     <a href="catalogo.html?tipo=stock" class="ver-todos">Ver todos →</a>
   </div>
   <div id="produtosStock"></div>
+  <div id="loaderStock" class="scroll-loader" style="display:none;">
+    <div class="scroll-spinner"></div>
+    <span>A carregar mais produtos...</span>
+  </div>
 </div>
 
 <!-- FOOTER -->
@@ -693,13 +726,39 @@
   }
 
   // ============================
-  // PRODUTOS
+  // PRODUTOS — SCROLL INFINITO
   // ============================
+  const PAGINA_TAM = 8;
+
+  // Estado independente para cada secção
+  const secoes = {
+    destaque: {
+      containerId: 'produtosDestaque',
+      gridId: 'gridDestaque',
+      loaderId: 'loaderDestaque',
+      pagina: 0,
+      carregando: false,
+      fim: false,
+      query: () => db.from('products').select('*').eq('status', 'active')
+                    .order('view_count', { ascending: false, nullsFirst: false })
+    },
+    stock: {
+      containerId: 'produtosStock',
+      gridId: 'gridStock',
+      loaderId: 'loaderStock',
+      pagina: 0,
+      carregando: false,
+      fim: false,
+      query: () => db.from('products').select('*').eq('status', 'active')
+                    .eq('availability_type', 'stock')
+                    .order('created_at', { ascending: false })
+    }
+  };
+
   function renderProdutoCard(p) {
     const temPromocao = p.sale_price && p.sale_price < p.price;
     const precoFinal = temPromocao ? p.sale_price : p.price;
     const desconto = temPromocao ? Math.round((1 - p.sale_price / p.price) * 100) : 0;
-
     return `
       <div class="produto-card" onclick="window.location.href='produto.html?id=${p.id}'">
         ${temPromocao ? `<div class="produto-card-badge">-${desconto}%</div>` : ''}
@@ -724,39 +783,70 @@
       </div>`;
   }
 
-  async function carregarProdutosDestaque() {
-    // Produtos mais acessados — ordenados por view_count descendente
-    // Se a coluna não existir ou todos tiverem 0, cai no fallback por created_at
-    const { data: produtos } = await db
-      .from('products')
-      .select('*')
-      .eq('status', 'active')
-      .order('view_count', { ascending: false, nullsFirst: false })
-      .limit(8);
+  async function carregarPagina(secao) {
+    if (secao.carregando || secao.fim) return;
+    secao.carregando = true;
+
+    // Mostrar loader
+    const loader = document.getElementById(secao.loaderId);
+    if (loader) loader.style.display = 'flex';
+
+    const offset = secao.pagina * PAGINA_TAM;
+    const { data: produtos } = await secao.query()
+      .range(offset, offset + PAGINA_TAM - 1);
+
+    if (loader) loader.style.display = 'none';
 
     if (!produtos || produtos.length === 0) {
-      mostrarVazio('produtosDestaque', '🛍️', 'Em breve novos produtos!', 'Estamos a preparar o catálogo. Volta em breve.');
+      if (secao.pagina === 0) {
+        const vazio = secao.containerId === 'produtosDestaque'
+          ? { icone: '🛍️', titulo: 'Em breve novos produtos!', texto: 'Estamos a preparar o catálogo.' }
+          : { icone: '✅', titulo: 'Em breve!', texto: 'Produtos disponíveis aparecerão aqui.' };
+        mostrarVazio(secao.containerId, vazio.icone, vazio.titulo, vazio.texto);
+      }
+      secao.fim = true;
+      secao.carregando = false;
       return;
     }
-    document.getElementById('produtosDestaque').innerHTML =
-      `<div class="produtos-grid">${produtos.map(renderProdutoCard).join('')}</div>`;
+
+    // Criar grid na primeira página
+    let grid = document.getElementById(secao.gridId);
+    if (!grid) {
+      const container = document.getElementById(secao.containerId);
+      container.innerHTML = `<div class="produtos-grid" id="${secao.gridId}"></div>`;
+      grid = document.getElementById(secao.gridId);
+    }
+
+    grid.insertAdjacentHTML('beforeend', produtos.map(renderProdutoCard).join(''));
+
+    if (produtos.length < PAGINA_TAM) secao.fim = true;
+
+    secao.pagina++;
+    secao.carregando = false;
+  }
+
+  async function carregarProdutosDestaque() {
+    await carregarPagina(secoes.destaque);
   }
 
   async function carregarProdutosStock() {
-    const { data: produtos } = await db
-      .from('products')
-      .select('*')
-      .eq('status', 'active')
-      .eq('availability_type', 'stock')
-      .order('created_at', { ascending: false })
-      .limit(8);
+    await carregarPagina(secoes.stock);
+  }
 
-    if (!produtos || produtos.length === 0) {
-      mostrarVazio('produtosStock', '✅', 'Em breve!', 'Produtos disponíveis para entrega imediata aparecerão aqui.');
-      return;
-    }
-    document.getElementById('produtosStock').innerHTML =
-      `<div class="produtos-grid">${produtos.map(renderProdutoCard).join('')}</div>`;
+  // Intersection Observer — deteta quando o loader entra no ecrã
+  function configurarScrollInfinito() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        if (entry.target.id === 'loaderDestaque') carregarPagina(secoes.destaque);
+        if (entry.target.id === 'loaderStock') carregarPagina(secoes.stock);
+      });
+    }, { rootMargin: '200px' });
+
+    const ld = document.getElementById('loaderDestaque');
+    const ls = document.getElementById('loaderStock');
+    if (ld) observer.observe(ld);
+    if (ls) observer.observe(ls);
   }
 
   // ============================
@@ -765,6 +855,7 @@
   carregarBanners();
   carregarProdutosDestaque();
   carregarProdutosStock();
+  configurarScrollInfinito();
 
 </script>
 <script>
